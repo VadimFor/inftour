@@ -1,16 +1,11 @@
+import { MAGAZINE_PDF_PATH } from "../config/magazine";
 import PageShell from "../components/PageShell";
+import RevistaContent from "./RevistaContent";
 
 export default function RevistaPage() {
   return (
     <PageShell>
-      <main className="relative z-20 pt-12 pb-24 container mx-auto px-6">
-        <h1 className="text-4xl md:text-5xl font-serif text-brand-black mb-4">
-          Revista
-        </h1>
-        <p className="text-gray-500 max-w-md font-light">
-          Contenido de Revista.
-        </p>
-      </main>
+      <RevistaContent pdfPath={MAGAZINE_PDF_PATH} />
     </PageShell>
   );
 }

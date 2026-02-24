@@ -11,7 +11,7 @@ export default function Nav() {
   const lang = useLangStore((s) => s.lang);
   const t = useLangStore((s) => s.t);
   return (
-    <nav className="sticky top-8 z-50 transition-all duration-300 bg-gradient-to-r from-gray-50 via-brand-stone to-gray-50 backdrop-blur-sm border-b border-gray-200/50 min-w-0">
+    <nav className="sticky top-8 z-50 transition-all duration-300 bg-gradient-to-r from-amber-50/90 via-amber-50/95 to-amber-50/90 backdrop-blur-sm border-b border-amber-100/80 min-w-0">
       <div className="container mx-auto px-6 h-20 flex justify-between items-center min-w-0">
         <Link href="/" className="group flex flex-col items-start shrink-0">
           <span className="font-serif text-2xl font-bold tracking-wider group-hover:text-brand-gold transition">
@@ -44,7 +44,7 @@ export default function Nav() {
           <NavMobileMenu />
         </div>
       </div>
-      <div className="h-px w-full bg-gray-300 min-w-0" aria-hidden />
+      <div className="h-px w-full bg-amber-100 min-w-0" aria-hidden />
     </nav>
   );
 }
