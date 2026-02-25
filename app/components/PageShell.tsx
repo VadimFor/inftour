@@ -17,9 +17,11 @@ export default async function PageShell({
   return (
     <div className="min-h-screen overflow-x-hidden">
       <TopBar weather={weather} seaTemp={seaTemp} />
-      <Nav />
-      {children}
-      <Footer />
+      <div className="pt-10">
+        <Nav />
+        {children}
+        <Footer />
+      </div>
     </div>
   );
 }

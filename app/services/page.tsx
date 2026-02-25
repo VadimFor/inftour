@@ -1,10 +1,10 @@
 import PageShell from "../components/PageShell";
-import ServicesContent from "./ServicesContent";
+import PagePlaceholder from "../components/PagePlaceholder";
 
 export default function ServicesPage() {
   return (
     <PageShell>
-      <ServicesContent />
+      <PagePlaceholder titleKey="servicesTitle" />
     </PageShell>
   );
 }

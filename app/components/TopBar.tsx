@@ -19,7 +19,7 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
   const t = useLangStore((s) => s.t);
 
   return (
-    <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white text-[10px] md:text-xs py-2 px-6 flex justify-between tracking-widest sticky top-0 z-60">
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white text-[10px] md:text-xs py-2 px-6 flex justify-between tracking-widest">
       <div className="flex items-center gap-4">
         <span className="flex items-center gap-2">
           <span className="text-white/80">Calpe:</span>

@@ -1,10 +1,10 @@
 import PageShell from "../components/PageShell";
-import LobbyContent from "./LobbyContent";
+import PagePlaceholder from "../components/PagePlaceholder";
 
 export default function LobbyPage() {
   return (
     <PageShell>
-      <LobbyContent />
+      <PagePlaceholder titleKey="lobbyTitle" />
     </PageShell>
   );
 }
