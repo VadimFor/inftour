@@ -1,40 +1,24 @@
 "use client";
 
 import Image from "next/image";
+import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../lib/langStore";
 
-const PLACEHOLDER_SPREADS = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
-    alt: "Apartment interior",
-    titleKey: "revistaSpread1Title" as const,
-    textKey: "revistaSpread1Text" as const,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80",
-    alt: "Pool and sea view",
-    titleKey: "revistaSpread2Title" as const,
-    textKey: "revistaSpread2Text" as const,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&q=80",
-    alt: "Villa terrace",
-    titleKey: "revistaSpread3Title" as const,
-    textKey: "revistaSpread3Text" as const,
-  },
-];
+const FEATURED_IMAGE =
+  "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?q=80&w=2070&auto=format&fit=crop";
+const ARTICLE1_IMAGE =
+  "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop";
+const ARTICLE2_IMAGE =
+  "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop";
 
 type Props = { pdfPath: string | null };
 
 export default function RevistaContent({ pdfPath }: Props) {
-  const t = useLangStore((s) => s.t);
+  const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
 
   if (pdfPath) {
     return (
-      <main className="relative z-20 pt-8 pb-24">
+      <main className="relative z-20  pb-24">
         <div className="container mx-auto px-4 max-w-5xl">
           <header className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-serif text-brand-black">
@@ -65,65 +49,124 @@ export default function RevistaContent({ pdfPath }: Props) {
   }
 
   return (
-    <main className="relative z-20 pt-8 pb-24">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Cover */}
-        <header className="text-center mb-16">
-          <div className="relative aspect-3/2 max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-xl mb-8">
+    <main className="relative z-20  pb-24">
+      {/* Hero */}
+      <section className="container mx-auto px-4 py-16 md:py-20 text-center max-w-4xl">
+        <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
+          {t("revHeroLabel")}
+        </span>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-gray-900 mb-6 leading-tight">
+          {t("revHeroTitle")}
+        </h1>
+        <p className="text-lg text-gray-600 font-light leading-relaxed">
+          {t("revHeroDesc")}
+        </p>
+      </section>
+
+      {/* Featured article */}
+      <section className="container mx-auto px-4 mb-20">
+        <article className="bg-white shadow-sm border border-gray-100 rounded-sm overflow-hidden flex flex-col lg:flex-row group">
+          <div className="lg:w-7/12 relative overflow-hidden h-72 lg:h-[400px] shrink-0">
             <Image
-              src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=900&q=80"
-              alt=""
+              src={FEATURED_IMAGE}
+              alt={t("revFeaturedTitle")}
               fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 672px"
+              className="object-cover transition duration-700 group-hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 58vw"
               priority
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 text-white">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold drop-shadow">
-                {t("revistaTitle")}
-              </h1>
-              <p className="text-white/90 font-light mt-2 drop-shadow">
-                {t("revistaTagline")}
-              </p>
-            </div>
           </div>
-          <p className="text-gray-500 text-sm max-w-lg mx-auto">
-            {t("revistaPlaceholderIntro")}
-          </p>
-        </header>
+          <div className="lg:w-5/12 p-8 lg:p-12 flex flex-col justify-center">
+            <span className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-3 block">
+              {t("revFeaturedLabel")}
+            </span>
+            <h2 className="text-3xl font-serif text-gray-900 mb-4 hover:text-brand-gold transition cursor-pointer">
+              {t("revFeaturedTitle")}
+            </h2>
+            <p className="text-sm text-gray-600 font-light leading-relaxed mb-6">
+              {t("revFeaturedDesc")}
+            </p>
+          </div>
+        </article>
+      </section>
 
-        {/* Placeholder spreads */}
-        <section className="space-y-20">
-          {PLACEHOLDER_SPREADS.map((spread, index) => (
-            <article
-              key={spread.titleKey}
-              className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 items-center"
-            >
-              <div
-                className={`relative aspect-4/3 rounded-xl overflow-hidden shadow-md ${
-                  index % 2 === 1 ? "md:order-2" : ""
-                }`}
-              >
+      {/* Latest articles + sidebar */}
+      <section className="container mx-auto px-4 mb-24 flex flex-col lg:flex-row gap-10">
+        <div className="lg:w-2/3">
+          <h3 className="text-2xl font-serif text-gray-900 mb-8 pb-4 border-b border-gray-200">
+            {t("revLatestTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
+              <div className="h-48 relative overflow-hidden shrink-0">
                 <Image
-                  src={spread.image}
-                  alt={spread.alt}
+                  src={ARTICLE1_IMAGE}
+                  alt={t("revArticle1Title")}
                   fill
-                  className="object-cover"
+                  className="object-cover transition duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
+                <span className="absolute bottom-4 left-4 bg-brand-darkgray text-white px-2 py-1 text-[9px] uppercase tracking-widest">
+                  {t("revArticle1Tag")}
+                </span>
               </div>
-              <div className={index % 2 === 1 ? "md:order-1" : ""}>
-                <h2 className="text-2xl font-serif font-semibold text-brand-black mb-3">
-                  {t(spread.titleKey)}
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {t(spread.textKey)}
+              <div className="p-6 flex flex-col flex-1">
+                <h4 className="text-xl font-serif text-gray-900 mb-3 group-hover:text-brand-gold transition cursor-pointer">
+                  {t("revArticle1Title")}
+                </h4>
+                <p className="text-xs text-gray-600 font-light leading-relaxed mb-4">
+                  {t("revArticle1Desc")}
                 </p>
               </div>
             </article>
-          ))}
-        </section>
-      </div>
+            <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
+              <div className="h-48 relative overflow-hidden shrink-0">
+                <Image
+                  src={ARTICLE2_IMAGE}
+                  alt={t("revArticle2Title")}
+                  fill
+                  className="object-cover transition duration-700 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <span className="absolute bottom-4 left-4 bg-brand-gold text-white px-2 py-1 text-[9px] uppercase tracking-widest">
+                  {t("revArticle2Tag")}
+                </span>
+              </div>
+              <div className="p-6 flex flex-col flex-1">
+                <h4 className="text-xl font-serif text-gray-900 mb-3 group-hover:text-brand-gold transition cursor-pointer">
+                  {t("revArticle2Title")}
+                </h4>
+                <p className="text-xs text-gray-600 font-light leading-relaxed mb-4">
+                  {t("revArticle2Desc")}
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+        <aside className="lg:w-1/3">
+          <h3 className="text-2xl font-serif text-gray-900 mb-8 pb-4 border-b border-gray-200">
+            {t("revLiveTitle")}
+          </h3>
+          <div className="space-y-6">
+            <div className="bg-white border-l-4 border-brand-gold p-5 shadow-sm rounded-r-sm">
+              <h5 className="font-bold text-gray-800 text-sm mb-2 hover:text-brand-link cursor-pointer">
+                {t("revLive1Title")}
+              </h5>
+              <p className="text-xs text-gray-600 font-light">
+                {t("revLive1Desc")}
+              </p>
+            </div>
+            <div className="bg-brand-darkgray text-white p-5 shadow-sm rounded-sm">
+              <h5 className="font-bold text-white text-sm mb-2">
+                {t("revLive2Title")}
+              </h5>
+              <p className="text-xs text-gray-300 font-light mb-3">
+                {t("revLive2Desc")}
+              </p>
+            </div>
+          </div>
+        </aside>
+      </section>
     </main>
   );
 }

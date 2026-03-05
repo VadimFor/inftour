@@ -51,18 +51,91 @@ function FlagRussia({ className }: { className?: string }) {
   );
 }
 
-const LANGUAGES: Array<{ code: Lang; label: string; Icon: typeof FlagEngland; title: string }> = [
+function FlagFrance({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 9 6"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      <rect width="3" height="6" fill="#002395" />
+      <rect x="3" width="3" height="6" fill="#fff" />
+      <rect x="6" width="3" height="6" fill="#ED2939" />
+    </svg>
+  );
+}
+
+function FlagItaly({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 9 6"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      <rect width="3" height="6" fill="#009246" />
+      <rect x="3" width="3" height="6" fill="#fff" />
+      <rect x="6" width="3" height="6" fill="#CE2B37" />
+    </svg>
+  );
+}
+
+function FlagGermany({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 9 6"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      <rect width="9" height="2" fill="#000" />
+      <rect y="2" width="9" height="2" fill="#DD0000" />
+      <rect y="4" width="9" height="2" fill="#FFCE00" />
+    </svg>
+  );
+}
+
+function FlagUkraine({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 9 6"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      <rect width="9" height="3" fill="#0057B7" />
+      <rect y="3" width="9" height="3" fill="#FFD700" />
+    </svg>
+  );
+}
+
+const LANGUAGES: Array<{
+  code: Lang;
+  label: string;
+  Icon: typeof FlagEngland;
+  title: string;
+}> = [
   { code: "eng", label: "ENG", Icon: FlagEngland, title: "English" },
   { code: "esp", label: "ESP", Icon: FlagSpain, title: "Español" },
   { code: "ru", label: "RU", Icon: FlagRussia, title: "Русский" },
+  { code: "fr", label: "FR", Icon: FlagFrance, title: "Français" },
+  { code: "it", label: "IT", Icon: FlagItaly, title: "Italiano" },
+  { code: "de", label: "DE", Icon: FlagGermany, title: "Deutsch" },
+  { code: "uk", label: "UK", Icon: FlagUkraine, title: "Українська" },
 ];
 
 type LanguageSwitcherProps = {
   /** When true, shows only the selected flag and opens a dropdown on click (for navbar). */
   compact?: boolean;
+  /** When true with compact, show all flags in one line (for mobile menu). No dropdown. */
+  inlineAll?: boolean;
 };
 
-export default function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({
+  compact = false,
+  inlineAll = false,
+}: LanguageSwitcherProps) {
   const lang = useLangStore((s) => s.lang);
   const setLang = useLangStore((s) => s.setLang);
   const [open, setOpen] = useState(false);
@@ -71,13 +144,44 @@ export default function LanguageSwitcher({ compact = false }: LanguageSwitcherPr
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+  if (compact && inlineAll) {
+    return (
+      <div
+        className="flex items-center justify-center gap-1.5 flex-wrap"
+        role="listbox"
+        aria-label="Select language"
+      >
+        {LANGUAGES.map((l) => (
+          <button
+            key={l.code}
+            type="button"
+            role="option"
+            aria-selected={lang === l.code}
+            onClick={() => setLang(l.code)}
+            title={l.title}
+            className={`w-8 h-6 shrink-0 overflow-hidden rounded-md border inline-flex focus:outline-none focus:ring-2 focus:ring-brand-gold transition ${
+              lang === l.code
+                ? "border-brand-gold ring-1 ring-brand-gold ring-offset-1 ring-offset-transparent"
+                : "border-gray-300 hover:border-brand-gold/60"
+            }`}
+          >
+            <l.Icon className="w-full h-full" />
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (compact) {
     const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];

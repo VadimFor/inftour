@@ -1,10 +1,10 @@
 import PageShell from "../components/PageShell";
-import PagePlaceholder from "../components/PagePlaceholder";
+import ExperienciasContent from "./ExperienciasContent";
 
 export default function ExperienciasPage() {
   return (
     <PageShell>
-      <PagePlaceholder titleKey="experienciasTitle" />
+      <ExperienciasContent />
     </PageShell>
   );
 }

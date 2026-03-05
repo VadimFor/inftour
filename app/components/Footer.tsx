@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../lib/langStore";
 
 export default function Footer() {
-  const lang = useLangStore((s) => s.lang);
-  const t = useLangStore((s) => s.t);
+  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   return (
     <footer className="bg-gradient-to-b from-brand-black via-gray-900 to-black text-white pt-20 pb-10">
       <div className="container mx-auto px-6">

@@ -28,6 +28,12 @@ export default function AIAgentChat() {
 
   useEffect(() => setMounted(true), []);
 
+  useEffect(() => {
+    const open = () => setIsOpen(true);
+    window.addEventListener("openAIChat" as any, open);
+    return () => window.removeEventListener("openAIChat" as any, open);
+  }, []);
+
   const sendMessage = useCallback(() => {
     const text = input.trim();
     if (!text) return;

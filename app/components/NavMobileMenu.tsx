@@ -1,17 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useShallow } from "zustand/react/shallow";
 import { navItems } from "../lib/nav-config";
 import { useLangStore } from "../lib/langStore";
 import AIAgentChat from "./AIAgentChat";
 import LanguageSwitcher from "./LanguageSwitcher";
 
+const LG_BREAKPOINT = 1024;
+
 export default function NavMobileMenu() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const lang = useLangStore((s) => s.lang);
-  const t = useLangStore((s) => s.t);
+  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`);
+    const handleChange = () => {
+      if (mql.matches) setOpen(false);
+    };
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setOpen(false);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="lg:hidden shrink-0">
@@ -43,23 +62,32 @@ export default function NavMobileMenu() {
             className="fixed left-0 right-0 z-50 py-4 px-6 bg-gradient-to-b from-gray-50 to-brand-stone border-b border-gray-200 shadow-lg"
             style={{ top: "7.5rem" }}
           >
-            <ul className="flex flex-col gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">
-              {navItems.map(({ href, labelKey, Icon }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 py-3 px-2 rounded-lg hover:text-brand-black hover:bg-white/60 transition"
-                  >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    {t(labelKey)}
-                  </Link>
-                </li>
-              ))}
+            <ul className="flex flex-col items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">
+              {navItems.map(({ href, labelKey, Icon }) => {
+                const isActive = pathname === href;
+                return (
+                  <li key={href} className="w-full flex justify-center">
+                    <Link
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 py-3 px-2 rounded-lg hover:text-brand-black hover:bg-white/60 transition relative after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-brand-gold after:transition-all ${
+                        isActive ? "text-brand-black after:w-3/4 after:bottom-0" : "after:w-0 after:bottom-0"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      {t(labelKey)}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
-            <div className="flex items-center gap-4 pt-4 mt-4 border-t border-gray-200">
-              <AIAgentChat />
-              <LanguageSwitcher compact />
+            <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
+              <div className="flex items-center justify-center gap-4">
+                <AIAgentChat />
+              </div>
+              <div className="flex justify-center">
+                <LanguageSwitcher compact inlineAll />
+              </div>
             </div>
           </div>
         </>,

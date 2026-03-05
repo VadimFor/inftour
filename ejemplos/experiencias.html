@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFTOUR | Experiencias en Calpe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: { gold: '#C5A85F', darkgray: '#787878', lightgray: '#D1D1D1', footer: '#FCFBF6', bg: '#F8F9FA', link: '#0084C9' } }, fontFamily: { serif: ['"Cormorant Garamond"', 'serif'], sans: ['"Manrope"', 'sans-serif'] } } } }
+    </script>
+    <style>
+        body { background-color: #F8F9FA; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #C5A85F; }
+        .image-zoom:hover img { transform: scale(1.05); }
+    </style>
+</head>
+<body class="text-gray-800 font-sans selection:bg-brand-gold selection:text-white">
+
+    <div class="bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-6 flex justify-between items-center tracking-wide">
+        <div class="flex items-center gap-4"><span>Ahora en Calpe 24°C ☀️ Agua: 21°C</span></div>
+        <div class="flex items-center"><a href="#" class="hover:text-gray-200 transition">WebCam</a></div>
+    </div>
+
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-6 h-[88px] flex justify-between items-center">
+            <a href="index.html" class="flex flex-col items-start mt-1">
+                <span class="font-serif text-3xl font-bold tracking-wider text-gray-800 leading-none">INFTOUR</span>
+                <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-gold mt-1">Calpe Collection</span>
+            </a>
+            <nav class="hidden md:flex items-center space-x-8 text-[11px] font-bold uppercase tracking-widest text-gray-500 mt-2">
+                <a href="index.html" class="hover:text-gray-800 transition pb-2 border-b-2 border-transparent">Reserva Directa</a>
+                <a href="experiencias.html" class="text-gray-800 border-b-2 border-brand-gold pb-2 transition">Experiencias</a>
+                <a href="service.html" class="hover:text-gray-800 transition pb-2 border-b-2 border-transparent">Service</a>
+                <a href="revista.html" class="hover:text-gray-800 transition pb-2 border-b-2 border-transparent">Revista</a>
+                <a href="lobby.html" class="hover:text-gray-800 transition pb-2 border-b-2 border-transparent">Lobby</a>
+            </nav>
+            <div class="hidden md:flex items-center gap-6 mt-2">
+                <div class="flex items-center gap-1 cursor-pointer"><span class="text-lg shadow-sm rounded-sm overflow-hidden block">🇪🇸</span></div>
+                <a href="lobby.html#ai-guide" class="bg-brand-darkgray text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider hover:bg-gray-600 transition shadow-sm rounded-sm">AI Asistente -></a>
+            </div>
+        </div>
+    </header>
+
+    <section class="container mx-auto px-4 py-16 md:py-24 text-center max-w-4xl">
+        <span class="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">Ecosistema de Ocio</span>
+        <h1 class="text-4xl md:text-6xl font-serif text-gray-900 mb-6 leading-tight">Experiencias INFTOUR</h1>
+        <p class="text-lg text-gray-600 font-light leading-relaxed">
+            Hemos creado una guía exclusiva que reemplazará por completo a la oficina de excursiones tradicional. Sumérgete en la auténtica vida de Calpe con nuestras recomendaciones cuidadosamente seleccionadas.
+        </p>
+    </section>
+
+    <main class="container mx-auto px-4 pb-24">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
+            <div class="md:col-span-8 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group image-zoom">
+                <div class="md:w-1/2 relative overflow-hidden h-64 md:h-auto">
+                    <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover transition duration-700" alt="Gastronomía">
+                </div>
+                <div class="md:w-1/2 p-8 flex flex-col justify-center">
+                    <h3 class="text-3xl font-serif text-gray-900 mb-2">Sabores</h3>
+                    <p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">Gastronomía local</p>
+                    <ul class="space-y-4 text-sm text-gray-600 border-l-2 border-brand-gold pl-4">
+                        <li><a href="#" class="hover:text-brand-gold transition block font-bold text-gray-800">1. Restaurantes recomendados</a><span class="text-xs font-light">De la alta cocina a las tapas tradicionales.</span></li>
+                        <li><a href="#" class="hover:text-brand-gold transition block font-bold text-gray-800">2. Mercados y Lonja</a><span class="text-xs font-light">Subasta de pescado y tiendas de productos frescos.</span></li>
+                        <li><a href="#" class="hover:text-brand-gold transition block font-bold text-gray-800">3. Recetas locales</a><span class="text-xs font-light">Aprende a cocinar Llauna de Calp o Arròs del Senyoret.</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="md:col-span-4 md:row-span-2 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col group image-zoom">
+                <div class="h-64 md:h-2/5 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover transition duration-700" alt="Naturaleza Calpe">
+                </div>
+                <div class="p-8 flex-1 flex flex-col">
+                    <h3 class="text-3xl font-serif text-gray-900 mb-2">Naturaleza</h3>
+                    <p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">Senderos y Reservas</p>
+                    <ul class="space-y-6 text-sm text-gray-600 flex-1">
+                        <li class="border-b border-gray-100 pb-3">
+                            <a href="#" class="hover:text-brand-gold transition font-bold text-gray-800 block mb-1">Ascenso al Peñón de Ifach</a>
+                            <p class="text-xs font-light leading-relaxed">Consejos de seguridad, permisos necesarios y las mejores horas para subir al símbolo de la Costa Blanca.</p>
+                        </li>
+                        <li class="border-b border-gray-100 pb-3">
+                            <a href="#" class="hover:text-brand-gold transition font-bold text-gray-800 block mb-1">Rutas por las Salinas</a>
+                            <p class="text-xs font-light leading-relaxed">Observación de flamencos y paseos llanos ideales para el atardecer.</p>
+                        </li>
+                        <li>
+                            <a href="#" class="hover:text-brand-gold transition font-bold text-gray-800 block mb-1">Paseos junto al mar</a>
+                            <p class="text-xs font-light leading-relaxed">Rutas ecológicas por los acantilados de Benissa y paseos marítimos de Calpe.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="md:col-span-4 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden p-8 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-3xl font-serif text-gray-900 mb-2">Familia</h3>
+                    <p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">Ocio compartido</p>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-center gap-2"><span class="text-brand-gold">▪</span> <a href="#" class="hover:text-brand-link transition">Áreas de BBQ y Parques</a></li>
+                        <li class="flex items-center gap-2"><span class="text-brand-gold">▪</span> <a href="#" class="hover:text-brand-link transition">Virtual Arena (Realidad Virtual)</a></li>
+                        <li class="flex items-center gap-2"><span class="text-brand-gold">▪</span> <a href="#" class="hover:text-brand-link transition">Feria local de atracciones</a></li>
+                        <li class="flex items-center gap-2"><span class="text-brand-gold">▪</span> <a href="#" class="hover:text-brand-link transition">Guía electrónica de la ciudad</a></li>
+                    </ul>
+                </div>
+                <a href="#" class="mt-6 inline-block text-xs font-bold uppercase tracking-wider text-white bg-brand-darkgray hover:bg-gray-800 transition py-3 px-4 text-center rounded-sm">Ver Calendario de Eventos</a>
+            </div>
+
+            <div class="md:col-span-4 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden p-8">
+                <h3 class="text-3xl font-serif text-gray-900 mb-2">Estilo de Vida</h3>
+                <p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">Deporte activo</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2000&auto=format&fit=crop" class="w-full h-24 object-cover rounded-sm" alt="Ciclismo">
+                    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2026&auto=format&fit=crop" class="w-full h-24 object-cover rounded-sm" alt="Deportes">
+                </div>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li><a href="#" class="hover:text-brand-link transition block font-bold">Rutas de ciclismo profesionales</a></li>
+                    <li><a href="#" class="hover:text-brand-link transition block font-bold">Instalaciones deportivas</a></li>
+                    <li><a href="#" class="hover:text-brand-link transition block font-bold">Alquiler de material deportivo</a></li>
+                    <li><a href="#" class="hover:text-brand-link transition block font-bold text-brand-gold">→ Calendario deportivo</a></li>
+                </ul>
+            </div>
+
+            <div class="md:col-span-12 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group image-zoom">
+                <div class="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center">
+                    <h3 class="text-3xl font-serif text-gray-900 mb-2">Relax</h3>
+                    <p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">Playas y SPA</p>
+                    <p class="text-sm text-gray-600 leading-relaxed mb-6">Descubre las calas escondidas de aguas cristalinas, las amplias playas de arena fina y los mejores centros de bienestar para desconectar.</p>
+                    <a href="#" class="text-brand-link text-sm font-bold flex items-center gap-2 hover:underline">Explorar catálogo <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></a>
+                </div>
+                <div class="md:w-2/3 h-64 md:h-auto overflow-hidden relative">
+                    <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover transition duration-700" alt="Relax SPA">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-brand-footer pt-16 border-t border-gray-200">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 pb-16">
+            <div>
+                <h4 class="text-brand-gold text-xl font-bold font-serif tracking-wider mb-6">INFTOUR SPAIN S.L.</h4>
+                <p class="text-sm text-gray-600 mb-6 font-medium">Alquiler vacacional exclusivo en Calpe.</p>
+                <div class="text-sm text-gray-600 font-medium">
+                    <p>Licencia de Operador Turístico:</p><p class="text-gray-500 ml-0 md:ml-4">EGVT-XXX-A.</p>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-brand-gold text-lg font-bold mb-6">Navegación</h4>
+                <ul class="space-y-2 text-sm text-gray-800 font-semibold">
+                    <li><a href="index.html" class="hover:text-brand-gold transition">Reserva directa</a></li>
+                    <li><a href="experiencias.html" class="hover:text-brand-gold transition">Experiencias</a></li>
+                    <li><a href="service.html" class="hover:text-brand-gold transition">Service</a></li>
+                    <li><a href="revista.html" class="hover:text-brand-gold transition">Revista</a></li>
+                    <li><a href="lobby.html" class="hover:text-brand-gold transition">Lobby</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-brand-gold text-lg font-bold mb-6">Contacto</h4>
+                <div class="space-y-4 text-sm text-gray-800 font-semibold">
+                    <p>c. Jardin 3 Local INFTOUR</p><p>Tel.</p><p>e-mail: <a href="mailto:mail@inftour.net" class="hover:text-brand-gold transition font-normal">mail@inftour.net</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-brand-darkgray text-white text-[11px] py-4 text-center tracking-wide font-medium">&copy; 2026 INFTOUR SPAIN S.L. Todos los derechos reservados.</div>
+    </footer>
+</body>
+</html>

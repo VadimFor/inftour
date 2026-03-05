@@ -1,10 +1,11 @@
 import PageShell from "../components/PageShell";
-import PagePlaceholder from "../components/PagePlaceholder";
+import RevistaContent from "./RevistaContent";
+import { MAGAZINE_PDF_PATH } from "../config/magazine";
 
 export default function RevistaPage() {
   return (
     <PageShell>
-      <PagePlaceholder titleKey="revistaTitle" />
+      <RevistaContent pdfPath={MAGAZINE_PDF_PATH} />
     </PageShell>
   );
 }

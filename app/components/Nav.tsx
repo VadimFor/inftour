@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useShallow } from "zustand/react/shallow";
 import { navItems } from "../lib/nav-config";
 import { useLangStore } from "../lib/langStore";
 import AIAgentChat from "./AIAgentChat";
@@ -10,16 +11,13 @@ import NavMobileMenu from "./NavMobileMenu";
 
 export default function Nav() {
   const pathname = usePathname();
-  const lang = useLangStore((s) => s.lang);
-  const t = useLangStore((s) => s.t);
+  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   return (
     <nav className="sticky top-10 z-50 transition-all duration-300 bg-linear-to-r from-amber-50/90 via-amber-50/95 to-amber-50/90 backdrop-blur-sm border-b border-gray-300 min-w-0" data-lang={lang}>
       <div className="container mx-auto px-6 h-20 flex justify-between items-center min-w-0">
         <Link
           href="/"
-          className={`group flex flex-col items-start shrink-0 relative after:content-[''] after:absolute after:left-0 after:h-0.5 after:bg-brand-gold after:transition-all after:-bottom-0.5 ${
-            pathname === "/" ? "after:w-full" : "after:w-0 group-hover:after:w-full"
-          }`}
+          className="group flex flex-col items-start shrink-0"
         >
           <span className="font-serif text-2xl font-bold tracking-wider group-hover:text-brand-gold transition">
             INFTOUR
