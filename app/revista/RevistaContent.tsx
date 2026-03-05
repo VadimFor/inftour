@@ -3,13 +3,9 @@
 import Image from "next/image";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../lib/langStore";
-
-const FEATURED_IMAGE =
-  "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?q=80&w=2070&auto=format&fit=crop";
-const ARTICLE1_IMAGE =
-  "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop";
-const ARTICLE2_IMAGE =
-  "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop";
+import featuredImage from "./pictures/salon.png";
+import article1Image from "./pictures/jabon.png";
+import article2Image from "./pictures/restaurante.png";
 
 type Props = { pdfPath: string | null };
 
@@ -68,7 +64,7 @@ export default function RevistaContent({ pdfPath }: Props) {
         <article className="bg-white shadow-sm border border-gray-100 rounded-sm overflow-hidden flex flex-col lg:flex-row group">
           <div className="lg:w-7/12 relative overflow-hidden h-72 lg:h-[400px] shrink-0">
             <Image
-              src={FEATURED_IMAGE}
+              src={featuredImage}
               alt={t("revFeaturedTitle")}
               fill
               className="object-cover transition duration-700 group-hover:scale-105"
@@ -100,7 +96,7 @@ export default function RevistaContent({ pdfPath }: Props) {
             <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
               <div className="h-48 relative overflow-hidden shrink-0">
                 <Image
-                  src={ARTICLE1_IMAGE}
+                  src={article1Image}
                   alt={t("revArticle1Title")}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-105"
@@ -122,7 +118,7 @@ export default function RevistaContent({ pdfPath }: Props) {
             <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
               <div className="h-48 relative overflow-hidden shrink-0">
                 <Image
-                  src={ARTICLE2_IMAGE}
+                  src={article2Image}
                   alt={t("revArticle2Title")}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-105"

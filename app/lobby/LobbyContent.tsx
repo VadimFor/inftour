@@ -5,11 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../lib/langStore";
-
-const ABOUT_IMAGE =
-  "https://lh3.googleusercontent.com/p/AF1QipOd9mMw3b6rQgf_8VY2nTSLofsyRl2vvhkOenA9=s680-w680-h510-rw";
-const AI_BG_IMAGE =
-  "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop";
+import aboutImage from "./pictures/oficina_inftour.png";
+import aiBgImage from "./pictures/ai_espacio.png";
 
 const INSTRUCTIONS = [
   { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
@@ -117,7 +114,7 @@ export default function LobbyContent() {
         <div className="bg-white border border-gray-100 shadow-sm rounded-lg overflow-hidden flex flex-col md:flex-row">
           <div className="md:w-1/2 relative h-64 md:min-h-[320px] overflow-hidden shrink-0">
             <Image
-              src={ABOUT_IMAGE}
+              src={aboutImage}
               alt=""
               fill
               className="object-cover"
@@ -176,7 +173,7 @@ export default function LobbyContent() {
         >
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <Image
-              src={AI_BG_IMAGE}
+              src={aiBgImage}
               alt=""
               fill
               className="object-cover"

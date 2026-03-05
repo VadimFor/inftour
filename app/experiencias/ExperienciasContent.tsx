@@ -4,17 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../lib/langStore";
-
-const GASTRONOMY_IMAGE =
-  "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop";
-const NATURE_IMAGE =
-  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop";
-const CYCLING_IMAGE =
-  "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2000&auto=format&fit=crop";
-const SPORTS_IMAGE =
-  "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2026&auto=format&fit=crop";
-const RELAX_IMAGE =
-  "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop";
+import gastronomyImage from "./pictures/restaurante.png";
+import natureImage from "./pictures/bosque.png";
+import cyclingImage from "./pictures/ciclistas.png";
+import sportsImage from "./pictures/papeles.png";
+import relaxImage from "./pictures/jabon.png";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -41,7 +35,7 @@ export default function ExperienciasContent() {
           <article className="md:col-span-8 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group">
             <div className="md:w-1/2 relative overflow-hidden h-64 md:h-auto min-h-64">
               <Image
-                src={GASTRONOMY_IMAGE}
+                src={gastronomyImage}
                 alt={t("expGastronomy")}
                 fill
                 className="object-cover transition duration-700 group-hover:scale-105"
@@ -88,7 +82,7 @@ export default function ExperienciasContent() {
           <article className="md:col-span-4 md:row-span-2 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col">
             <div className="h-64 md:h-2/5 relative overflow-hidden min-h-48">
               <Image
-                src={NATURE_IMAGE}
+                src={natureImage}
                 alt={t("expNature")}
                 fill
                 className="object-cover transition duration-700 group-hover:scale-105"
@@ -174,7 +168,7 @@ export default function ExperienciasContent() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="relative h-24 rounded-sm overflow-hidden">
                 <Image
-                  src={CYCLING_IMAGE}
+                  src={cyclingImage}
                   alt={t("expCycling")}
                   fill
                   className="object-cover"
@@ -183,7 +177,7 @@ export default function ExperienciasContent() {
               </div>
               <div className="relative h-24 rounded-sm overflow-hidden">
                 <Image
-                  src={SPORTS_IMAGE}
+                  src={sportsImage}
                   alt={t("expSportsFacilities")}
                   fill
                   className="object-cover"
@@ -236,7 +230,7 @@ export default function ExperienciasContent() {
             </div>
             <div className="md:w-2/3 h-64 md:h-80 lg:h-96 relative overflow-hidden">
               <Image
-                src={RELAX_IMAGE}
+                src={relaxImage}
                 alt={t("expRelax")}
                 fill
                 className="object-cover transition duration-700"
