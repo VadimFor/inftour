@@ -2,16 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useLangStore } from "../lib/langStore";
-import gastronomyImage from "./pictures/restaurante.png";
-import natureImage from "./pictures/bosque.png";
-import cyclingImage from "./pictures/ciclistas.png";
-import sportsImage from "./pictures/papeles.png";
-import relaxImage from "./pictures/jabon.png";
+import { useLangStore } from "../../lib/langStore";
+import gastronomyImage from "../pictures/restaurante.png";
+import natureImage from "../pictures/bosque.png";
+import cyclingImage from "../pictures/ciclistas.png";
+import sportsImage from "../pictures/papeles.png";
+import relaxImage from "../pictures/jabon.png";
+import RestaurantsModal from "./RestaurantsModal";
+import MarketsModal from "./MarketsModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
+  const [restaurantsOpen, setRestaurantsOpen] = useState(false);
+  const [marketsOpen, setMarketsOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -51,17 +56,25 @@ export default function ExperienciasContent() {
               </p>
               <ul className="space-y-4 text-sm text-gray-600 border-l-2 border-brand-gold pl-4">
                 <li>
-                  <span className="block font-bold text-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setRestaurantsOpen(true)}
+                    className="block font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                  >
                     1. {t("expRestaurants")}
-                  </span>
+                  </button>
                   <span className="text-xs font-light">
                     {t("expRestaurantsDesc")}
                   </span>
                 </li>
                 <li>
-                  <span className="block font-bold text-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setMarketsOpen(true)}
+                    className="block font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                  >
                     2. {t("expMarkets")}
-                  </span>
+                  </button>
                   <span className="text-xs font-light">
                     {t("expMarketsDesc")}
                   </span>
@@ -197,7 +210,7 @@ export default function ExperienciasContent() {
 
           {/* Relax – full width */}
           <article className="md:col-span-12 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row">
-            <div className="md:w-1/3 bg-[#F8F9FA] p-8 flex flex-col justify-center">
+            <div className="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center">
               <h2 className="text-3xl font-serif text-gray-900 mb-2">
                 {t("expRelax")}
               </h2>
@@ -240,6 +253,14 @@ export default function ExperienciasContent() {
           </article>
         </div>
       </div>
+      <RestaurantsModal
+        isOpen={restaurantsOpen}
+        onClose={() => setRestaurantsOpen(false)}
+      />
+      <MarketsModal
+        isOpen={marketsOpen}
+        onClose={() => setMarketsOpen(false)}
+      />
     </main>
   );
 }

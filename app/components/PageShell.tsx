@@ -2,7 +2,7 @@ import { getCalpSeaTemperature } from "@/lib/sea-temperature";
 import { getCalpWeather } from "@/lib/weather";
 import Footer from "./Footer";
 import Nav from "./Nav";
-import TopBar from "./TopBar";
+import TopBar from "./TopBar/TopBar";
 
 export default async function PageShell({
   children,

@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useLangStore } from "../lib/langStore";
-import aboutImage from "./pictures/oficina_inftour.png";
-import aiBgImage from "./pictures/ai_espacio.png";
+import { useLangStore } from "../../lib/langStore";
+import aboutImage from "../pictures/oficina_inftour.png";
+import aiBgImage from "../pictures/ai_espacio.png";
 
 const INSTRUCTIONS = [
   { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },

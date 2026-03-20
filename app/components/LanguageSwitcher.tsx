@@ -110,6 +110,20 @@ function FlagUkraine({ className }: { className?: string }) {
   );
 }
 
+function FlagPoland({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 9 6"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      <rect width="9" height="3" fill="#fff" />
+      <rect y="3" width="9" height="3" fill="#DC143C" />
+    </svg>
+  );
+}
+
 const LANGUAGES: Array<{
   code: Lang;
   label: string;
@@ -123,6 +137,7 @@ const LANGUAGES: Array<{
   { code: "it", label: "IT", Icon: FlagItaly, title: "Italiano" },
   { code: "de", label: "DE", Icon: FlagGermany, title: "Deutsch" },
   { code: "uk", label: "UK", Icon: FlagUkraine, title: "Українська" },
+  { code: "pl", label: "PL", Icon: FlagPoland, title: "Polski" },
 ];
 
 type LanguageSwitcherProps = {
@@ -170,13 +185,16 @@ export default function LanguageSwitcher({
             aria-selected={lang === l.code}
             onClick={() => setLang(l.code)}
             title={l.title}
-            className={`w-8 h-6 shrink-0 overflow-hidden rounded-md border inline-flex focus:outline-none focus:ring-2 focus:ring-brand-gold transition ${
+            className={`flex items-center gap-1.5 px-2 py-1 shrink-0 rounded-md border focus:outline-none focus:ring-2 focus:ring-brand-gold transition ${
               lang === l.code
                 ? "border-brand-gold ring-1 ring-brand-gold ring-offset-1 ring-offset-transparent"
                 : "border-gray-300 hover:border-brand-gold/60"
             }`}
           >
-            <l.Icon className="w-full h-full" />
+            <span className="w-8 h-6 shrink-0 overflow-hidden rounded-sm inline-flex">
+              <l.Icon className="w-full h-full" />
+            </span>
+            <span className="text-xs font-medium text-gray-700">{l.label}</span>
           </button>
         ))}
       </div>
@@ -194,17 +212,32 @@ export default function LanguageSwitcher({
             e.stopPropagation();
             setOpen((o) => !o);
           }}
-          className="w-8 h-6 shrink-0 overflow-hidden rounded-md border border-gray-300 inline-flex focus:outline-none focus:ring-2 focus:ring-brand-gold cursor-pointer"
+          className="flex items-center gap-1.5 px-1.5 h-7 shrink-0 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-gold cursor-pointer"
           title={current.title}
           aria-label={`Language: ${current.title}`}
           aria-expanded={open}
           aria-haspopup="listbox"
         >
-          <current.Icon className="w-full h-full" />
+          <span className="w-7 h-5 shrink-0 overflow-hidden rounded-sm inline-flex">
+            <current.Icon className="w-full h-full" />
+          </span>
+          <span className="text-xs font-medium text-gray-700">{current.label}</span>
+          <svg
+            className={`w-3 h-3 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`}
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <polyline points="2,4 6,8 10,4" />
+          </svg>
         </button>
         {open && (
           <div
-            className="absolute right-0 top-full mt-2 py-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-8 z-[100]"
+            className="absolute right-0 top-full mt-2 py-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-8 z-100"
             role="listbox"
             aria-label="Select language"
           >
@@ -218,12 +251,13 @@ export default function LanguageSwitcher({
                   setLang(l.code);
                   setOpen(false);
                 }}
-                className={`w-full flex justify-center py-2 px-3 hover:bg-brand-stone transition ${lang === l.code ? "ring-1 ring-inset ring-brand-gold" : ""}`}
+                className={`w-full flex items-center gap-2 py-2 px-3 hover:bg-brand-stone transition ${lang === l.code ? "ring-1 ring-inset ring-brand-gold" : ""}`}
                 title={l.title}
               >
                 <span className="w-7 h-5 shrink-0 overflow-hidden rounded-sm inline-flex">
                   <l.Icon className="w-full h-full" />
                 </span>
+                <span className="text-xs font-medium text-gray-700">{l.label}</span>
               </button>
             ))}
           </div>

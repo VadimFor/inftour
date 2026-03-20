@@ -1,5 +1,5 @@
 import PageShell from "../components/PageShell";
-import ServicesContent from "./ServicesContent";
+import ServicesContent from "./components/ServicesContent";
 
 export default function ServicesPage() {
   return (

@@ -7,7 +7,6 @@ import { createPortal } from "react-dom";
 import { useShallow } from "zustand/react/shallow";
 import { navItems } from "../lib/nav-config";
 import { useLangStore } from "../lib/langStore";
-import AIAgentChat from "./AIAgentChat";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const LG_BREAKPOINT = 1024;
@@ -63,18 +62,17 @@ export default function NavMobileMenu() {
             style={{ top: "7.5rem" }}
           >
             <ul className="flex flex-col items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">
-              {navItems.map(({ href, labelKey, Icon }) => {
+              {navItems.map(({ href, labelKey }) => {
                 const isActive = pathname === href;
                 return (
                   <li key={href} className="w-full flex justify-center">
                     <Link
                       href={href}
                       onClick={() => setOpen(false)}
-                      className={`flex items-center gap-3 py-3 px-2 rounded-lg hover:text-brand-black hover:bg-white/60 transition relative after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-brand-gold after:transition-all ${
+                      className={`py-3 px-2 rounded-lg hover:text-brand-black hover:bg-white/60 transition relative after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-brand-gold after:transition-all ${
                         isActive ? "text-brand-black after:w-3/4 after:bottom-0" : "after:w-0 after:bottom-0"
                       }`}
                     >
-                      <Icon className="w-5 h-5 shrink-0" />
                       {t(labelKey)}
                     </Link>
                   </li>
@@ -83,7 +81,13 @@ export default function NavMobileMenu() {
             </ul>
             <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
               <div className="flex items-center justify-center gap-4">
-                <AIAgentChat />
+                <Link
+                  href="/lobby#ai-guide"
+                  onClick={() => setOpen(false)}
+                  className="bg-brand-darkgray text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider hover:bg-gray-600 transition shadow-sm rounded-sm"
+                >
+                  AI Asistente →
+                </Link>
               </div>
               <div className="flex justify-center">
                 <LanguageSwitcher compact inlineAll />

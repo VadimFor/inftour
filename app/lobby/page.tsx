@@ -1,5 +1,5 @@
 import PageShell from "../components/PageShell";
-import LobbyContent from "./LobbyContent";
+import LobbyContent from "./components/LobbyContent";
 
 export default function LobbyPage() {
   return (

@@ -2,11 +2,11 @@
 
 import { create } from "zustand";
 
-export type Lang = "eng" | "esp" | "ru" | "fr" | "it" | "de" | "uk";
+export type Lang = "eng" | "esp" | "ru" | "fr" | "it" | "de" | "uk" | "pl";
 
 const STORAGE_KEY = "inftour_lang";
-const LANG_TO_HTML: Record<Lang, string> = { eng: "en", esp: "es", ru: "ru", fr: "fr", it: "it", de: "de", uk: "uk" };
-const VALID_LANGS: Lang[] = ["eng", "esp", "ru", "fr", "it", "de", "uk"];
+const LANG_TO_HTML: Record<Lang, string> = { eng: "en", esp: "es", ru: "ru", fr: "fr", it: "it", de: "de", uk: "uk", pl: "pl" };
+const VALID_LANGS: Lang[] = ["eng", "esp", "ru", "fr", "it", "de", "uk", "pl"];
 
 /** Map browser language tag (e.g. "en", "es-ES") to our Lang. Uses first match from navigator.languages. */
 function getBrowserLang(): Lang {
@@ -21,11 +21,12 @@ function getBrowserLang(): Lang {
     if (code === "it") return "it";
     if (code === "de") return "de";
     if (code === "uk") return "uk";
+    if (code === "pl") return "pl";
   }
   return "eng";
 }
 
-type LangStrings = { eng: string; esp: string; ru: string; fr: string; it: string; de: string; uk: string };
+type LangStrings = { eng: string; esp: string; ru: string; fr: string; it: string; de: string; uk: string; pl: string };
 type TranslationMap = Record<string, LangStrings>;
 
 const translations: TranslationMap = {
@@ -38,14 +39,15 @@ const translations: TranslationMap = {
     it: "Calpe Collection",
     de: "Calpe Collection",
     uk: "Колекція Кальпе",
+    pl: "Kolekcja Calpe",
   },
-  reservaDirecta: { eng: "Direct booking", esp: "Reserva directa", ru: "Прямое бронирование", fr: "Réservation directe", it: "Prenotazione diretta", de: "Direktbuchung", uk: "Пряме бронювання" },
-  experiencias: { eng: "Experiences", esp: "Experiencias", ru: "Впечатления", fr: "Expériences", it: "Esperienze", de: "Erlebnisse", uk: "Враження" },
-  services: { eng: "Services", esp: "Servicios", ru: "Услуги", fr: "Services", it: "Servizi", de: "Dienstleistungen", uk: "Послуги" },
-  revista: { eng: "Magazine", esp: "Revista", ru: "Журнал", fr: "Magazine", it: "Rivista", de: "Magazin", uk: "Журнал" },
-  lobby: { eng: "Lobby", esp: "Lobby", ru: "Лобби", fr: "Lobby", it: "Lobby", de: "Lobby", uk: "Лобі" },
-  aiAgent: { eng: "AI Agent", esp: "Agente IA", ru: "ИИ-агент", fr: "Agent IA", it: "Agente IA", de: "KI-Agent", uk: "ІІ-агент" },
-  openAIChat: { eng: "Open AI Agent chat", esp: "Abrir chat del agente IA", ru: "Открыть чат ИИ-агента", fr: "Ouvrir le chat de l'agent IA", it: "Apri chat agente IA", de: "KI-Agent-Chat öffnen", uk: "Відкрити чат ІІ-агента" },
+  reservaDirecta: { eng: "Direct booking", esp: "Reserva directa", ru: "Прямое бронирование", fr: "Réservation directe", it: "Prenotazione diretta", de: "Direktbuchung", uk: "Пряме бронювання", pl: "Rezerwacja bezpośrednia" },
+  experiencias: { eng: "Experiences", esp: "Experiencias", ru: "Впечатления", fr: "Expériences", it: "Esperienze", de: "Erlebnisse", uk: "Враження", pl: "Doświadczenia" },
+  services: { eng: "Services", esp: "Servicios", ru: "Услуги", fr: "Services", it: "Servizi", de: "Dienstleistungen", uk: "Послуги", pl: "Usługi" },
+  revista: { eng: "Magazine", esp: "Revista", ru: "Журнал", fr: "Magazine", it: "Rivista", de: "Magazin", uk: "Журнал", pl: "Magazyn" },
+  lobby: { eng: "Lobby", esp: "Lobby", ru: "Лобби", fr: "Lobby", it: "Lobby", de: "Lobby", uk: "Лобі", pl: "Lobby" },
+  aiAgent: { eng: "AI Agent", esp: "Agente IA", ru: "ИИ-агент", fr: "Agent IA", it: "Agente IA", de: "KI-Agent", uk: "ІІ-агент", pl: "Agent AI" },
+  openAIChat: { eng: "Open AI Agent chat", esp: "Abrir chat del agente IA", ru: "Открыть чат ИИ-агента", fr: "Ouvrir le chat de l'agent IA", it: "Apri chat agente IA", de: "KI-Agent-Chat öffnen", uk: "Відкрити чат ІІ-агента", pl: "Otwórz czat agenta AI" },
 
   // Footer
   footerTagline: {
@@ -56,6 +58,7 @@ const translations: TranslationMap = {
     it: "Affitti esclusivi di appartamenti a Calpe.",
     de: "Exklusive Apartment-Vermietung in Calpe.",
     uk: "Ексклюзивна оренда апартаментів у Кальпе.",
+    pl: "Ekskluzywny wynajem apartamentów w Calpe.",
   },
   footerLicense: {
     eng: "Tour operator license: EGVT-XXX-A.",
@@ -65,9 +68,10 @@ const translations: TranslationMap = {
     it: "Licenza tour operator: EGVT-XXX-A.",
     de: "Reiseveranstalter-Lizenz: EGVT-XXX-A.",
     uk: "Ліцензія туроператора: EGVT-XXX-A.",
+    pl: "Licencja organizatora turystyki: EGVT-XXX-A.",
   },
-  navigation: { eng: "Navigation", esp: "Navegación", ru: "Навигация", fr: "Navigation", it: "Navigazione", de: "Navigation", uk: "Навігація" },
-  contact: { eng: "Contact", esp: "Contacto", ru: "Связь", fr: "Contact", it: "Contatti", de: "Kontakt", uk: "Контакти" },
+  navigation: { eng: "Navigation", esp: "Navegación", ru: "Навигация", fr: "Navigation", it: "Navigazione", de: "Navigation", uk: "Навігація", pl: "Nawigacja" },
+  contact: { eng: "Contact", esp: "Contacto", ru: "Связь", fr: "Contact", it: "Contatti", de: "Kontakt", uk: "Контакти", pl: "Kontakt" },
   allRightsReserved: {
     eng: "© 2026 INFTOUR. All rights reserved.",
     esp: "© 2026 INFTOUR. Todos los derechos reservados.",
@@ -76,23 +80,29 @@ const translations: TranslationMap = {
     it: "© 2026 INFTOUR. Tutti i diritti riservati.",
     de: "© 2026 INFTOUR. Alle Rechte vorbehalten.",
     uk: "© 2026 INFTOUR. Усі права захищено.",
+    pl: "© 2026 INFTOUR. Wszelkie prawa zastrzeżone.",
   },
-  privacyPolicy: { eng: "Privacy Policy", esp: "Política de privacidad", ru: "Политика конфиденциальности", fr: "Politique de confidentialité", it: "Informativa sulla privacy", de: "Datenschutz", uk: "Політика конфіденційності" },
-  termsOfService: { eng: "Terms of Service", esp: "Términos de uso", ru: "Условия использования", fr: "Conditions d'utilisation", it: "Termini di utilizzo", de: "Nutzungsbedingungen", uk: "Умови використання" },
+  privacyPolicy: { eng: "Privacy Policy", esp: "Política de privacidad", ru: "Политика конфиденциальности", fr: "Politique de confidentialité", it: "Informativa sulla privacy", de: "Datenschutz", uk: "Політика конфіденційності", pl: "Polityka prywatności" },
+  termsOfService: { eng: "Terms of Service", esp: "Términos de uso", ru: "Условия использования", fr: "Conditions d'utilisation", it: "Termini di utilizzo", de: "Nutzungsbedingungen", uk: "Умови використання", pl: "Warunki użytkowania" },
 
   // TopBar
-  sea: { eng: "Sea", esp: "Mar", ru: "Море", fr: "Mer", it: "Mare", de: "Meer", uk: "Море" },
-  seaTempTitle: { eng: "Sea temperature in Calpe", esp: "Temperatura del mar en Calpe", ru: "Температура моря в Кальпе", fr: "Température de la mer à Calpe", it: "Temperatura del mare a Calpe", de: "Wassertemperatur in Calpe", uk: "Температура моря в Кальпе" },
-  calpeLiveWebcam: { eng: "Calpe Live Webcam", esp: "Webcam en vivo Calpe", ru: "Веб-камера Кальпе", fr: "Webcam en direct Calpe", it: "Webcam live Calpe", de: "Calpe Live-Webcam", uk: "Веб-камера Кальпе" },
-  openInNewTab: { eng: "Open in new tab", esp: "Abrir en nueva pestaña", ru: "Открыть в новой вкладке", fr: "Ouvrir dans un nouvel onglet", it: "Apri in nuova scheda", de: "In neuem Tab öffnen", uk: "Відкрити в новій вкладці" },
-  close: { eng: "Close", esp: "Cerrar", ru: "Закрыть", fr: "Fermer", it: "Chiudi", de: "Schließen", uk: "Закрити" },
+  nowInCalpe: { eng: "Now in Calpe", esp: "Ahora en Calpe", ru: "Сейчас в Кальпе", fr: "Maintenant à Calpe", it: "Ora a Calpe", de: "Jetzt in Calpe", uk: "Зараз у Кальпе", pl: "Teraz w Calpe" },
+  agua: { eng: "Water", esp: "Agua", ru: "Вода", fr: "Eau", it: "Acqua", de: "Wasser", uk: "Вода", pl: "Woda" },
+  sea: { eng: "Sea", esp: "Mar", ru: "Море", fr: "Mer", it: "Mare", de: "Meer", uk: "Море", pl: "Morze" },
+  seaTempTitle: { eng: "Sea temperature in Calpe", esp: "Temperatura del mar en Calpe", ru: "Температура моря в Кальпе", fr: "Température de la mer à Calpe", it: "Temperatura del mare a Calpe", de: "Wassertemperatur in Calpe", uk: "Температура моря в Кальпе", pl: "Temperatura morza w Calpe" },
+  calpeLiveWebcam: { eng: "Calpe Live Webcam", esp: "Webcam en vivo Calpe", ru: "Веб-камера Кальпе", fr: "Webcam en direct Calpe", it: "Webcam live Calpe", de: "Calpe Live-Webcam", uk: "Веб-камера Кальпе", pl: "Webcam na żywo Calpe" },
+  webcam1: { eng: "WebCam 1", esp: "WebCam 1", ru: "Веб-камера 1", fr: "Webcam 1", it: "Webcam 1", de: "Webcam 1", uk: "Веб-камера 1", pl: "Webcam 1" },
+  webcam2: { eng: "WebCam 2", esp: "WebCam 2", ru: "Веб-камера 2", fr: "Webcam 2", it: "Webcam 2", de: "Webcam 2", uk: "Веб-камера 2", pl: "Webcam 2" },
+  webcam3: { eng: "WebCam 3", esp: "WebCam 3", ru: "Веб-камера 3", fr: "Webcam 3", it: "Webcam 3", de: "Webcam 3", uk: "Веб-камера 3", pl: "Webcam 3" },
+  openInNewTab: { eng: "Open in new tab", esp: "Abrir en nueva pestaña", ru: "Открыть в новой вкладке", fr: "Ouvrir dans un nouvel onglet", it: "Apri in nuova scheda", de: "In neuem Tab öffnen", uk: "Відкрити в новій вкладці", pl: "Otwórz w nowej karcie" },
+  close: { eng: "Close", esp: "Cerrar", ru: "Закрыть", fr: "Fermer", it: "Chiudi", de: "Schließen", uk: "Закрити", pl: "Zamknij" },
 
   // Nav mobile menu
-  openMenu: { eng: "Open menu", esp: "Abrir menú", ru: "Открыть меню", fr: "Ouvrir le menu", it: "Apri menu", de: "Menü öffnen", uk: "Відкрити меню" },
-  closeMenu: { eng: "Close menu", esp: "Cerrar menú", ru: "Закрыть меню", fr: "Fermer le menu", it: "Chiudi menu", de: "Menü schließen", uk: "Закрити меню" },
+  openMenu: { eng: "Open menu", esp: "Abrir menú", ru: "Открыть меню", fr: "Ouvrir le menu", it: "Apri menu", de: "Menü öffnen", uk: "Відкрити меню", pl: "Otwórz menu" },
+  closeMenu: { eng: "Close menu", esp: "Cerrar menú", ru: "Закрыть меню", fr: "Fermer le menu", it: "Chiudi menu", de: "Menü schließen", uk: "Закрити меню", pl: "Zamknij menu" },
 
   // AI Agent chat
-  closeChat: { eng: "Close chat", esp: "Cerrar chat", ru: "Закрыть чат", fr: "Fermer le chat", it: "Chiudi chat", de: "Chat schließen", uk: "Закрити чат" },
+  closeChat: { eng: "Close chat", esp: "Cerrar chat", ru: "Закрыть чат", fr: "Fermer le chat", it: "Chiudi chat", de: "Chat schließen", uk: "Закрити чат", pl: "Zamknij czat" },
   aiAgentWelcome: {
     eng: "Hello, I'm the INFTOUR assistant. How can I help you today? Ask me about bookings, experiences in Calpe or anything else.",
     esp: "Hola, soy el asistente de INFTOUR. ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre reservas, experiencias en Calpe o cualquier otro tema.",
@@ -101,6 +111,7 @@ const translations: TranslationMap = {
     it: "Ciao, sono l'assistente INFTOUR. Come posso aiutarti? Chiedimi prenotazioni, esperienze a Calpe o altro.",
     de: "Hallo, ich bin der INFTOUR-Assistent. Wie kann ich Ihnen helfen? Fragen Sie nach Buchungen, Erlebnissen in Calpe oder anderem.",
     uk: "Вітаю, я помічник INFTOUR. Чим можу допомогти? Питайте про бронювання, враження в Кальпе або будь-що інше.",
+    pl: "Witaj, jestem asystentem INFTOUR. Jak mogę ci pomóc? Pytaj o rezerwacje, atrakcje w Calpe lub cokolwiek innego.",
   },
   aiAgentReply: {
     eng: "Thank you for your message. An agent will reply shortly.",
@@ -110,6 +121,7 @@ const translations: TranslationMap = {
     it: "Grazie per il messaggio. Un agente risponderà a breve.",
     de: "Vielen Dank für Ihre Nachricht. Ein Agent wird sich in Kürze melden.",
     uk: "Дякуємо за повідомлення. Агент відповість найближчим часом.",
+    pl: "Dziękujemy za wiadomość. Agent odpowie wkrótce.",
   },
   writeMessage: {
     eng: "Type your message...",
@@ -119,8 +131,9 @@ const translations: TranslationMap = {
     it: "Scrivi il tuo messaggio...",
     de: "Nachricht eingeben...",
     uk: "Введіть повідомлення...",
+    pl: "Wpisz wiadomość...",
   },
-  send: { eng: "Send", esp: "Enviar", ru: "Отправить", fr: "Envoyer", it: "Invia", de: "Senden", uk: "Надіслати" },
+  send: { eng: "Send", esp: "Enviar", ru: "Отправить", fr: "Envoyer", it: "Invia", de: "Senden", uk: "Надіслати", pl: "Wyślij" },
 
   // Home
   loadingCalendar: {
@@ -131,11 +144,12 @@ const translations: TranslationMap = {
     it: "Caricamento calendario...",
     de: "Kalender wird geladen...",
     uk: "Завантаження календаря...",
+    pl: "Ładowanie kalendarza...",
   },
-  bookingCalendar: { eng: "Booking calendar", esp: "Calendario de reservas", ru: "Календарь бронирования", fr: "Calendrier des réservations", it: "Calendario prenotazioni", de: "Buchungskalender", uk: "Календар бронювань" },
+  bookingCalendar: { eng: "Booking calendar", esp: "Calendario de reservas", ru: "Календарь бронирования", fr: "Calendrier des réservations", it: "Calendario prenotazioni", de: "Buchungskalender", uk: "Календар бронювань", pl: "Kalendarz rezerwacji" },
 
   // Pages – Experiencias (Ecosystem)
-  experienciasTitle: { eng: "Experiences", esp: "Experiencias", ru: "Впечатления", fr: "Expériences", it: "Esperienze", de: "Erlebnisse", uk: "Враження" },
+  experienciasTitle: { eng: "Experiences", esp: "Experiencias", ru: "Впечатления", fr: "Expériences", it: "Esperienze", de: "Erlebnisse", uk: "Враження", pl: "Doświadczenia" },
   experienciasContent: {
     eng: "Experiences content.",
     esp: "Contenido de Experiencias.",
@@ -144,6 +158,7 @@ const translations: TranslationMap = {
     it: "Contenuto Esperienze.",
     de: "Inhalt Erlebnisse.",
     uk: "Зміст розділу «Враження».",
+    pl: "Zawartość sekcji Doświadczenia.",
   },
   expHeroTitle: {
     eng: "Ecosystem of rest",
@@ -153,6 +168,7 @@ const translations: TranslationMap = {
     it: "Ecosistema del riposo",
     de: "Ökosystem der Erholung",
     uk: "Екосистема відпочинку",
+    pl: "Ekosystem wypoczynku",
   },
   expHeroDesc: {
     eng: "We created a guide that will replace a tour bureau for you.",
@@ -162,8 +178,9 @@ const translations: TranslationMap = {
     it: "Abbiamo creato una guida che sostituirà l'ufficio escursioni per te.",
     de: "Wir haben einen Reiseführer erstellt, der Ihnen das Reisebüro ersetzt.",
     uk: "Ми створили гід, який замінить вам туристичне бюро.",
+    pl: "Stworzyliśmy przewodnik, który zastąpi ci biuro wycieczek.",
   },
-  expAIGuide: { eng: "AI guide", esp: "Guía IA", ru: "АИ гид", fr: "Guide IA", it: "Guida IA", de: "KI-Reiseführer", uk: "ШІ-гід" },
+  expAIGuide: { eng: "AI guide", esp: "Guía IA", ru: "АИ гид", fr: "Guide IA", it: "Guida IA", de: "KI-Reiseführer", uk: "ШІ-гід", pl: "Przewodnik AI" },
   expAIGuideDesc: {
     eng: "Clear list of what our AI assistant can do: bookings, availability, recommendations for restaurants and activities, tips for Ifach and Salinas, events calendar, and more. Open the chat from the menu.",
     esp: "Lista clara de lo que hace nuestro asistente IA: reservas, disponibilidad, recomendaciones de restaurantes y actividades, consejos para el Ifach y Salinas, calendario de eventos y más. Abre el chat desde el menú.",
@@ -172,8 +189,9 @@ const translations: TranslationMap = {
     it: "Elenco chiaro di cosa fa il nostro assistente IA: prenotazioni, disponibilità, consigli su ristoranti e attività, Ifach e Salinas, calendario eventi. Apri la chat dal menu.",
     de: "Klare Liste der KI-Assistenten-Funktionen: Buchungen, Verfügbarkeit, Empfehlungen für Restaurants und Aktivitäten, Tipps zu Ifach und Salinas, Veranstaltungskalender. Chat im Menü öffnen.",
     uk: "Чіткий список можливостей ШІ-гіда: бронювання, наявність, рекомендації ресторанів та активностей, поради щодо Іфачу та Салінас, календар подій. Відкрийте чат у меню.",
+    pl: "Lista tego, co potrafi nasz asystent AI: rezerwacje, dostępność, rekomendacje restauracji i atrakcji, wskazówki dotyczące Ifach i Salinas, kalendarz wydarzeń i nie tylko. Otwórz czat z menu.",
   },
-  expGastronomy: { eng: "Tastes – Gastronomy", esp: "Sabores – Gastronomía", ru: "Вкусы – Гастрономия", fr: "Saveurs – Gastronomie", it: "Sapori – Gastronomia", de: "Geschmack – Gastronomie", uk: "Смаки – Гастрономія" },
+  expGastronomy: { eng: "Tastes – Gastronomy", esp: "Sabores – Gastronomía", ru: "Вкусы – Гастрономия", fr: "Saveurs – Gastronomie", it: "Sapori – Gastronomia", de: "Geschmack – Gastronomie", uk: "Смаки – Гастрономія", pl: "Smaki – Gastronomia" },
   expGastronomyDesc: {
     eng: "Guide to restaurants, markets, fish market, and recommended local recipes.",
     esp: "Guía de restaurantes, mercados, lonja, y recetas locales recomendadas.",
@@ -182,11 +200,12 @@ const translations: TranslationMap = {
     it: "Guida a ristoranti, mercati, mercato del pesce e ricette locali consigliate.",
     de: "Führer zu Restaurants, Märkten, Fischmarkt und empfohlenen lokalen Rezepten.",
     uk: "Гід по ресторанах, ринках, рибній біржі та рекомендованих місцевих рецептах.",
+    pl: "Przewodnik po restauracjach, targach, giełdzie rybnej i lokalnych przepisach.",
   },
-  expRestaurants: { eng: "Restaurants", esp: "Restaurantes", ru: "Рестораны", fr: "Restaurants", it: "Ristoranti", de: "Restaurants", uk: "Ресторани" },
-  expMarkets: { eng: "Markets, fish market, grocery stores", esp: "Mercados, lonja, tiendas de alimentación", ru: "Рынки, рыбные биржи, продуктовые магазины", fr: "Marchés, criée, épiceries", it: "Mercati, mercato del pesce, alimentari", de: "Märkte, Fischmarkt, Lebensmittelgeschäfte", uk: "Ринки, рибні біржі, продуктові магазини" },
-  expRecipes: { eng: "Local recipes", esp: "Recetas locales", ru: "Местные рецепты блюд", fr: "Recettes locales", it: "Ricette locali", de: "Lokale Rezepte", uk: "Місцеві рецепти" },
-  expNature: { eng: "Nature", esp: "Naturaleza", ru: "Природа", fr: "Nature", it: "Natura", de: "Natur", uk: "Природа" },
+  expRestaurants: { eng: "Restaurants", esp: "Restaurantes", ru: "Рестораны", fr: "Restaurants", it: "Ristoranti", de: "Restaurants", uk: "Ресторани", pl: "Restauracje" },
+  expMarkets: { eng: "Markets, fish market, grocery stores", esp: "Mercados, lonja, tiendas de alimentación", ru: "Рынки, рыбные биржи, продуктовые магазины", fr: "Marchés, criée, épiceries", it: "Mercati, mercato del pesce, alimentari", de: "Märkte, Fischmarkt, Lebensmittelgeschäfte", uk: "Ринки, рибні біржі, продуктові магазини", pl: "Targi, giełda rybna, sklepy spożywcze" },
+  expRecipes: { eng: "Local recipes", esp: "Recetas locales", ru: "Местные рецепты блюд", fr: "Recettes locales", it: "Ricette locali", de: "Lokale Rezepte", uk: "Місцеві рецепти", pl: "Lokalne przepisy" },
+  expNature: { eng: "Nature", esp: "Naturaleza", ru: "Природа", fr: "Nature", it: "Natura", de: "Natur", uk: "Природа", pl: "Natura" },
   expNatureDesc: {
     eng: "Trails in nature reserves: tips for climbing Ifach, routes along Salinas, seaside walks.",
     esp: "Rutas por reservas naturales: consejos para subir al Ifach, rutas por Salinas, paseos junto al mar.",
@@ -195,11 +214,12 @@ const translations: TranslationMap = {
     it: "Sentieri nelle riserve naturali: consigli per l'Ifach, percorsi Salinas, passeggiate sul mare.",
     de: "Wanderwege in Naturschutzgebieten: Tipps für Ifach, Routen an den Salinas, Strandspaziergänge.",
     uk: "Стежки в природних заповідниках: поради щодо Іфачу, маршрути вздовж Салінас, прогулянки біля моря.",
+    pl: "Szlaki w rezerwatach przyrody: wskazówki dotyczące wspinaczki na Ifach, trasy wzdłuż Salinas, spacery nadmorskie.",
   },
-  expIfach: { eng: "Climbing Ifach", esp: "Subida al Ifach", ru: "Восхождение на Ифач", fr: "Ascension de l'Ifach", it: "Salita all'Ifach", de: "Ifach besteigen", uk: "Підйом на Іфач" },
-  expSalinas: { eng: "Hiking along Salinas", esp: "Rutas por Salinas", ru: "Пешие маршруты вдоль Салинас", fr: "Randonnées Salinas", it: "Escursioni Salinas", de: "Wanderungen an den Salinas", uk: "Піші маршрути вздовж Салінас" },
-  expSeaside: { eng: "Seaside walks", esp: "Paseos junto al mar", ru: "Прогулки вдоль моря", fr: "Promenades en bord de mer", it: "Passeggiate sul mare", de: "Strandspaziergänge", uk: "Прогулянки вздовж моря" },
-  expFamily: { eng: "Family", esp: "Familia", ru: "Семья", fr: "Famille", it: "Famiglia", de: "Familie", uk: "Сім'я" },
+  expIfach: { eng: "Climbing Ifach", esp: "Subida al Ifach", ru: "Восхождение на Ифач", fr: "Ascension de l'Ifach", it: "Salita all'Ifach", de: "Ifach besteigen", uk: "Підйом на Іфач", pl: "Wspinaczka na Ifach" },
+  expSalinas: { eng: "Hiking along Salinas", esp: "Rutas por Salinas", ru: "Пешие маршруты вдоль Салинас", fr: "Randonnées Salinas", it: "Escursioni Salinas", de: "Wanderungen an den Salinas", uk: "Піші маршрути вздовж Салінас", pl: "Wędrówki wzdłuż Salinas" },
+  expSeaside: { eng: "Seaside walks", esp: "Paseos junto al mar", ru: "Прогулки вдоль моря", fr: "Promenades en bord de mer", it: "Passeggiate sul mare", de: "Strandspaziergänge", uk: "Прогулянки вздовж моря", pl: "Spacery nadmorskie" },
+  expFamily: { eng: "Family", esp: "Familia", ru: "Семья", fr: "Famille", it: "Famiglia", de: "Familie", uk: "Сім'я", pl: "Rodzina" },
   expFamilyDesc: {
     eng: "Leisure with family and friends.",
     esp: "Ocio en familia y con amigos.",
@@ -208,12 +228,13 @@ const translations: TranslationMap = {
     it: "Tempo libero in famiglia e con amici.",
     de: "Freizeit mit Familie und Freunden.",
     uk: "Дозвіллє з сім'єю та друзями.",
+    pl: "Wypoczynek z rodziną i przyjaciółmi.",
   },
-  expBBQ: { eng: "BBQ, Virtual arena & playgrounds", esp: "Barbacoas, arena virtual y parques", ru: "BBQ, Virtualnaya arena и детские площадки", fr: "BBQ, arène virtuelle et aires de jeux", it: "BBQ, arena virtuale e parchi giochi", de: "BBQ, virtuelle Arena und Spielplätze", uk: "BBQ, віртуальна арена та дитячі майданчики" },
-  expFeria: { eng: "Feria", esp: "Feria", ru: "Feria", fr: "Feria", it: "Feria", de: "Feria", uk: "Feria" },
-  expCityGuide: { eng: "Electronic city guide", esp: "Guía electrónica de la ciudad", ru: "Электронный гид по городу", fr: "Guide électronique de la ville", it: "Guida elettronica della città", de: "Elektronischer Stadtführer", uk: "Електронний гід по місту" },
-  expEventsCalendar: { eng: "Events calendar", esp: "Calendario de eventos", ru: "Календарь событий", fr: "Calendrier des événements", it: "Calendario eventi", de: "Veranstaltungskalender", uk: "Календар подій" },
-  expRelax: { eng: "Relax", esp: "Relax", ru: "Релакс", fr: "Relax", it: "Relax", de: "Entspannung", uk: "Релакс" },
+  expBBQ: { eng: "BBQ, Virtual arena & playgrounds", esp: "Barbacoas, arena virtual y parques", ru: "BBQ, Virtualnaya arena и детские площадки", fr: "BBQ, arène virtuelle et aires de jeux", it: "BBQ, arena virtuale e parchi giochi", de: "BBQ, virtuelle Arena und Spielplätze", uk: "BBQ, віртуальна арена та дитячі майданчики", pl: "BBQ, wirtualna arena i place zabaw" },
+  expFeria: { eng: "Feria", esp: "Feria", ru: "Feria", fr: "Feria", it: "Feria", de: "Feria", uk: "Feria", pl: "Feria" },
+  expCityGuide: { eng: "Electronic city guide", esp: "Guía electrónica de la ciudad", ru: "Электронный гид по городу", fr: "Guide électronique de la ville", it: "Guida elettronica della città", de: "Elektronischer Stadtführer", uk: "Електронний гід по місту", pl: "Elektroniczny przewodnik po mieście" },
+  expEventsCalendar: { eng: "Events calendar", esp: "Calendario de eventos", ru: "Календарь событий", fr: "Calendrier des événements", it: "Calendario eventi", de: "Veranstaltungskalender", uk: "Календар подій", pl: "Kalendarz wydarzeń" },
+  expRelax: { eng: "Relax", esp: "Relax", ru: "Релакс", fr: "Relax", it: "Relax", de: "Entspannung", uk: "Релакс", pl: "Relaks" },
   expRelaxDesc: {
     eng: "Beaches and SPA.",
     esp: "Playas y SPA.",
@@ -222,8 +243,9 @@ const translations: TranslationMap = {
     it: "Spiagge e SPA.",
     de: "Strände und SPA.",
     uk: "Пляжі та СПА.",
+    pl: "Plaże i SPA.",
   },
-  expSport: { eng: "Lifestyle – Sport", esp: "Estilo de vida – Deporte", ru: "Образ жизни – Спорт", fr: "Style de vie – Sport", it: "Stile di vita – Sport", de: "Lifestyle – Sport", uk: "Стиль життя – Спорт" },
+  expSport: { eng: "Lifestyle – Sport", esp: "Estilo de vida – Deporte", ru: "Образ жизни – Спорт", fr: "Style de vie – Sport", it: "Stile di vita – Sport", de: "Lifestyle – Sport", uk: "Стиль життя – Спорт", pl: "Styl życia – Sport" },
   expSportDesc: {
     eng: "Cycling, sports facilities, equipment rental, and events calendar.",
     esp: "Ciclismo, instalaciones deportivas, alquiler de material y calendario de eventos.",
@@ -232,13 +254,14 @@ const translations: TranslationMap = {
     it: "Ciclismo, strutture sportive, noleggio attrezzature e calendario eventi.",
     de: "Radfahren, Sportanlagen, Ausrüstungsverleih und Veranstaltungskalender.",
     uk: "Велопрогулянки, спортивні споруди, прокат інвентарю та календар подій.",
+    pl: "Jazda na rowerze, obiekty sportowe, wypożyczalnia sprzętu i kalendarz wydarzeń.",
   },
-  expCycling: { eng: "Cycling", esp: "Ciclismo", ru: "Вело прогулки", fr: "Vélo", it: "Ciclismo", de: "Radfahren", uk: "Велопрогулянки" },
-  expSportsFacilities: { eng: "Sports facilities in Calpe", esp: "Instalaciones deportivas en Calpe", ru: "Спортивные сооружения Кальпе", fr: "Installations sportives à Calpe", it: "Strutture sportive a Calpe", de: "Sportanlagen in Calpe", uk: "Спортивні споруди в Кальпе" },
-  expEquipmentRental: { eng: "Sports equipment rental", esp: "Alquiler de material deportivo", ru: "Прокат спортивного инвентаря", fr: "Location de matériel sportif", it: "Noleggio attrezzature sportive", de: "Sportausrüstungsverleih", uk: "Прокат спортивного інвентарю" },
-  expSportsEvents: { eng: "Sports events & calendar", esp: "Eventos deportivos y calendario", ru: "Спортивные мероприятия, календарь", fr: "Événements sportifs et calendrier", it: "Eventi sportivi e calendario", de: "Sportveranstaltungen und Kalender", uk: "Спортивні події та календар" },
-  expHeroLabel: { eng: "Leisure ecosystem", esp: "Ecosistema de Ocio", ru: "Экосистема досуга", fr: "Écosystème de loisirs", it: "Ecosistema del tempo libero", de: "Freizeit-Ökosystem", uk: "Екосистема дозвілля" },
-  expPageTitle: { eng: "INFTOUR Experiences", esp: "Experiencias INFTOUR", ru: "Впечатления INFTOUR", fr: "Expériences INFTOUR", it: "Esperienze INFTOUR", de: "INFTOUR Erlebnisse", uk: "Враження INFTOUR" },
+  expCycling: { eng: "Cycling", esp: "Ciclismo", ru: "Вело прогулки", fr: "Vélo", it: "Ciclismo", de: "Radfahren", uk: "Велопрогулянки", pl: "Jazda na rowerze" },
+  expSportsFacilities: { eng: "Sports facilities in Calpe", esp: "Instalaciones deportivas en Calpe", ru: "Спортивные сооружения Кальпе", fr: "Installations sportives à Calpe", it: "Strutture sportive a Calpe", de: "Sportanlagen in Calpe", uk: "Спортивні споруди в Кальпе", pl: "Obiekty sportowe w Calpe" },
+  expEquipmentRental: { eng: "Sports equipment rental", esp: "Alquiler de material deportivo", ru: "Прокат спортивного инвентаря", fr: "Location de matériel sportif", it: "Noleggio attrezzature sportive", de: "Sportausrüstungsverleih", uk: "Прокат спортивного інвентарю", pl: "Wypożyczalnia sprzętu sportowego" },
+  expSportsEvents: { eng: "Sports events & calendar", esp: "Eventos deportivos y calendario", ru: "Спортивные мероприятия, календарь", fr: "Événements sportifs et calendrier", it: "Eventi sportivi e calendario", de: "Sportveranstaltungen und Kalender", uk: "Спортивні події та календар", pl: "Imprezy sportowe i kalendarz" },
+  expHeroLabel: { eng: "Leisure ecosystem", esp: "Ecosistema de Ocio", ru: "Экосистема досуга", fr: "Écosystème de loisirs", it: "Ecosistema del tempo libero", de: "Freizeit-Ökosystem", uk: "Екосистема дозвілля", pl: "Ekosystem wypoczynku" },
+  expPageTitle: { eng: "INFTOUR Experiences", esp: "Experiencias INFTOUR", ru: "Впечатления INFTOUR", fr: "Expériences INFTOUR", it: "Esperienze INFTOUR", de: "INFTOUR Erlebnisse", uk: "Враження INFTOUR", pl: "Doświadczenia INFTOUR" },
   expHeroDescLong: {
     eng: "We have created an exclusive guide that will completely replace the traditional excursion office. Immerse yourself in the authentic life of Calpe with our carefully selected recommendations.",
     esp: "Hemos creado una guía exclusiva que reemplazará por completo a la oficina de excursiones tradicional. Sumérgete en la auténtica vida de Calpe con nuestras recomendaciones cuidadosamente seleccionadas.",
@@ -247,18 +270,42 @@ const translations: TranslationMap = {
     it: "Abbiamo creato una guida esclusiva che sostituirà completamente l'ufficio escursioni tradizionale. Immergiti nella vita autentica di Calpe con le nostre raccomandazioni selezionate.",
     de: "Wir haben einen exklusiven Guide erstellt, der das traditionelle Ausflugsbüro vollständig ersetzen wird. Tauchen Sie ein in das authentische Leben von Calpe mit unseren sorgfältig ausgewählten Empfehlungen.",
     uk: "Ми створили ексклюзивний гід, який повністю замінить традиційне екскурсійне бюро. Пориньте в справжнє життя Кальпе з нашими ретельно підібраними рекомендаціями.",
+    pl: "Stworzyliśmy ekskluzywny przewodnik, który całkowicie zastąpi tradycyjne biuro wycieczek. Zanurz się w autentycznym życiu Calpe z naszymi starannie dobranymi rekomendacjami.",
   },
-  expGastronomySub: { eng: "Local gastronomy", esp: "Gastronomía local", ru: "Местная гастрономия", fr: "Gastronomie locale", it: "Gastronomia locale", de: "Lokale Gastronomie", uk: "Місцева гастрономія" },
-  expRestaurantsDesc: { eng: "From fine dining to traditional tapas.", esp: "De la alta cocina a las tapas tradicionales.", ru: "От высокой кухни до традиционных тапас.", fr: "De la haute cuisine aux tapas traditionnelles.", it: "Dalla cucina raffinata alle tapas tradizionali.", de: "Von Feinschmecker-Küche bis zu traditionellen Tapas.", uk: "Від високої кухні до традиційних тапас." },
-  expMarketsDesc: { eng: "Fish auction and fresh produce shops.", esp: "Subasta de pescado y tiendas de productos frescos.", ru: "Рыбный аукцион и магазины свежих продуктов.", fr: "Vente aux enchères de poisson et magasins de produits frais.", it: "Asta del pesce e negozi di prodotti freschi.", de: "Fischversteigerung und Frischeproduktläden.", uk: "Рибний аукціон та магазини свіжих продуктів." },
-  expRecipesDesc: { eng: "Learn to cook Llauna de Calp or Arròs del Senyoret.", esp: "Aprende a cocinar Llauna de Calp o Arròs del Senyoret.", ru: "Научитесь готовить Llauna de Calp или Arròs del Senyoret.", fr: "Apprenez à cuisiner la Llauna de Calp ou l'Arròs del Senyoret.", it: "Impara a cucinare Llauna de Calp o Arròs del Senyoret.", de: "Lernen Sie Llauna de Calp oder Arròs del Senyoret zu kochen.", uk: "Навчіться готувати Llauna de Calp або Arròs del Senyoret." },
-  expNatureSub: { eng: "Trails and reserves", esp: "Senderos y Reservas", ru: "Тропы и заповедники", fr: "Sentiers et réserves", it: "Sentieri e riserve", de: "Wanderwege und Reservate", uk: "Стежки та заповідники" },
-  expIfachDesc: { eng: "Safety tips, required permits and best times to climb the symbol of the Costa Blanca.", esp: "Consejos de seguridad, permisos necesarios y las mejores horas para subir al símbolo de la Costa Blanca.", ru: "Советы по безопасности, необходимые разрешения и лучшее время для восхождения на символ Коста-Бланки.", fr: "Conseils de sécurité, permis nécessaires et meilleures heures pour gravir le symbole de la Costa Blanca.", it: "Consigli di sicurezza, permessi necessari e migliori orari per salire sul simbolo della Costa Blanca.", de: "Sicherheitstipps, erforderliche Genehmigungen und beste Zeiten für den Aufstieg zum Symbol der Costa Blanca.", uk: "Поради з безпеки, необхідні дозволи та найкращий час для підйому на символ Коста-Бланки." },
-  expSalinasDesc: { eng: "Flamingo watching and flat walks ideal for sunset.", esp: "Observación de flamencos y paseos llanos ideales para el atardecer.", ru: "Наблюдение за фламинго и равнинные прогулки, идеальные для заката.", fr: "Observation des flamants et promenades plates idéales au coucher du soleil.", it: "Osservazione dei fenicotteri e passeggiate piatte ideali per il tramonto.", de: "Flamingo-Beobachtung und flache Spaziergänge ideal bei Sonnenuntergang.", uk: "Спостереження за фламінго та рівнинні прогулянки, ідеальні для заходу сонця." },
-  expSeasideDesc: { eng: "Eco routes along the cliffs of Benissa and Calpe seafront promenades.", esp: "Rutas ecológicas por los acantilados de Benissa y paseos marítimos de Calpe.", ru: "Экомаршруты по скалам Бениссы и набережные Кальпе.", fr: "Parcours écologiques le long des falaises de Benissa et promenades en front de mer de Calpe.", it: "Percorsi ecologici lungo le scogliere di Benissa e passeggiate sul lungomare di Calpe.", de: "Ökorouten entlang der Klippen von Benissa und Calpes Strandpromenaden.", uk: "Екомаршрути вздовж скель Бенісси та набережні Кальпе." },
-  expFamilySub: { eng: "Shared leisure", esp: "Ocio compartido", ru: "Совместный досуг", fr: "Loisirs partagés", it: "Tempo libero condiviso", de: "Gemeinsame Freizeit", uk: "Спільний дозвіллє" },
-  expViewEventsCalendar: { eng: "View events calendar", esp: "Ver Calendario de Eventos", ru: "Календарь событий", fr: "Voir le calendrier des événements", it: "Vedi calendario eventi", de: "Veranstaltungskalender anzeigen", uk: "Переглянути календар подій" },
-  expSportSub: { eng: "Active sport", esp: "Deporte activo", ru: "Активный спорт", fr: "Sport actif", it: "Sport attivo", de: "Aktiver Sport", uk: "Активний спорт" },
+  expGastronomySub: { eng: "Local gastronomy", esp: "Gastronomía local", ru: "Местная гастрономия", fr: "Gastronomie locale", it: "Gastronomia locale", de: "Lokale Gastronomie", uk: "Місцева гастрономія", pl: "Lokalna gastronomia" },
+  expRestaurantsDesc: { eng: "From fine dining to traditional tapas.", esp: "De la alta cocina a las tapas tradicionales.", ru: "От высокой кухни до традиционных тапас.", fr: "De la haute cuisine aux tapas traditionnelles.", it: "Dalla cucina raffinata alle tapas tradizionali.", de: "Von Feinschmecker-Küche bis zu traditionellen Tapas.", uk: "Від високої кухні до традиційних тапас.", pl: "Od haute cuisine po tradycyjne tapas." },
+  expRestaurantsModalTitle: { eng: "Recommended restaurants", esp: "Restaurantes recomendados", ru: "Рекомендуемые рестораны", fr: "Restaurants recommandés", it: "Ristoranti consigliati", de: "Empfohlene Restaurants", uk: "Рекомендовані ресторани", pl: "Polecane restauracje" },
+  expRestaurantsModalSubtitle: { eng: "From fine dining to traditional tapas.", esp: "De la alta cocina a las tapas tradicionales.", ru: "От высокой кухни до традиционных тапас.", fr: "De la haute cuisine aux tapas traditionnelles.", it: "Dall'alta cucina alle tapas tradizionali.", de: "Von Sterneküche bis zu traditionellen Tapas.", uk: "Від високої кухні до традиційних тапас.", pl: "Od wysokiej kuchni po tradycyjne tapas." },
+  expRestaurantsModalIntro: { eng: "Gastronomy in Calpe: the art of living by the sea. Calpe is not only known for immaculate beaches, but also as one of the gastronomic hubs of the Costa Blanca.", esp: "Gastronomía en Calpe: el arte de vivir junto al mar. Calpe no es solo sinónimo de playas impecables, sino también uno de los epicentros gastronómicos de la Costa Blanca.", ru: "Гастрономия Кальпе: искусство жить у моря. Кальпе — это не только безупречные пляжи, но и один из главных гастрономических центров Коста-Бланки.", fr: "Gastronomie à Calpe : l'art de vivre au bord de la mer. Calpe n'est pas seulement synonyme de plages impeccables, c'est aussi l'un des pôles gastronomiques de la Costa Blanca.", it: "Gastronomia a Calpe: l'arte di vivere sul mare. Calpe non è solo sinonimo di spiagge impeccabili, ma anche uno dei poli gastronomici della Costa Blanca.", de: "Gastronomie in Calpe: die Kunst, am Meer zu leben. Calpe steht nicht nur für makellose Strände, sondern auch für eines der gastronomischen Zentren der Costa Blanca.", uk: "Гастрономія в Кальпе: мистецтво жити біля моря. Кальпе відомий не лише бездоганними пляжами, а й як один із гастрономічних центрів Коста-Бланки.", pl: "Gastronomia w Calpe: sztuka życia nad morzem. Calpe to nie tylko nieskazitelne plaże, ale także jedno z gastronomicznych centrów Costa Blanca." },
+  expRestaurantsModalSection1: { eng: "Michelin stars and fine dining: for special evenings, Beat and Audrey's offer tasting menus and reimagined Mediterranean classics, while Orobianco combines top Italian cuisine with panoramic coastal views.", esp: "Estrellas Michelin y alta cocina: para veladas especiales, Beat y Audrey's ofrecen menús degustación y clásicos mediterráneos reinventados, mientras que Orobianco combina alta cocina italiana con vistas panorámicas de la costa.", ru: "Звезды Michelin и высокая кухня: для особенных вечеров Beat и Audrey's предлагают дегустационные сеты и переосмысленную средиземноморскую классику, а Orobianco сочетает итальянскую высокую кухню с панорамным видом на побережье.", fr: "Étoiles Michelin et haute cuisine : pour des soirées spéciales, Beat et Audrey's proposent des menus dégustation, tandis qu'Orobianco associe cuisine italienne d'exception et vue panoramique sur la côte.", it: "Stelle Michelin e alta cucina: per serate speciali, Beat e Audrey's propongono menu degustazione, mentre Orobianco unisce cucina italiana d'eccellenza e vista panoramica sulla costa.", de: "Michelin-Sterne und gehobene Küche: Für besondere Abende bieten Beat und Audrey's Degustationsmenüs, während Orobianco Spitzenküche mit Panoramablick auf die Küste verbindet.", uk: "Зірки Michelin і висока кухня: для особливих вечорів Beat і Audrey's пропонують дегустаційні меню, а Orobianco поєднує італійську високу кухню з панорамним видом на узбережжя.", pl: "Gwiazdy Michelin i fine dining: na wyjątkowe wieczory Beat i Audrey's oferują menu degustacyjne, a Orobianco łączy włoską kuchnię premium z panoramicznym widokiem na wybrzeże." },
+  expRestaurantsModalSection2: { eng: "Seafood and signature paellas: for traditional paella and local red prawns, visit Restaurante del Real Club Nautico de Calpe or Abiss by the sea.", esp: "Delicias del mar y paellas de referencia: para una paella tradicional y la gamba roja local, visite el Restaurante del Real Club Nautico de Calpe o Abiss, junto al mar.", ru: "Морские деликатесы и эталонная паэлья: за традиционной паэльей и местной красной креветкой отправляйтесь в Restaurante del Real Club Nautico de Calpe или Abiss у воды.", fr: "Délices de la mer et paellas de référence : pour une paella traditionnelle et la crevette rouge locale, rendez-vous au Restaurante del Real Club Nautico de Calpe ou chez Abiss en bord de mer.", it: "Specialità di mare e paella: per una paella tradizionale e il gambero rosso locale, prova il Restaurante del Real Club Nautico de Calpe o Abiss sul mare.", de: "Meeresdelikatessen und Paella: Für traditionelle Paella und rote Garnelen besuchen Sie das Restaurante del Real Club Nautico de Calpe oder Abiss direkt am Meer.", uk: "Морські делікатеси та паелья: за традиційною паельєю і місцевою червоною креветкою завітайте до Restaurante del Real Club Nautico de Calpe або Abiss біля моря.", pl: "Morskie specjały i paella: po tradycyjną paellę i lokalną czerwoną krewetkę wybierz się do Restaurante del Real Club Nautico de Calpe lub Abiss nad samym morzem." },
+  expRestaurantsModalSection3: { eng: "For a more sophisticated evening, book Capri's panoramic terrace: live lobster, chilled champagne and the sound of the waves.", esp: "Para una noche más sofisticada, reserve la terraza panorámica de Capri: bogavante vivo, champán helado y el sonido de las olas.", ru: "Для более изысканного вечера бронируйте видовую террасу Capri: живые омары, ледяное шампанское и шум волн.", fr: "Pour une soirée plus sophistiquée, réservez la terrasse panoramique de Capri : homard vivant, champagne glacé et bruit des vagues.", it: "Per una serata più sofisticata, prenota la terrazza panoramica di Capri: astice vivo, champagne ghiacciato e suono delle onde.", de: "Für einen besonders eleganten Abend: die Panoramaterrasse von Capri mit lebendem Hummer, gekühltem Champagner und Meeresrauschen.", uk: "Для вишуканого вечора забронюйте панорамну терасу Capri: живий омар, охолоджене шампанське та шум хвиль.", pl: "Na bardziej elegancki wieczór zarezerwuj panoramiczny taras Capri: żywy homar, schłodzony szampan i szum fal." },
+  expRestaurantsModalSection4: { eng: "Mornings with flavor: for smoothie bowls, avocado toasts and specialty coffee, visit Plant Shack or Cafeseamos.", esp: "Mañanas con sabor: para smoothie bowls, tostadas de aguacate y café de especialidad, visite Plant Shack o Cafeseamos.", ru: "Утро со вкусом: за смузи-боулами, тостами с авокадо и specialty-кофе заходите в Plant Shack или Cafeseamos.", fr: "Matins savoureux : pour des smoothie bowls, toasts à l'avocat et café de spécialité, rendez-vous chez Plant Shack ou Cafeseamos.", it: "Mattine con gusto: per smoothie bowl, toast con avocado e caffè specialty, vai da Plant Shack o Cafeseamos.", de: "Geschmackvoller Morgen: Für Smoothie Bowls, Avocado-Toast und Specialty Coffee besuchen Sie Plant Shack oder Cafeseamos.", uk: "Смачний ранок: за смузі-боулами, тостами з авокадо і specialty-кавою завітайте в Plant Shack або Cafeseamos.", pl: "Smakowite poranki: na smoothie bowle, tosty z awokado i kawę specialty zajrzyj do Plant Shack lub Cafeseamos." },
+  expRestaurantsModalSection5: { eng: "If you prefer a classic Spanish breakfast with ham, grated tomato and fresh pastries, choose one of the traditional cafes on the seafront.", esp: "Si prefiere un desayuno clásico español con jamón, tomate rallado y bollería recién hecha, elija una cafetería tradicional del paseo marítimo.", ru: "Если предпочитаете классический испанский завтрак с хамоном, томатами и свежей выпечкой, выбирайте традиционные кофейни на набережной.", fr: "Si vous préférez un petit-déjeuner espagnol classique avec jambon, tomate râpée et viennoiseries fraîches, choisissez un café traditionnel du front de mer.", it: "Se preferisci una colazione spagnola classica con jamon, pomodoro grattugiato e pasticceria fresca, scegli un bar tradizionale sul lungomare.", de: "Wenn Sie ein klassisches spanisches Frühstück mit Schinken, geriebener Tomate und frischem Gebäck bevorzugen, wählen Sie eines der traditionellen Cafes an der Promenade.", uk: "Якщо ви віддаєте перевагу класичному іспанському сніданку з хамоном, тертим томатом і свіжою випічкою, обирайте традиційні кав'ярні на набережній.", pl: "Jeśli wolisz klasyczne hiszpańskie śniadanie z szynką, tartym pomidorem i świeżymi wypiekami, wybierz tradyjną kawiarnię przy promenadzie." },
+  expRestaurantsModalSection6: { eng: "Rural aesthetics and meat cuisine: for a peaceful inland setting, try La Casa del Maco; for aged steaks and grilled meat, book El Toro or La Vina de Calpe.", esp: "Estética rural y carnes: para un entorno tranquilo en el interior, pruebe La Casa del Maco; para carnes maduradas y a la parrilla, reserve en El Toro o La Vina de Calpe.", ru: "Загородная эстетика и мясная гастрономия: для спокойной атмосферы выбирайте La Casa del Maco; за стейками сухой выдержки и грилем — El Toro или La Vina de Calpe.", fr: "Ambiance rurale et cuisine de viande : pour un cadre paisible, essayez La Casa del Maco ; pour les viandes maturées et grillées, réservez chez El Toro ou La Vina de Calpe.", it: "Atmosfera rurale e cucina di carne: per un contesto tranquillo prova La Casa del Maco; per carni frollate e griglia prenota da El Toro o La Vina de Calpe.", de: "Ländliche Atmosphäre und Fleischküche: Für Ruhe im Hinterland empfiehlt sich La Casa del Maco; für Dry-Aged-Steaks und Grillgerichte El Toro oder La Vina de Calpe.", uk: "Заміська естетика та м'ясна гастрономія: для спокійної атмосфери оберіть La Casa del Maco; за витриманими стейками та грилем — El Toro або La Vina de Calpe.", pl: "Wiejski klimat i kuchnia mięsna: dla spokojniejszej atmosfery wybierz La Casa del Maco; na steki sezonowane i grillowane mięsa zarezerwuj El Toro lub La Vina de Calpe." },
+  expRestaurantsModalSection7: { eng: "Tapas and wine: for Spanish tapas with an excellent wine list, choose Tavino, El Andaluz or Tasca La Espanola; for relaxed dining with friends, Komfort or Umami are excellent options.", esp: "Tapas y vino: para tapas españolas con excelente carta de vinos, elija Tavino, El Andaluz o Tasca La Espanola; para comer con amigos, Komfort o Umami son excelentes opciones.", ru: "Тапас и вино: за испанскими закусками и отличной винной картой выбирайте Tavino, El Andaluz или Tasca La Espanola; для дружеского обеда отлично подойдут Komfort или Umami.", fr: "Tapas et vin : pour des tapas espagnoles et une excellente carte des vins, choisissez Tavino, El Andaluz ou Tasca La Espanola ; pour un repas détendu entre amis, Komfort ou Umami sont d'excellents choix.", it: "Tapas e vino: per tapas spagnole e un'ottima carta vini scegli Tavino, El Andaluz o Tasca La Espanola; per un pranzo rilassato tra amici, Komfort o Umami sono ottime scelte.", de: "Tapas und Wein: Für spanische Tapas mit exzellenter Weinkarte sind Tavino, El Andaluz oder Tasca La Espanola ideal; für ein entspanntes Essen mit Freunden Komfort oder Umami.", uk: "Тапас і вино: за іспанськими закусками та чудовою винною картою обирайте Tavino, El Andaluz або Tasca La Espanola; для невимушеного обіду з друзями підійдуть Komfort чи Umami.", pl: "Tapas i wino: na hiszpańskie tapas i świetną kartę win wybierz Tavino, El Andaluz lub Tasca La Espanola; na swobodny posiłek z przyjaciółmi świetne będą Komfort lub Umami." },
+  expRestaurantsModalSection8: { eng: "Conscious choice: vegetarian and gluten-free menus with sea views are available at Restaurante 78, while classic gluten-free Italian cuisine can be found at Gastrobottega di Giuseppe.", esp: "Elección consciente: menús vegetarianos y sin gluten con vistas en Restaurante 78, y cocina italiana clásica sin gluten en Gastrobottega di Giuseppe.", ru: "Осознанный выбор: в Restaurante 78 ждут вегетарианские и безглютеновые меню с видом, а классическая итальянская кухня без глютена — в Gastrobottega di Giuseppe.", fr: "Choix responsable : des menus végétariens et sans gluten avec vue sont proposés au Restaurante 78, et une cuisine italienne classique sans gluten chez Gastrobottega di Giuseppe.", it: "Scelta consapevole: menu vegetariani e senza glutine con vista al Restaurante 78, e cucina italiana classica senza glutine da Gastrobottega di Giuseppe.", de: "Bewusste Auswahl: Vegetarische und glutenfreie Menüs mit Aussicht bietet Restaurante 78, klassische glutenfreie italienische Küche gibt es bei Gastrobottega di Giuseppe.", uk: "Усвідомлений вибір: у Restaurante 78 доступні вегетаріанські та безглютенові меню з краєвидом, а класичну італійську кухню без глютену шукайте в Gastrobottega di Giuseppe.", pl: "Świadomy wybór: wegetariańskie i bezglutenowe menu z widokiem znajdziesz w Restaurante 78, a klasyczną włoską kuchnię bez glutenu w Gastrobottega di Giuseppe." },
+  expRestaurantsModalSection9: { eng: "Beach lounges and sunset: end your day in a seaside lounge bar with signature cocktails, sea breeze and relaxed DJ sets before a long Spanish dinner.", esp: "Beach lounges y atardecer: termine el día en un lounge bar frente al mar con cócteles de autor, brisa marina y sesiones de DJ relajadas antes de una larga cena española.", ru: "Пляжные лаунжи и закат: завершите день в прибрежном лаунж-баре с авторскими коктейлями, морским бризом и расслабленными DJ-сетами перед долгим испанским ужином.", fr: "Lounge bars de plage et coucher de soleil : terminez la journée dans un bar en bord de mer avec cocktails signature, brise marine et DJ sets détendus.", it: "Beach lounge e tramonto: concludi la giornata in un lounge bar sul mare con cocktail d'autore, brezza marina e DJ set rilassati prima di una lunga cena spagnola.", de: "Beach-Lounges und Sonnenuntergang: Beenden Sie den Tag in einer Lounge-Bar am Meer mit Signature-Cocktails, Meeresbrise und entspannten DJ-Sets.", uk: "Пляжні лаунжі та захід сонця: завершіть день у прибережному лаунж-барі з авторськими коктейлями, морським бризом і спокійними DJ-сетами.", pl: "Plażowe lounge i zachód słońca: zakończ dzień w nadmorskim lounge barze z autorskimi koktajlami, morską bryzą i relaksującymi setami DJ-a." },
+  expRestaurantsModalTip: { eng: "INFTOUR tip: in high season, the best tables on the Costa Blanca are booked several days in advance. Our AI assistant can provide addresses, contacts and locations any time.", esp: "Consejo INFTOUR: en temporada alta, las mejores mesas de la Costa Blanca se reservan con varios días de antelación. Nuestro asistente de IA puede ofrecer direcciones, contactos y ubicaciones en cualquier momento.", ru: "Совет INFTOUR: в высокий сезон лучшие столики на Коста-Бланке бронируют за несколько дней. Наш AI-ассистент в любое время подскажет адреса, контакты и геолокации.", fr: "Conseil INFTOUR : en haute saison, les meilleures tables de la Costa Blanca se réservent plusieurs jours à l'avance. Notre assistant IA peut fournir adresses, contacts et localisations à tout moment.", it: "Consiglio INFTOUR: in alta stagione i tavoli migliori della Costa Blanca si prenotano con diversi giorni di anticipo. Il nostro assistente IA puo fornire indirizzi, contatti e posizioni in qualsiasi momento.", de: "INFTOUR-Tipp: In der Hochsaison sind die besten Tische an der Costa Blanca oft mehrere Tage im Voraus ausgebucht. Unser KI-Assistent liefert jederzeit Adressen, Kontakte und Standorte.", uk: "Порада INFTOUR: у високий сезон найкращі столики на Коста-Бланці бронюють за кілька днів. Наш ШІ-помічник у будь-який момент надасть адреси, контакти та геолокації.", pl: "Wskazowka INFTOUR: w sezonie najlepsze stoliki na Costa Blanca rezerwuje sie z kilkudniowym wyprzedzeniem. Nasz asystent AI moze podac adresy, kontakty i lokalizacje w kazdej chwili." },
+  expMarketsModalTitle: { eng: "Markets and fish market", esp: "Mercados y lonja", ru: "Рынки и рыбная биржа", fr: "Marchés et criée", it: "Mercati e mercato del pesce", de: "Märkte und Fischmarkt", uk: "Ринки та рибна біржа", pl: "Targi i giełda rybna" },
+  expMarketsModalSubtitle: { eng: "Fresh produce and local rhythm.", esp: "Producto fresco y ritmo local.", ru: "Свежие продукты и местный ритм.", fr: "Produits frais et rythme local.", it: "Prodotti freschi e ritmo locale.", de: "Frische Produkte und lokaler Rhythmus.", uk: "Свіжі продукти та місцевий ритм.", pl: "Świeże produkty i lokalny rytm." },
+  expMarketsModalIntro: { eng: "Calpe can be experienced through its markets: from fish landing at the port to neighborhood shops where locals buy every day.", esp: "Calpe se vive también a través de sus mercados: desde el pescado recién descargado en puerto hasta las tiendas de barrio donde compra la gente local.", ru: "Кальпе можно почувствовать через его рынки: от свежего улова в порту до районных магазинов, где закупаются местные.", fr: "Calpe se découvre aussi par ses marchés : du poisson tout juste débarqué au port aux commerces de quartier fréquentés par les habitants.", it: "Calpe si scopre anche attraverso i suoi mercati: dal pesce appena sbarcato in porto ai negozi di quartiere frequentati dai residenti.", de: "Calpe erlebt man auch über seine Märkte: vom frisch angelandeten Fisch im Hafen bis zu den Läden, in denen Einheimische täglich einkaufen.", uk: "Кальпе відкривається і через свої ринки: від свіжого улову в порту до крамниць, де щодня купують місцеві.", pl: "Calpe poznaje się także przez targi: od świeżej ryby w porcie po osiedlowe sklepy, w których codziennie kupują mieszkańcy." },
+  expMarketsModalSection1: { eng: "The fish market at the port is one of the most authentic experiences: arrive in the afternoon to see the boats unload and feel the real maritime pulse of Calpe.", esp: "La lonja del puerto es una de las experiencias más auténticas: llega por la tarde para ver la descarga de barcos y sentir el pulso marinero real de Calpe.", ru: "Рыбная биржа в порту - одно из самых аутентичных впечатлений: приходите во второй половине дня, чтобы увидеть разгрузку лодок и почувствовать морской ритм Кальпе.", fr: "La criée du port est l'une des expériences les plus authentiques : venez l'après-midi pour voir le débarquement des bateaux et sentir le vrai rythme marin de Calpe.", it: "Il mercato del pesce al porto è una delle esperienze più autentiche: arriva nel pomeriggio per vedere lo scarico delle barche e sentire il vero ritmo marinaro di Calpe.", de: "Der Fischmarkt im Hafen gehört zu den authentischsten Erlebnissen: Kommen Sie am Nachmittag, um das Entladen der Boote zu sehen und den maritimen Rhythmus Calpes zu spüren.", uk: "Рибна біржа в порту - одна з найавтентичніших вражень: приходьте після обіду, щоб побачити вивантаження човнів і відчути справжній морський ритм Кальпе.", pl: "Giełda rybna w porcie to jedno z najbardziej autentycznych doświadczeń: przyjdź po południu, by zobaczyć rozładunek łodzi i poczuć morski rytm Calpe." },
+  expMarketsModalSection2: { eng: "For seafood shopping, prioritize local fishmongers near the port and ask for seasonal catches: quality is higher and flavors are much more intense.", esp: "Para comprar marisco y pescado, prioriza pescaderías de proximidad cerca del puerto y pregunta por capturas de temporada: la calidad es superior y el sabor mucho más intenso.", ru: "Для покупки рыбы и морепродуктов выбирайте местные лавки у порта и спрашивайте сезонный улов: качество выше, а вкус заметно насыщеннее.", fr: "Pour acheter poisson et fruits de mer, privilégiez les poissonneries proches du port et demandez les prises de saison : la qualité est supérieure et le goût plus intense.", it: "Per acquistare pesce e frutti di mare, scegli le pescherie vicino al porto e chiedi il pescato di stagione: qualità più alta e sapore molto più intenso.", de: "Für den Kauf von Fisch und Meeresfrüchten bevorzugen Sie Fischgeschäfte nahe dem Hafen und fragen Sie nach saisonalem Fang: höhere Qualität und intensiverer Geschmack.", uk: "Для покупки риби й морепродуктів обирайте крамниці біля порту та питайте сезонний улов: якість вища, а смак значно насиченіший.", pl: "Kupując ryby i owoce morza, wybieraj lokalne sklepy przy porcie i pytaj o sezonowe połowy: jakość jest wyższa, a smak wyraźnie intensywniejszy." },
+  expMarketsModalSection3: { eng: "In fruit and vegetable stores, look for products from nearby orchards and inland villages. Citrus, tomatoes and herbs are usually freshest in the morning.", esp: "En fruterías y verdulerías, busca producto de huerta cercana y pueblos del interior. Cítricos, tomates y hierbas suelen estar en su mejor punto por la mañana.", ru: "В овощных и фруктовых лавках ищите продукты из близлежащих садов и деревень. Цитрусы, томаты и зелень обычно самые свежие утром.", fr: "Dans les primeurs, recherchez les produits des vergers voisins et des villages de l'intérieur. Agrumes, tomates et herbes sont souvent au meilleur de leur fraîcheur le matin.", it: "Nei negozi di frutta e verdura, cerca prodotti provenienti da orti vicini e paesi dell'interno. Agrumi, pomodori ed erbe sono spesso al massimo della freschezza al mattino.", de: "In Obst- und Gemüseläden achten Sie auf Produkte aus nahen Anbaugebieten und Dörfern im Hinterland. Zitrusfrüchte, Tomaten und Kräuter sind morgens oft am frischesten.", uk: "У овочевих і фруктових крамницях шукайте продукти з найближчих господарств і сіл. Цитрусові, томати та зелень зазвичай найсвіжіші зранку.", pl: "W warzywniakach i sklepach owocowych szukaj produktów z pobliskich upraw i miejscowości w głębi lądu. Cytrusy, pomidory i zioła są zwykle najświeższe rano." },
+  expMarketsModalSection4: { eng: "Gourmet and delicatessen stores are ideal for local gifts: olive oil, canned seafood, artisan salts and regional wines are practical and high-value options.", esp: "Las tiendas gourmet y de ultramarinos son ideales para regalos locales: aceite de oliva, conservas marinas, sales artesanas y vinos de la zona son apuestas prácticas y de valor.", ru: "Гастрономические лавки отлично подходят для местных подарков: оливковое масло, рыбные консервы, ремесленная соль и региональные вина - практичный и ценный выбор.", fr: "Les épiceries fines sont parfaites pour des cadeaux locaux : huile d'olive, conserves marines, sels artisanaux et vins de la région sont des options pratiques et de qualité.", it: "Le botteghe gourmet sono ideali per regali locali: olio d'oliva, conserve di mare, sali artigianali e vini della zona sono scelte pratiche e di valore.", de: "Feinkostläden eignen sich ideal für lokale Geschenke: Olivenöl, Fischkonserven, handwerkliche Salze und regionale Weine sind praktische, hochwertige Optionen.", uk: "Гурме-крамниці ідеальні для локальних подарунків: оливкова олія, морські консерви, реміснича сіль і регіональні вина - практичні та цінні варіанти.", pl: "Sklepy delikatesowe są idealne na lokalne prezenty: oliwa, przetwory z owoców morza, rzemieślnicze sole i regionalne wina to praktyczne i wartościowe opcje." },
+  expMarketsModalSection5: { eng: "If you cook at home, plan purchases in two rounds: fresh produce in the morning and fish in the afternoon, to align quality with mealtime.", esp: "Si cocinas en casa, planifica la compra en dos rondas: frescos por la mañana y pescado por la tarde, así ajustas calidad y momento de consumo.", ru: "Если готовите дома, делайте покупки в два этапа: свежие продукты утром, рыбу после обеда - так качество лучше совпадает со временем приготовления.", fr: "Si vous cuisinez à la maison, organisez vos achats en deux temps : produits frais le matin et poisson l'après-midi, pour optimiser qualité et consommation.", it: "Se cucini a casa, organizza la spesa in due fasi: freschi al mattino e pesce nel pomeriggio, così allinei qualità e momento del consumo.", de: "Wenn Sie zu Hause kochen, planen Sie den Einkauf in zwei Runden: Frischeprodukte morgens und Fisch am Nachmittag, um Qualität und Verzehrzeitpunkt optimal abzustimmen.", uk: "Якщо готуєте вдома, плануйте покупки у два етапи: свіжі продукти зранку, рибу - після обіду, щоб узгодити якість і час приготування.", pl: "Jeśli gotujesz w domu, zaplanuj zakupy w dwóch turach: świeże produkty rano, ryby po południu - wtedy jakość najlepiej pasuje do pory gotowania." },
+  expMarketsModalSection6: { eng: "INFTOUR recommendation: combine this route with a local recipe from our guide and ask our assistant for exact points, opening hours and practical tips in your language.", esp: "Recomendación INFTOUR: combina esta ruta con una receta local de nuestra guía y pide a nuestro asistente los puntos exactos, horarios y consejos prácticos en tu idioma.", ru: "Рекомендация INFTOUR: совместите этот маршрут с местным рецептом из нашего гида и спросите ассистента о точных точках, расписании и практических советах на вашем языке.", fr: "Recommandation INFTOUR : combinez cet itinéraire avec une recette locale de notre guide et demandez à notre assistant les lieux exacts, horaires et conseils pratiques dans votre langue.", it: "Consiglio INFTOUR: combina questo percorso con una ricetta locale della nostra guida e chiedi al nostro assistente punti esatti, orari e consigli pratici nella tua lingua.", de: "INFTOUR-Empfehlung: Kombinieren Sie diese Route mit einem lokalen Rezept aus unserem Guide und fragen Sie unseren Assistenten nach genauen Orten, Öffnungszeiten und praktischen Tipps in Ihrer Sprache.", uk: "Рекомендація INFTOUR: поєднайте цей маршрут із місцевим рецептом з нашого гіда і попросіть асистента про точні локації, години роботи та практичні поради вашою мовою.", pl: "Rekomendacja INFTOUR: połącz tę trasę z lokalnym przepisem z naszego przewodnika i poproś asystenta o dokładne punkty, godziny otwarcia i praktyczne wskazówki w Twoim języku." },
+  expMarketsModalTip: { eng: "Tip: in summer, go earlier to avoid heat and find the best selection of fish, fruit and seasonal produce.", esp: "Consejo: en verano conviene ir temprano para evitar calor y encontrar la mejor selección de pescado, fruta y producto de temporada.", ru: "Совет: летом лучше идти пораньше, чтобы избежать жары и застать лучший выбор рыбы, фруктов и сезонных продуктов.", fr: "Conseil : en été, venez tôt pour éviter la chaleur et profiter du meilleur choix de poisson, fruits et produits de saison.", it: "Consiglio: in estate conviene andare presto per evitare il caldo e trovare la migliore selezione di pesce, frutta e prodotti stagionali.", de: "Tipp: Im Sommer lohnt es sich, früh zu gehen, um der Hitze zu entgehen und die beste Auswahl an Fisch, Obst und Saisonprodukten zu finden.", uk: "Порада: влітку краще йти раніше, щоб уникнути спеки та знайти найкращий вибір риби, фруктів і сезонних продуктів.", pl: "Wskazówka: latem warto iść wcześniej, aby uniknąć upału i znaleźć najlepszy wybór ryb, owoców i produktów sezonowych." },
+  expMarketsDesc: { eng: "Fish auction and fresh produce shops.", esp: "Subasta de pescado y tiendas de productos frescos.", ru: "Рыбный аукцион и магазины свежих продуктов.", fr: "Vente aux enchères de poisson et magasins de produits frais.", it: "Asta del pesce e negozi di prodotti freschi.", de: "Fischversteigerung und Frischeproduktläden.", uk: "Рибний аукціон та магазини свіжих продуктів.", pl: "Aukcja rybna i sklepy ze świeżymi produktami." },
+  expRecipesDesc: { eng: "Learn to cook Llauna de Calp or Arròs del Senyoret.", esp: "Aprende a cocinar Llauna de Calp o Arròs del Senyoret.", ru: "Научитесь готовить Llauna de Calp или Arròs del Senyoret.", fr: "Apprenez à cuisiner la Llauna de Calp ou l'Arròs del Senyoret.", it: "Impara a cucinare Llauna de Calp o Arròs del Senyoret.", de: "Lernen Sie Llauna de Calp oder Arròs del Senyoret zu kochen.", uk: "Навчіться готувати Llauna de Calp або Arròs del Senyoret.", pl: "Naucz się gotować Llauna de Calp lub Arròs del Senyoret." },
+  expNatureSub: { eng: "Trails and reserves", esp: "Senderos y Reservas", ru: "Тропы и заповедники", fr: "Sentiers et réserves", it: "Sentieri e riserve", de: "Wanderwege und Reservate", uk: "Стежки та заповідники", pl: "Szlaki i rezerwaty" },
+  expIfachDesc: { eng: "Safety tips, required permits and best times to climb the symbol of the Costa Blanca.", esp: "Consejos de seguridad, permisos necesarios y las mejores horas para subir al símbolo de la Costa Blanca.", ru: "Советы по безопасности, необходимые разрешения и лучшее время для восхождения на символ Коста-Бланки.", fr: "Conseils de sécurité, permis nécessaires et meilleures heures pour gravir le symbole de la Costa Blanca.", it: "Consigli di sicurezza, permessi necessari e migliori orari per salire sul simbolo della Costa Blanca.", de: "Sicherheitstipps, erforderliche Genehmigungen und beste Zeiten für den Aufstieg zum Symbol der Costa Blanca.", uk: "Поради з безпеки, необхідні дозволи та найкращий час для підйому на символ Коста-Бланки.", pl: "Wskazówki bezpieczeństwa, wymagane pozwolenia i najlepsze pory na wejście na symbol Costy Blanca." },
+  expSalinasDesc: { eng: "Flamingo watching and flat walks ideal for sunset.", esp: "Observación de flamencos y paseos llanos ideales para el atardecer.", ru: "Наблюдение за фламинго и равнинные прогулки, идеальные для заката.", fr: "Observation des flamants et promenades plates idéales au coucher du soleil.", it: "Osservazione dei fenicotteri e passeggiate piatte ideali per il tramonto.", de: "Flamingo-Beobachtung und flache Spaziergänge ideal bei Sonnenuntergang.", uk: "Спостереження за фламінго та рівнинні прогулянки, ідеальні для заходу сонця.", pl: "Obserwacja flamingów i płaskie spacery idealne na zachód słońca." },
+  expSeasideDesc: { eng: "Eco routes along the cliffs of Benissa and Calpe seafront promenades.", esp: "Rutas ecológicas por los acantilados de Benissa y paseos marítimos de Calpe.", ru: "Экомаршруты по скалам Бениссы и набережные Кальпе.", fr: "Parcours écologiques le long des falaises de Benissa et promenades en front de mer de Calpe.", it: "Percorsi ecologici lungo le scogliere di Benissa e passeggiate sul lungomare di Calpe.", de: "Ökorouten entlang der Klippen von Benissa und Calpes Strandpromenaden.", uk: "Екомаршрути вздовж скель Бенісси та набережні Кальпе.", pl: "Trasy ekologiczne wzdłuż klifów Benissy i nadmorskie promenady Calpe." },
+  expFamilySub: { eng: "Shared leisure", esp: "Ocio compartido", ru: "Совместный досуг", fr: "Loisirs partagés", it: "Tempo libero condiviso", de: "Gemeinsame Freizeit", uk: "Спільний дозвіллє", pl: "Wspólny wypoczynek" },
+  expViewEventsCalendar: { eng: "View events calendar", esp: "Ver Calendario de Eventos", ru: "Календарь событий", fr: "Voir le calendrier des événements", it: "Vedi calendario eventi", de: "Veranstaltungskalender anzeigen", uk: "Переглянути календар подій", pl: "Zobacz kalendarz wydarzeń" },
+  expSportSub: { eng: "Active sport", esp: "Deporte activo", ru: "Активный спорт", fr: "Sport actif", it: "Sport attivo", de: "Aktiver Sport", uk: "Активний спорт", pl: "Aktywny sport" },
   expRelaxDescLong: {
     eng: "Discover hidden coves with crystal-clear waters, wide sandy beaches and the best wellness centres to unwind.",
     esp: "Descubre las calas escondidas de aguas cristalinas, las amplias playas de arena fina y los mejores centros de bienestar para desconectar.",
@@ -267,11 +314,12 @@ const translations: TranslationMap = {
     it: "Scopri le calette nascoste con acque cristalline, le ampie spiagge di sabbia fine e i migliori centri benessere per staccare.",
     de: "Entdecken Sie versteckte Buchten mit kristallklarem Wasser, weite Sandstrände und die besten Wellnesszentren zum Abschalten.",
     uk: "Відкрийте для себе укриті бухти з кришталево чистою водою, широкі піщані пляжі та найкращі спа-центри для відпочинку.",
+    pl: "Odkryj ukryte zatoczki z krystalicznie czystą wodą, szerokie piaszczyste plaże i najlepsze centra wellness, by się odprężyć.",
   },
-  expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог" },
+  expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 
   // Revista (Magazine)
-  revistaTitle: { eng: "Rental properties magazine", esp: "Revista de alquileres", ru: "Журнал об аренде", fr: "Magazine locations", it: "Rivista affitti", de: "Mietobjekte-Magazin", uk: "Журнал про оренду" },
+  revistaTitle: { eng: "Rental properties magazine", esp: "Revista de alquileres", ru: "Журнал об аренде", fr: "Magazine locations", it: "Rivista affitti", de: "Mietobjekte-Magazin", uk: "Журнал про оренду", pl: "Magazyn o wynajmie" },
   revistaTagline: {
     eng: "Discover our selection of apartments and villas in Calpe.",
     esp: "Descubre nuestra selección de apartamentos y villas en Calpe.",
@@ -280,6 +328,7 @@ const translations: TranslationMap = {
     it: "Scopri la nostra selezione di appartamenti e ville a Calpe.",
     de: "Entdecken Sie unsere Auswahl an Apartments und Villen in Calpe.",
     uk: "Ознайомтесь з нашою підбіркою апартаментів та вілл у Кальпе.",
+    pl: "Odkryj nasz wybór apartamentów i willi w Calpe.",
   },
   revistaPlaceholderIntro: {
     eng: "Your next magazine issue will appear here. Upload a PDF to public/magazine/ and set MAGAZINE_PDF_PATH in app/config/magazine.ts to display it.",
@@ -289,8 +338,9 @@ const translations: TranslationMap = {
     it: "Il prossimo numero apparirà qui. Carica un PDF in public/magazine/ e imposta MAGAZINE_PDF_PATH in app/config/magazine.ts.",
     de: "Die nächste Ausgabe erscheint hier. PDF in public/magazine/ hochladen und MAGAZINE_PDF_PATH in app/config/magazine.ts setzen.",
     uk: "Тут з'явиться журнал. Завантажте PDF у public/magazine/ та вкажіть MAGAZINE_PDF_PATH у app/config/magazine.ts.",
+    pl: "Twój następny numer magazynu pojawi się tutaj. Prześlij plik PDF do public/magazine/ i ustaw MAGAZINE_PDF_PATH w app/config/magazine.ts.",
   },
-  revistaDownload: { eng: "Download magazine", esp: "Descargar revista", ru: "Скачать журнал", fr: "Télécharger le magazine", it: "Scarica rivista", de: "Magazin herunterladen", uk: "Завантажити журнал" },
+  revistaDownload: { eng: "Download magazine", esp: "Descargar revista", ru: "Скачать журнал", fr: "Télécharger le magazine", it: "Scarica rivista", de: "Magazin herunterladen", uk: "Завантажити журнал", pl: "Pobierz magazyn" },
   revistaSpread1Title: {
     eng: "Apartments with sea views",
     esp: "Apartamentos con vistas al mar",
@@ -299,6 +349,7 @@ const translations: TranslationMap = {
     it: "Appartamenti con vista mare",
     de: "Apartments mit Meerblick",
     uk: "Апартаменти з видом на море",
+    pl: "Apartamenty z widokiem na morze",
   },
   revistaSpread1Text: {
     eng: "Hand-picked flats and penthouses in Calpe with direct views of the Mediterranean and the Peñón de Ifach. Modern amenities and easy access to the beach.",
@@ -308,6 +359,7 @@ const translations: TranslationMap = {
     it: "Appartamenti e attici selezionati a Calpe con vista sul Mediterraneo e sul Peñón de Ifach. Comfort moderni e facile accesso alla spiaggia.",
     de: "Ausgewählte Wohnungen und Penthäuser in Calpe mit Blick aufs Mittelmeer und den Peñón de Ifach. Moderne Ausstattung und Strandnähe.",
     uk: "Підібрані апартаменти та пентхауси в Кальпе з видом на Середземне море та Пеньйон-де-Іфач. Сучасні зручності та близько до пляжу.",
+    pl: "Starannie dobrane mieszkania i penthouse'y w Calpe z widokiem na Morze Śródziemne i Peñón de Ifach. Nowoczesne udogodnienia i łatwy dostęp do plaży.",
   },
   revistaSpread2Title: {
     eng: "Pools & outdoor living",
@@ -317,15 +369,17 @@ const translations: TranslationMap = {
     it: "Piscine e vita all'aperto",
     de: "Pools und Outdoor-Living",
     uk: "Басейни та відпочинок на відкритому повітрі",
+    pl: "Baseny i życie na świeżym powietrzu",
   },
   revistaSpread2Text: {
     eng: "Properties with private or communal pools, terraces and gardens. Enjoy the Costa Blanca lifestyle from your own space.",
     esp: "Propiedades con piscina privada o comunitaria, terrazas y jardines. Disfruta del estilo de vida de la Costa Blanca desde tu espacio.",
-    ru: "Объекты с частным или общим бассейном, террасами и садами. Наслаждайтесь жизнью на Коста-Бланке у себя.",
+    ru: "Объекты с частным или общим бассейном, террасами и садами. Наслаждайтесь жизнью на Коста-Бланке у себе.",
     fr: "Biens avec piscine privée ou commune, terrasses et jardins. Profitez du style de vie Costa Blanca depuis chez vous.",
     it: "Immobili con piscina privata o comune, terrazze e giardini. Goditi lo stile di vita Costa Blanca dal tuo spazio.",
     de: "Objekte mit privatem oder Gemeinschaftspool, Terrassen und Gärten. Genießen Sie den Costa-Blanca-Lifestyle in den eigenen vier Wänden.",
     uk: "Об'єкти з приватним або спільним басейном, терасами та садами. Насолоджуйтесь життям на Коста-Бланці у себе.",
+    pl: "Nieruchomości z prywatnym lub wspólnym basenem, tarasami i ogrodami. Ciesz się stylem życia Costa Blanca we własnej przestrzeni.",
   },
   revistaSpread3Title: {
     eng: "Villas for families & groups",
@@ -335,6 +389,7 @@ const translations: TranslationMap = {
     it: "Ville per famiglie e gruppi",
     de: "Villen für Familien und Gruppen",
     uk: "Вілли для сімей та компаній",
+    pl: "Wille dla rodzin i grup",
   },
   revistaSpread3Text: {
     eng: "Spacious villas with multiple bedrooms, kitchens and outdoor areas. Ideal for longer stays and family holidays in Calpe.",
@@ -344,9 +399,10 @@ const translations: TranslationMap = {
     it: "Ville spaziose con più camere da letto, cucine e spazi esterni. Ideali per soggiorni lunghi e vacanze in famiglia a Calpe.",
     de: "Geräumige Villen mit mehreren Schlafzimmern, Küchen und Außenbereichen. Ideal für längere Aufenthalte und Familienurlaub in Calpe.",
     uk: "Просторні вілли з кількома спальнями, кухнями та зонами на вулиці. Ідеально для тривалого відпочинку та сімейного відпустку в Кальпе.",
+    pl: "Przestronne wille z wieloma sypialniami, kuchniami i przestrzeniami zewnętrznymi. Idealne na dłuższe pobyty i rodzinne wakacje w Calpe.",
   },
-  revHeroLabel: { eng: "Inspiration & News", esp: "Inspiración y Noticias", ru: "Вдохновение и новости", fr: "Inspiration et actualités", it: "Ispirazione e notizie", de: "Inspiration & Nachrichten", uk: "Натхнення та новини" },
-  revHeroTitle: { eng: "INFTOUR Magazine", esp: "Revista INFTOUR", ru: "Журнал INFTOUR", fr: "Magazine INFTOUR", it: "Rivista INFTOUR", de: "INFTOUR Magazin", uk: "Журнал INFTOUR" },
+  revHeroLabel: { eng: "Inspiration & News", esp: "Inspiración y Noticias", ru: "Вдохновение и новости", fr: "Inspiration et actualités", it: "Ispirazione e notizie", de: "Inspiration & Nachrichten", uk: "Натхнення та новини", pl: "Inspiracja i aktualności" },
+  revHeroTitle: { eng: "INFTOUR Magazine", esp: "Revista INFTOUR", ru: "Журнал INFTOUR", fr: "Magazine INFTOUR", it: "Rivista INFTOUR", de: "INFTOUR Magazin", uk: "Журнал INFTOUR", pl: "Magazyn INFTOUR" },
   revHeroDesc: {
     eng: "Discover the Costa Blanca through our lifestyle articles, guides and exclusive tips.",
     esp: "Descubra la Costa Blanca a través de nuestros artículos de estilo de vida, guías y consejos exclusivos.",
@@ -355,9 +411,10 @@ const translations: TranslationMap = {
     it: "Scopri la Costa Blanca attraverso i nostri articoli lifestyle, guide e consigli esclusivi.",
     de: "Entdecken Sie die Costa Blanca durch unsere Lifestyle-Artikel, Guides und exklusive Tipps.",
     uk: "Відкрийте для себе Коста-Бланку в наших статтях про стиль життя, гідах та ексклюзивних порадах.",
+    pl: "Odkryj Costę Blancą poprzez nasze artykuły lifestyle, przewodniki i ekskluzywne wskazówki.",
   },
-  revFeaturedLabel: { eng: "Destination guide", esp: "Guía de Destino", ru: "Путеводитель", fr: "Guide de destination", it: "Guida di destinazione", de: "Reiseführer", uk: "Путівник" },
-  revFeaturedTitle: { eng: "Holidays in Calpe: The Definitive Guide", esp: "Vacaciones en Calpe: La Guía Definitiva", ru: "Отдых в Кальпе: Полный гид", fr: "Vacances à Calpe : le guide définitif", it: "Vacanze a Calpe: la guida definitiva", de: "Urlaub in Calpe: der definitive Guide", uk: "Відпочинок у Кальпе: Повний гід" },
+  revFeaturedLabel: { eng: "Destination guide", esp: "Guía de Destino", ru: "Путеводитель", fr: "Guide de destination", it: "Guida di destinazione", de: "Reiseführer", uk: "Путівник", pl: "Przewodnik po destynacji" },
+  revFeaturedTitle: { eng: "Holidays in Calpe: The Definitive Guide", esp: "Vacaciones en Calpe: La Guía Definitiva", ru: "Отдых в Кальпе: Полный гид", fr: "Vacances à Calpe : le guide définitif", it: "Vacanze a Calpe: la guida definitiva", de: "Urlaub in Calpe: der definitive Guide", uk: "Відпочинок у Кальпе: Повний гід", pl: "Wakacje w Calpe: Ostateczny przewodnik" },
   revFeaturedDesc: {
     eng: "Planning the perfect Mediterranean holiday means knowing the best-kept secrets. From the majestic Peñón de Ifach to the fine sandy beaches.",
     esp: "Planificar unas vacaciones perfectas en el Mediterráneo requiere conocer los secretos mejor guardados. Desde el majestuoso Peñón de Ifach hasta las playas de arena fina.",
@@ -366,10 +423,11 @@ const translations: TranslationMap = {
     it: "Pianificare una vacanza perfetta nel Mediterraneo significa conoscere i segreti meglio custoditi. Dal maestoso Peñón de Ifach alle spiagge di sabbia fine.",
     de: "Die perfekte Mittelmeer-Reise planen heißt, die bestgehüteten Geheimnisse zu kennen. Vom majestätischen Peñón de Ifach bis zu den feinen Sandstränden.",
     uk: "Планувати ідеальну відпустку на Середземному морі — значить знати найкращі секрети. Від величного Пеньйон-де-Іфач до пляжів з дрібним піском.",
+    pl: "Planowanie idealnych wakacji śródziemnomorskich wymaga poznania najlepiej strzeżonych tajemnic. Od majestatycznego Peñón de Ifach po drobnoziarniste plaże.",
   },
-  revLatestTitle: { eng: "Latest articles", esp: "Últimos Artículos", ru: "Последние статьи", fr: "Derniers articles", it: "Ultimi articoli", de: "Neueste Artikel", uk: "Останні статті" },
-  revArticle1Tag: { eng: "Nature", esp: "Naturaleza", ru: "Природа", fr: "Nature", it: "Natura", de: "Natur", uk: "Природа" },
-  revArticle1Title: { eng: "The 5 most secret coves", esp: "Las 5 Calas más secretas", ru: "5 самых укромных бухт", fr: "Les 5 calanques les plus secrètes", it: "Le 5 calette più segrete", de: "Die 5 geheimsten Buchten", uk: "5 найзатишніших бухт" },
+  revLatestTitle: { eng: "Latest articles", esp: "Últimos Artículos", ru: "Последние статьи", fr: "Derniers articles", it: "Ultimi articoli", de: "Neueste Artikel", uk: "Останні статті", pl: "Najnowsze artykuły" },
+  revArticle1Tag: { eng: "Nature", esp: "Naturaleza", ru: "Природа", fr: "Nature", it: "Natura", de: "Natur", uk: "Природа", pl: "Natura" },
+  revArticle1Title: { eng: "The 5 most secret coves", esp: "Las 5 Calas más secretas", ru: "5 самых укромных бухт", fr: "Les 5 calanques les plus secrètes", it: "Le 5 calette più segrete", de: "Die 5 geheimsten Buchten", uk: "5 найзатишніших бухт", pl: "5 najbardziej tajemniczych zatoczek" },
   revArticle1Desc: {
     eng: "Escape the crowds. Discover paradise corners of crystal-clear waters ideal for snorkelling.",
     esp: "Escápese de las multitudes. Descubra rincones paradisíacos de aguas cristalinas ideales para hacer snorkel.",
@@ -378,9 +436,10 @@ const translations: TranslationMap = {
     it: "Scappa dalla folla. Scopri angoli paradisiaci con acque cristalline ideali per lo snorkeling.",
     de: "Entfliehen Sie den Menschenmassen. Entdecken Sie Paradiese mit kristallklarem Wasser zum Schnorcheln.",
     uk: "Утечіть від натовпу. Відкрийте райські куточки з кришталево чистою водою для снорклінгу.",
+    pl: "Ucieknij od tłumów. Odkryj rajskie zakątki z krystalicznie czystą wodą, idealne do snorkelingu.",
   },
-  revArticle2Tag: { eng: "Gastronomy", esp: "Gastronomía", ru: "Гастрономия", fr: "Gastronomie", it: "Gastronomia", de: "Gastronomie", uk: "Гастрономія" },
-  revArticle2Title: { eng: "Where to eat Arròs del Senyoret", esp: "Dónde comer el Arròs del Senyoret", ru: "Где попробовать Arròs del Senyoret", fr: "Où déguster l'Arròs del Senyoret", it: "Dove mangiare l'Arròs del Senyoret", de: "Wo man Arròs del Senyoret isst", uk: "Де скуштувати Arròs del Senyoret" },
+  revArticle2Tag: { eng: "Gastronomy", esp: "Gastronomía", ru: "Гастрономия", fr: "Gastronomie", it: "Gastronomia", de: "Gastronomie", uk: "Гастрономія", pl: "Gastronomia" },
+  revArticle2Title: { eng: "Where to eat Arròs del Senyoret", esp: "Dónde comer el Arròs del Senyoret", ru: "Где попробовать Arròs del Senyoret", fr: "Où déguster l'Arròs del Senyoret", it: "Dove mangiare l'Arròs del Senyoret", de: "Wo man Arròs del Senyoret isst", uk: "Де скуштувати Arròs del Senyoret", pl: "Gdzie jeść Arròs del Senyoret" },
   revArticle2Desc: {
     eng: "A gastronomic route through the best restaurants in Calpe harbour.",
     esp: "Una ruta gastronómica por los mejores restaurantes del puerto de Calpe.",
@@ -389,9 +448,10 @@ const translations: TranslationMap = {
     it: "Un percorso gastronomico tra i migliori ristoranti del porto di Calpe.",
     de: "Eine kulinarische Route durch die besten Restaurants im Hafen von Calpe.",
     uk: "Гастрономічний маршрут по найкращих ресторанах порту Кальпе.",
+    pl: "Trasa gastronomiczna po najlepszych restauracjach portu w Calpe.",
   },
-  revLiveTitle: { eng: "Live: Calpe", esp: "En Directo: Calpe", ru: "В эфире: Кальпе", fr: "En direct : Calpe", it: "In diretta: Calpe", de: "Live: Calpe", uk: "В ефірі: Кальпе" },
-  revLive1Title: { eng: "Calpe renews its Blue Flags", esp: "Calpe renueva sus Banderas Azules", ru: "Кальпе продлевает Голубые флаги", fr: "Calpe renouvelle ses Pavillons Bleus", it: "Calpe rinnova le Bandiere Blu", de: "Calpe erneuert seine Blauen Flaggen", uk: "Кальпе продовжує Сині прапори" },
+  revLiveTitle: { eng: "Live: Calpe", esp: "En Directo: Calpe", ru: "В эфире: Кальпе", fr: "En direct : Calpe", it: "In diretta: Calpe", de: "Live: Calpe", uk: "В ефірі: Кальпе", pl: "Na żywo: Calpe" },
+  revLive1Title: { eng: "Calpe renews its Blue Flags", esp: "Calpe renueva sus Banderas Azules", ru: "Кальпе продлевает Голубые флаги", fr: "Calpe renouvelle ses Pavillons Bleus", it: "Calpe rinnova le Bandiere Blu", de: "Calpe erneuert seine Blauen Flaggen", uk: "Кальпе продовжує Сині прапори", pl: "Calpe odnawia Niebieskie Flagi" },
   revLive1Desc: {
     eng: "Arenal-Bol and La Fossa beaches keep their international award for excellent water quality.",
     esp: "Las playas de Arenal-Bol y La Fossa mantienen su galardón internacional por la excelente calidad de sus aguas.",
@@ -400,8 +460,9 @@ const translations: TranslationMap = {
     it: "Le spiagge di Arenal-Bol e La Fossa mantengono il riconoscimento internazionale per l'eccellente qualità delle acque.",
     de: "Die Strände Arenal-Bol und La Fossa behalten ihre internationale Auszeichnung für exzellente Wasserqualität.",
     uk: "Пляжі Arenal-Bol та La Fossa зберігають міжнародну нагороду за відмінну якість води.",
+    pl: "Plaże Arenal-Bol i La Fossa zachowują swoje międzynarodowe wyróżnienie za doskonałą jakość wody.",
   },
-  revLive2Title: { eng: "Moors and Christians Festival", esp: "Fiestas de Moros y Cristianos", ru: "Фестиваль мавров и христиан", fr: "Fêtes des Maures et Chrétiens", it: "Festa di Mori e Cristiani", de: "Mauren- und Christenfest", uk: "Фестиваль маврів і християн" },
+  revLive2Title: { eng: "Moors and Christians Festival", esp: "Fiestas de Moros y Cristianos", ru: "Фестиваль мавров и христиан", fr: "Fêtes des Maures et Chrétiens", it: "Festa di Mori e Cristiani", de: "Mauren- und Christenfest", uk: "Фестиваль маврів і християн", pl: "Festiwal Maurów i Chrześcijan" },
   revLive2Desc: {
     eng: "Get ready for the most spectacular event of the year in Calpe.",
     esp: "Prepárese para el evento más espectacular del año en Calpe.",
@@ -410,11 +471,12 @@ const translations: TranslationMap = {
     it: "Preparatevi per l'evento più spettacolare dell'anno a Calpe.",
     de: "Bereiten Sie sich auf das spektakulärste Event des Jahres in Calpe vor.",
     uk: "Підготуйтеся до найбільш видовищної події року в Кальпе.",
+    pl: "Przygotuj się na najbardziej spektakularne wydarzenie roku w Calpe.",
   },
 
   // Services
-  servicesTitle: { eng: "Services", esp: "Servicios", ru: "Услуги", fr: "Services", it: "Servizi", de: "Dienstleistungen", uk: "Послуги" },
-  svcHeroLabel: { eng: "Concierge Service", esp: "Servicio de Conserjería", ru: "Консьерж-сервис", fr: "Service Concierge", it: "Servizio Concierge", de: "Concierge-Service", uk: "Консьєрж-сервіс" },
+  servicesTitle: { eng: "Services", esp: "Servicios", ru: "Услуги", fr: "Services", it: "Servizi", de: "Dienstleistungen", uk: "Послуги", pl: "Usługi" },
+  svcHeroLabel: { eng: "Concierge Service", esp: "Servicio de Conserjería", ru: "Консьерж-сервис", fr: "Service Concierge", it: "Servizio Concierge", de: "Concierge-Service", uk: "Консьєрж-сервіс", pl: "Usługa Concierge" },
   svcHeroTitle1: {
     eng: "We take care of the details.",
     esp: "Nosotros nos ocupamos de los detalles.",
@@ -423,6 +485,7 @@ const translations: TranslationMap = {
     it: "Noi ci occupiamo dei dettagli.",
     de: "Wir kümmern uns um die Details.",
     uk: "Ми дбаємо про деталі.",
+    pl: "My dbamy o szczegóły.",
   },
   svcHeroTitle2: {
     eng: "You take home the experiences.",
@@ -432,6 +495,7 @@ const translations: TranslationMap = {
     it: "Voi vi portate a casa le esperienze.",
     de: "Sie nehmen die Erlebnisse mit.",
     uk: "Ви забираєте враження з собою.",
+    pl: "Ty zabierasz ze sobą doświadczenia.",
   },
   svcHeroDesc: {
     eng: "Unlike a traditional booking, INFTOUR offers a level of attention and care comparable to a luxury cruise.",
@@ -441,18 +505,19 @@ const translations: TranslationMap = {
     it: "A differenza di una prenotazione tradizionale, INFTOUR offre un livello di attenzione e cura paragonabile a una crociera di lusso.",
     de: "Anders als eine traditionelle Buchung bietet INFTOUR ein Maß an Aufmerksamkeit und Betreuung vergleichbar mit einer Luxuskreuzfahrt.",
     uk: "На відміну від звичайного бронювання, INFTOUR пропонує рівень турботи та уваги, порівняний з круїзом класу люкс.",
+    pl: "W odróżnieniu od tradycyjnej rezerwacji, INFTOUR oferuje poziom uwagi i troski porównywalny z luksusowym rejsem.",
   },
-  svcCardAITitle: { eng: "AI Assistant", esp: "Asistente AI", ru: "ИИ-ассистент", fr: "Assistant IA", it: "Assistente IA", de: "KI-Assistent", uk: "ШІ-асистент" },
-  svcCardAI1: { eng: "24/7 instant support", esp: "Soporte instantáneo 24/7", ru: "Мгновенная поддержка 24/7", fr: "Assistance instantanée 24h/24", it: "Supporto istantaneo 24/7", de: "Sofortige Unterstützung 24/7", uk: "Миттєва підтримка 24/7" },
-  svcCardAI2: { eng: "Help with any incident", esp: "Asistencia ante cualquier incidencia", ru: "Помощь при любом инциденте", fr: "Assistance en cas d'incident", it: "Assistenza per qualsiasi evenienza", de: "Hilfe bei jedem Vorfall", uk: "Допомога з будь-яким інцидентом" },
-  svcCardAI3: { eng: "Quick guide to local services", esp: "Guía rápida de servicios urbanos", ru: "Краткий гид по городским услугам", fr: "Guide rapide des services locaux", it: "Guida rapida ai servizi locali", de: "Kurzer Überblick über lokale Dienste", uk: "Короткий гід по міських послугах" },
-  svcCardAI4: { eng: "Fluid support in your language", esp: "Atención fluida en su idioma", ru: "Поддержка на вашем языке", fr: "Prise en charge fluide dans votre langue", it: "Assistenza fluida nella tua lingua", de: "Unterstützung in Ihrer Sprache", uk: "Підтримка вашою мовою" },
-  svcCardRefTitle: { eng: "Reference numbers", esp: "Números de Referencia", ru: "Справочные номера", fr: "Numéros de référence", it: "Numeri di riferimento", de: "Referenznummern", uk: "Довідкові номери" },
-  svcCardRef1: { eng: "Emergency services", esp: "Servicios de emergencia", ru: "Экстренные службы", fr: "Services d'urgence", it: "Servizi di emergenza", de: "Notdienste", uk: "Екстрені служби" },
-  svcCardRef2: { eng: "Medical / Pharmacy", esp: "Médico / Farmacia", ru: "Медицина / Аптека", fr: "Médecin / Pharmacie", it: "Medico / Farmacia", de: "Arzt / Apotheke", uk: "Медицина / Аптека" },
-  svcCardRef3: { eng: "Transfer and car rental", esp: "Traslado y Alquiler de coches", ru: "Трансфер и аренда авто", fr: "Transfert et location de voiture", it: "Transfer e noleggio auto", de: "Transfer und Autovermietung", uk: "Трансфер та оренда авто" },
-  svcCardRef4: { eng: "Tours / Activities", esp: "Excursiones / Actividades", ru: "Экскурсии / Активности", fr: "Excursions / Activités", it: "Escursioni / Attività", de: "Ausflüge / Aktivitäten", uk: "Екскурсії / Активності" },
-  svcCardCleaningTitle: { eng: "Cleaning service", esp: "Servicio de Limpieza", ru: "Уборка", fr: "Service de ménage", it: "Servizio di pulizia", de: "Reinigungsservice", uk: "Прибирання" },
+  svcCardAITitle: { eng: "AI Assistant", esp: "Asistente AI", ru: "ИИ-ассистент", fr: "Assistant IA", it: "Assistente IA", de: "KI-Assistent", uk: "ШІ-асистент", pl: "Asystent AI" },
+  svcCardAI1: { eng: "24/7 instant support", esp: "Soporte instantáneo 24/7", ru: "Мгновенная поддержка 24/7", fr: "Assistance instantanée 24h/24", it: "Supporto istantaneo 24/7", de: "Sofortige Unterstützung 24/7", uk: "Миттєва підтримка 24/7", pl: "Natychmiastowe wsparcie 24/7" },
+  svcCardAI2: { eng: "Help with any incident", esp: "Asistencia ante cualquier incidencia", ru: "Помощь при любом инциденте", fr: "Assistance en cas d'incident", it: "Assistenza per qualsiasi evenienza", de: "Hilfe bei jedem Vorfall", uk: "Допомога з будь-яким інцидентом", pl: "Pomoc przy każdym incydencie" },
+  svcCardAI3: { eng: "Quick guide to local services", esp: "Guía rápida de servicios urbanos", ru: "Краткий гид по городским услугам", fr: "Guide rapide des services locaux", it: "Guida rapida ai servizi locali", de: "Kurzer Überblick über lokale Dienste", uk: "Короткий гід по міських послугах", pl: "Szybki przewodnik po lokalnych usługach" },
+  svcCardAI4: { eng: "Fluid support in your language", esp: "Atención fluida en su idioma", ru: "Поддержка на вашем языке", fr: "Prise en charge fluide dans votre langue", it: "Assistenza fluida nella tua lingua", de: "Unterstützung in Ihrer Sprache", uk: "Підтримка вашою мовою", pl: "Płynna obsługa w Twoim języku" },
+  svcCardRefTitle: { eng: "Reference numbers", esp: "Números de Referencia", ru: "Справочные номера", fr: "Numéros de référence", it: "Numeri di riferimento", de: "Referenznummern", uk: "Довідкові номери", pl: "Numery referencyjne" },
+  svcCardRef1: { eng: "Emergency services", esp: "Servicios de emergencia", ru: "Экстренные службы", fr: "Services d'urgence", it: "Servizi di emergenza", de: "Notdienste", uk: "Екстрені служби", pl: "Służby ratunkowe" },
+  svcCardRef2: { eng: "Medical / Pharmacy", esp: "Médico / Farmacia", ru: "Медицина / Аптека", fr: "Médecin / Pharmacie", it: "Medico / Farmacia", de: "Arzt / Apotheke", uk: "Медицина / Аптека", pl: "Medycyna / Apteka" },
+  svcCardRef3: { eng: "Transfer and car rental", esp: "Traslado y Alquiler de coches", ru: "Трансфер и аренда авто", fr: "Transfert et location de voiture", it: "Transfer e noleggio auto", de: "Transfer und Autovermietung", uk: "Трансфер та оренда авто", pl: "Transfer i wynajem samochodu" },
+  svcCardRef4: { eng: "Tours / Activities", esp: "Excursiones / Actividades", ru: "Экскурсии / Активности", fr: "Excursions / Activités", it: "Escursioni / Attività", de: "Ausflüge / Aktivitäten", uk: "Екскурсії / Активності", pl: "Wycieczki / Atrakcje" },
+  svcCardCleaningTitle: { eng: "Cleaning service", esp: "Servicio de Limpieza", ru: "Уборка", fr: "Service de ménage", it: "Servizio di pulizia", de: "Reinigungsservice", uk: "Прибирання", pl: "Usługa sprzątania" },
   svcCardCleaningDesc: {
     eng: "We maintain hotel standards with cleaning and sheet changes on request.",
     esp: "Mantenemos el estándar de un hotel con limpieza y cambio de sábanas bajo petición.",
@@ -461,8 +526,9 @@ const translations: TranslationMap = {
     it: "Manteniamo lo standard alberghiero con pulizia e cambio lenzuola su richiesta.",
     de: "Wir halten Hotelstandards mit Reinigung und Bettwäschewechsel auf Anfrage.",
     uk: "Підтримуємо готельні стандарти: прибирання та зміна білизни на запит.",
+    pl: "Utrzymujemy standardy hotelowe ze sprzątaniem i zmianą pościeli na życzenie.",
   },
-  svcCardOfficeTitle: { eng: "Office in Calpe", esp: "Oficina en Calpe", ru: "Офис в Кальпе", fr: "Bureau à Calpe", it: "Ufficio a Calpe", de: "Büro in Calpe", uk: "Офіс у Кальпе" },
+  svcCardOfficeTitle: { eng: "Office in Calpe", esp: "Oficina en Calpe", ru: "Офис в Кальпе", fr: "Bureau à Calpe", it: "Ufficio a Calpe", de: "Büro in Calpe", uk: "Офіс у Кальпе", pl: "Biuro w Calpe" },
   svcCardOfficeDesc: {
     eng: "Unlike anonymous platforms, we are physically nearby to help you.",
     esp: "A diferencia de plataformas anónimas, estamos físicamente cerca para ayudarle.",
@@ -471,6 +537,7 @@ const translations: TranslationMap = {
     it: "A differenza delle piattaforme anonime, siamo fisicamente vicini per aiutarti.",
     de: "Anders als anonyme Plattformen sind wir physisch vor Ort, um Ihnen zu helfen.",
     uk: "На відміну від анонімних платформ, ми фізично поруч, щоб допомогти.",
+    pl: "W odróżnieniu od anonimowych platform, jesteśmy fizycznie w pobliżu, aby ci pomóc.",
   },
   servicesIntro: {
     eng: "What we offer for your stay in Calpe.",
@@ -480,6 +547,7 @@ const translations: TranslationMap = {
     it: "Cosa offriamo per il tuo soggiorno a Calpe.",
     de: "Was wir für Ihren Aufenthalt in Calpe anbieten.",
     uk: "Що ми пропонуємо для вашого відпочинку в Кальпе.",
+    pl: "Co oferujemy na Twój pobyt w Calpe.",
   },
   service1Title: {
     eng: "Exclusive apartment rentals",
@@ -489,6 +557,7 @@ const translations: TranslationMap = {
     it: "Affitti esclusivi di appartamenti",
     de: "Exklusive Apartment-Vermietung",
     uk: "Ексклюзивна оренда апартаментів",
+    pl: "Ekskluzywny wynajem apartamentów",
   },
   service1Desc: {
     eng: "Hand-picked apartments with sea views and hotel-level amenities. Each property is inspected and maintained to the highest standards, so you enjoy the privacy of a home with the comfort of a boutique stay.",
@@ -498,6 +567,7 @@ const translations: TranslationMap = {
     it: "Appartamenti selezionati con vista mare e comfort da hotel. Ogni proprietà è ispezionata e mantenuta ai massimi standard.",
     de: "Ausgewählte Apartments mit Meerblick und Hotelkomfort. Jede Immobilie wird geprüft und nach höchsten Standards gepflegt.",
     uk: "Ретельно підібрані апартаменти з видом на море та рівнем комфорту готелю. Кожен об'єкт перевірений і підтримується в ідеальному стані.",
+    pl: "Starannie dobrane apartamenty z widokiem na morze i udogodnieniami na poziomie hotelowym. Każda nieruchomość jest sprawdzona i utrzymywana według najwyższych standardów.",
   },
   service2Title: {
     eng: "Concierge & experiences",
@@ -507,6 +577,7 @@ const translations: TranslationMap = {
     it: "Concierge ed esperienze",
     de: "Concierge & Erlebnisse",
     uk: "Консьєрж та враження",
+    pl: "Concierge i doświadczenia",
   },
   service2Desc: {
     eng: "From boat trips and wine tastings to guided hikes up the Peñón de Ifach—we organise activities tailored to you. Our team knows Calpe inside out and can suggest the best restaurants, beaches and hidden spots.",
@@ -516,6 +587,7 @@ const translations: TranslationMap = {
     it: "Da gite in barca e degustazioni di vini alle escursioni guidate sul Peñón de Ifach: organizziamo attività su misura. Il nostro team conosce Calpe a fondo.",
     de: "Von Bootsfahrten und Weinproben bis zu geführten Wanderungen auf den Peñón de Ifach – wir organisieren maßgeschneiderte Aktivitäten. Unser Team kennt Calpe in- und auswendig.",
     uk: "Морські прогулянки, дегустації вин, екскурсії на Пеньйон-де-Іфач — організуємо активності під вас. Наша команда знає Кальпе як ніхто.",
+    pl: "Od rejsów łodzią i degustacji wina po prowadzone wycieczki na Peñón de Ifach — organizujemy aktywności dopasowane do Ciebie. Nasz zespół zna Calpe na wylot.",
   },
   service3Title: {
     eng: "Support whenever you need it",
@@ -525,6 +597,7 @@ const translations: TranslationMap = {
     it: "Supporto quando serve",
     de: "Unterstützung rund um die Uhr",
     uk: "Підтримка в будь-який час",
+    pl: "Wsparcie kiedy go potrzebujesz",
   },
   service3Desc: {
     eng: "Clear check-in instructions, 24/7 contact for emergencies, and a dedicated point of contact for your stay. Book with confidence knowing we're here to make your trip smooth from arrival to departure.",
@@ -534,6 +607,7 @@ const translations: TranslationMap = {
     it: "Istruzioni di check-in chiare, contatto 24/7 per emergenze e referente dedicato. Prenota con fiducia.",
     de: "Klare Check-in-Anweisungen, 24/7-Notfallkontakt und fester Ansprechpartner. Buchen Sie mit Vertrauen.",
     uk: "Зрозумілі інструкції з заїзду, контакт 24/7 у разі термінових питань та персональний менеджер на час відпочинку.",
+    pl: "Jasne instrukcje meldowania, kontakt 24/7 w nagłych wypadkach i dedykowany opiekun na czas pobytu. Rezerwuj pewnie.",
   },
   servicesPracticalTitle: {
     eng: "Practical information",
@@ -543,6 +617,7 @@ const translations: TranslationMap = {
     it: "Informazioni pratiche",
     de: "Praktische Informationen",
     uk: "Корисна інформація",
+    pl: "Informacje praktyczne",
   },
   servicesPracticalIntro: {
     eng: "Useful contacts and services in Calpe.",
@@ -552,8 +627,9 @@ const translations: TranslationMap = {
     it: "Contatti e servizi utili a Calpe.",
     de: "Nützliche Kontakte und Dienste in Calpe.",
     uk: "Корисні контакти та послуги в Кальпе.",
+    pl: "Przydatne kontakty i usługi w Calpe.",
   },
-  practicalPolice: { eng: "Police & emergency", esp: "Policía y emergencias", ru: "Полиция и экстренные службы", fr: "Police et urgences", it: "Polizia e emergenze", de: "Polizei und Notfall", uk: "Поліція та екстрені служби" },
+  practicalPolice: { eng: "Police & emergency", esp: "Policía y emergencias", ru: "Полиция и экстренные службы", fr: "Police et urgences", it: "Polizia e emergenze", de: "Polizei und Notfall", uk: "Поліція та екстрені служби", pl: "Policja i pogotowie" },
   practicalPoliceDetail: {
     eng: "Local police (Policía Local): 965 83 00 00. Guardia Civil: 965 83 02 00. Emergency (all): 112.",
     esp: "Policía Local: 965 83 00 00. Guardia Civil: 965 83 02 00. Emergencias: 112.",
@@ -562,8 +638,9 @@ const translations: TranslationMap = {
     it: "Polizia locale: 965 83 00 00. Guardia Civil: 965 83 02 00. Emergenze: 112.",
     de: "Lokalpolizei: 965 83 00 00. Guardia Civil: 965 83 02 00. Notfall: 112.",
     uk: "Місцева поліція: 965 83 00 00. Гвардія Цивіль: 965 83 02 00. Екстрена служба: 112.",
+    pl: "Policja lokalna (Policía Local): 965 83 00 00. Guardia Civil: 965 83 02 00. Pogotowie: 112.",
   },
-  practicalMedical: { eng: "Medical & pharmacies", esp: "Médico y farmacias", ru: "Медицина и аптеки", fr: "Médecine et pharmacies", it: "Medico e farmacie", de: "Medizin und Apotheken", uk: "Медицина та аптеки" },
+  practicalMedical: { eng: "Medical & pharmacies", esp: "Médico y farmacias", ru: "Медицина и аптеки", fr: "Médecine et pharmacies", it: "Medico e farmacie", de: "Medizin und Apotheken", uk: "Медицина та аптеки", pl: "Medycyna i apteki" },
   practicalMedicalDetail: {
     eng: "Health centre (Centro de Salud): 965 83 02 50. 24h pharmacy rotation; check farmaciasdeguardia.com. Emergency: 112.",
     esp: "Centro de Salud: 965 83 02 50. Farmacias de guardia 24h; consulta farmaciasdeguardia.com. Emergencias: 112.",
@@ -572,8 +649,9 @@ const translations: TranslationMap = {
     it: "Centro di salute: 965 83 02 50. Farmacie di turno 24h: farmaciasdeguardia.com. Emergenze: 112.",
     de: "Gesundheitszentrum: 965 83 02 50. Notdienst-Apotheken 24h: farmaciasdeguardia.com. Notfall: 112.",
     uk: "Медцентр: 965 83 02 50. Чергові аптеки 24 год: farmaciasdeguardia.com. Екстрена служба: 112.",
+    pl: "Centrum zdrowia (Centro de Salud): 965 83 02 50. Apteki dyżurne 24h: farmaciasdeguardia.com. Pogotowie: 112.",
   },
-  practicalTransfers: { eng: "Airport transfers", esp: "Traslados al aeropuerto", ru: "Трансфер в аэропорт", fr: "Transferts aéroport", it: "Transfer aeroporto", de: "Flughafentransfer", uk: "Трансфер в аеропорт" },
+  practicalTransfers: { eng: "Airport transfers", esp: "Traslados al aeropuerto", ru: "Трансфер в аэропорт", fr: "Transferts aéroport", it: "Transfer aeroporto", de: "Flughafentransfer", uk: "Трансфер в аеропорт", pl: "Transfery lotniskowe" },
   practicalTransfersDetail: {
     eng: "Private and shared transfers to/from Alicante and Valencia airports. We can arrange pickup and drop-off for your stay.",
     esp: "Traslados privados y compartidos a/desde aeropuertos de Alicante y Valencia. Podemos gestionar recogida y regreso.",
@@ -582,8 +660,9 @@ const translations: TranslationMap = {
     it: "Transfer privati e condivisi da/per aeroporti di Alicante e Valencia. Possiamo organizzare ritiro e rientro.",
     de: "Private und gemeinsame Transfers zu/von den Flughäfen Alicante und Valencia. Abholung und Rückfahrt auf Anfrage.",
     uk: "Індивідуальні та групові трансфери в аеропорти Аліканте та Валенсії. Можемо організувати зустріч та проводи.",
+    pl: "Prywatne i wspólne transfery do/z lotnisk Alicante i Walencji. Możemy zorganizować odbiór i powrót.",
   },
-  practicalCarRental: { eng: "Car rental", esp: "Alquiler de coches", ru: "Аренда авто", fr: "Location de voitures", it: "Noleggio auto", de: "Autovermietung", uk: "Оренда авто" },
+  practicalCarRental: { eng: "Car rental", esp: "Alquiler de coches", ru: "Аренда авто", fr: "Location de voitures", it: "Noleggio auto", de: "Autovermietung", uk: "Оренда авто", pl: "Wynajem samochodów" },
   practicalCarRentalDetail: {
     eng: "Several agencies in Calpe and at Alicante airport. We recommend booking in advance in high season.",
     esp: "Varias agencias en Calpe y en el aeropuerto de Alicante. Recomendamos reservar con antelación en temporada alta.",
@@ -592,8 +671,9 @@ const translations: TranslationMap = {
     it: "Diverse agenzie a Calpe e all'aeroporto di Alicante. Consigliamo di prenotare in anticipo in alta stagione.",
     de: "Mehrere Vermieter in Calpe und am Flughafen Alicante. Wir empfehlen Vorausbuchung in der Hochsaison.",
     uk: "Агентства в Кальпе та в аеропорту Аліканте. У високий сезон краще бронювати заздалегідь.",
+    pl: "Kilka agencji w Calpe i na lotnisku w Alicante. Zalecamy rezerwację z wyprzedzeniem w szczycie sezonu.",
   },
-  practicalSupermarket: { eng: "Supermarket delivery", esp: "Supermercado a domicilio", ru: "Доставка продуктов", fr: "Livraison supermarché", it: "Consegna supermercato", de: "Supermarkt-Lieferung", uk: "Доставка продуктів" },
+  practicalSupermarket: { eng: "Supermarket delivery", esp: "Supermercado a domicilio", ru: "Доставка продуктов", fr: "Livraison supermarché", it: "Consegna supermercato", de: "Supermarkt-Lieferung", uk: "Доставка продуктів", pl: "Dostawa z supermarketu" },
   practicalSupermarketDetail: {
     eng: "Supermarkets that deliver to your door: Consum, Mercadona, Carrefour and others offer online orders with delivery to Calpe.",
     esp: "Supermercados con entrega a domicilio: Consum, Mercadona, Carrefour y otros ofrecen pedidos online con entrega en Calpe.",
@@ -602,8 +682,9 @@ const translations: TranslationMap = {
     it: "Supermercati con consegna a domicilio: Consum, Mercadona, Carrefour e altri. Ordini online con consegna a Calpe.",
     de: "Supermärkte mit Lieferung: Consum, Mercadona, Carrefour u.a. bieten Online-Bestellung mit Lieferung nach Calpe.",
     uk: "Доставка на дім: Consum, Mercadona, Carrefour та інші доставляють замовлення в Кальпе.",
+    pl: "Supermarkety z dostawą do domu: Consum, Mercadona, Carrefour i inne oferują zamówienia online z dostawą do Calpe.",
   },
-  practicalBikeRental: { eng: "Bike rental", esp: "Alquiler de bicis", ru: "Аренда велосипедов", fr: "Location de vélos", it: "Noleggio bici", de: "Fahrradverleih", uk: "Оренда велосипедів" },
+  practicalBikeRental: { eng: "Bike rental", esp: "Alquiler de bicis", ru: "Аренда велосипедов", fr: "Location de vélos", it: "Noleggio bici", de: "Fahrradverleih", uk: "Оренда велосипедів", pl: "Wynajem rowerów" },
   practicalBikeRentalDetail: {
     eng: "Bike and e-bike rental in Calpe for exploring the coast and Peñón area. Ask us for recommended providers.",
     esp: "Alquiler de bicis y e-bikes en Calpe para explorar la costa y el Peñón. Pregúntanos por proveedores recomendados.",
@@ -612,6 +693,7 @@ const translations: TranslationMap = {
     it: "Noleggio bici e e-bike a Calpe per esplorare la costa e il Peñón. Chiedici i fornitori consigliati.",
     de: "Fahrrad- und E-Bike-Verleih in Calpe für Küste und Peñón. Wir nennen Ihnen empfehlenswerte Anbieter.",
     uk: "Оренда велосипедів та електросамокатів у Кальпе для поїздок узбережжям та до Пеньйону. Підкажемо перевірених прокатників.",
+    pl: "Wynajem rowerów i e-rowerów w Calpe do eksploracji wybrzeża i okolic Peñón. Zapytaj o polecanych dostawców.",
   },
   servicesActivitiesTitle: {
     eng: "Activities",
@@ -621,6 +703,7 @@ const translations: TranslationMap = {
     it: "Attività",
     de: "Aktivitäten",
     uk: "Активності",
+    pl: "Atrakcje",
   },
   servicesActivitiesIntro: {
     eng: "Ideas for your stay: hiking, sea, culture and more.",
@@ -630,8 +713,9 @@ const translations: TranslationMap = {
     it: "Idee per il tuo soggiorno: trekking, mare, cultura e altro.",
     de: "Ideen für Ihren Aufenthalt: Wandern, Meer, Kultur und mehr.",
     uk: "Ідеї для відпочинку: піші походи, море, культура та інше.",
+    pl: "Pomysły na pobyt: wędrówki, morze, kultura i więcej.",
   },
-  activityHiking: { eng: "Hiking", esp: "Senderismo", ru: "Пешие походы", fr: "Randonnée", it: "Trekking", de: "Wandern", uk: "Піші походи" },
+  activityHiking: { eng: "Hiking", esp: "Senderismo", ru: "Пешие походы", fr: "Randonnée", it: "Trekking", de: "Wandern", uk: "Піші походи", pl: "Wędrówki" },
   activityHikingDesc: {
     eng: "Peñón de Ifach natural park, coastal paths and marked routes. Stunning views and varied difficulty levels.",
     esp: "Parque natural del Peñón de Ifach, sendas costeras y rutas señalizadas. Vistas increíbles y distintos niveles de dificultad.",
@@ -640,8 +724,9 @@ const translations: TranslationMap = {
     it: "Parco naturale del Peñón de Ifach, sentieri costieri e percorsi segnalati. Viste mozzafiato e livelli di difficoltà vari.",
     de: "Naturpark Peñón de Ifach, Küstenwege und markierte Routen. Atemberaubende Aussichten und verschiedene Schwierigkeitsgrade.",
     uk: "Природний парк Пеньйон-де-Іфач, прибережні стежки та марковані маршрути. Чудові види та різна складність.",
+    pl: "Park przyrody Peñón de Ifach, ścieżki nadmorskie i oznakowane trasy. Zapierające dech widoki i różne stopnie trudności.",
   },
-  activityBoating: { eng: "Boating & sea", esp: "Barca y mar", ru: "Морские прогулки", fr: "Bateau et mer", it: "Barca e mare", de: "Boot & Meer", uk: "Морські прогулянки" },
+  activityBoating: { eng: "Boating & sea", esp: "Barca y mar", ru: "Морские прогулки", fr: "Bateau et mer", it: "Barca e mare", de: "Boot & Meer", uk: "Морські прогулянки", pl: "Rejsy i morze" },
   activityBoatingDesc: {
     eng: "Boat trips, kayak, paddle and sailing. Explore the coast and coves from the water.",
     esp: "Paseos en barco, kayak, paddle y vela. Explora la costa y las calas desde el mar.",
@@ -650,8 +735,9 @@ const translations: TranslationMap = {
     it: "Gite in barca, kayak, paddle e vela. Esplora la costa e le calette dall'acqua.",
     de: "Bootsfahrten, Kajak, Paddeln und Segeln. Erkunden Sie die Küste und Buchten vom Wasser aus.",
     uk: "Прогулянки на катері, каякінг, SUP та вітрило. Досліджуйте узбережжя та бухти з води.",
+    pl: "Rejsy łodzią, kajak, paddle i żeglarstwo. Odkrywaj wybrzeże i zatoczki od strony wody.",
   },
-  activityDiving: { eng: "Diving & snorkelling", esp: "Buceo y snorkel", ru: "Дайвинг и снорклинг", fr: "Plongée et snorkeling", it: "Sub e snorkeling", de: "Tauchen & Schnorcheln", uk: "Дайвінг та снорклінг" },
+  activityDiving: { eng: "Diving & snorkelling", esp: "Buceo y snorkel", ru: "Дайвинг и снорклинг", fr: "Plongée et snorkeling", it: "Sub e snorkeling", de: "Tauchen & Schnorcheln", uk: "Дайвінг та снорклінг", pl: "Nurkowanie i snorkeling" },
   activityDivingDesc: {
     eng: "Diving schools and snorkelling spots along the coast. Clear waters and marine life.",
     esp: "Escuelas de buceo y zonas de snorkel en la costa. Aguas transparentes y vida marina.",
@@ -660,8 +746,9 @@ const translations: TranslationMap = {
     it: "Scuole sub e spot per lo snorkeling lungo la costa. Acque limpide e vita marina.",
     de: "Tauchschulen und Schnorchelspots an der Küste. Klares Wasser und marine Lebenswelt.",
     uk: "Дайв-школи та місця для снорклінгу. Прозора вода та підводний світ.",
+    pl: "Szkoły nurkowania i miejsca do snorkelingu wzdłuż wybrzeża. Czysta woda i życie morskie.",
   },
-  activityCycling: { eng: "Cycling", esp: "Ciclismo", ru: "Велоспорт", fr: "Vélo", it: "Ciclismo", de: "Radfahren", uk: "Велоспорт" },
+  activityCycling: { eng: "Cycling", esp: "Ciclismo", ru: "Велоспорт", fr: "Vélo", it: "Ciclismo", de: "Radfahren", uk: "Велоспорт", pl: "Kolarstwo" },
   activityCyclingDesc: {
     eng: "Road and mountain biking. Calpe is a popular base for cyclists; routes for all levels.",
     esp: "Ciclismo en carretera y montaña. Calpe es base ideal para ciclistas; rutas para todos los niveles.",
@@ -670,8 +757,9 @@ const translations: TranslationMap = {
     it: "Ciclismo su strada e mountain bike. Calpe è base ideale per ciclisti; percorsi per tutti i livelli.",
     de: "Straßen- und Mountainbiken. Calpe ist eine beliebte Basis für Radfahrer; Routen für alle Levels.",
     uk: "Шосе та маунтинбайк. Кальпе — популярна база для велосипедистів; маршрути на будь-який рівень.",
+    pl: "Kolarstwo szosowe i górskie. Calpe to popularna baza dla rowerzystów; trasy dla wszystkich poziomów.",
   },
-  activityWine: { eng: "Wine & gastronomy", esp: "Vino y gastronomía", ru: "Вина и гастрономия", fr: "Vin et gastronomie", it: "Vino e gastronomia", de: "Wein & Gastronomie", uk: "Вино та гастрономія" },
+  activityWine: { eng: "Wine & gastronomy", esp: "Vino y gastronomía", ru: "Вина и гастрономия", fr: "Vin et gastronomie", it: "Vino e gastronomia", de: "Wein & Gastronomie", uk: "Вино та гастрономія", pl: "Wino i gastronomia" },
   activityWineDesc: {
     eng: "Wine tastings, local bodegas and restaurants. Costa Blanca wines and Mediterranean cuisine.",
     esp: "Catas de vino, bodegas y restaurantes de la zona. Vinos de la Costa Blanca y cocina mediterránea.",
@@ -680,8 +768,9 @@ const translations: TranslationMap = {
     it: "Degustazioni di vino, bodeghe e ristoranti locali. Vini della Costa Blanca e cucina mediterranea.",
     de: "Weinproben, lokale Bodegas und Restaurants. Costa-Blanca-Weine und mediterrane Küche.",
     uk: "Дегустації вин, місцеві бодеги та ресторани. Вина Коста-Бланки та середземноморська кухня.",
+    pl: "Degustacje wina, lokalne bodegas i restauracje. Wina Costy Blanca i kuchnia śródziemnomorska.",
   },
-  activityBeach: { eng: "Beaches & family", esp: "Playas y familia", ru: "Пляжи и семья", fr: "Plages et famille", it: "Spiagge e famiglia", de: "Strände & Familie", uk: "Пляжі та сім'я" },
+  activityBeach: { eng: "Beaches & family", esp: "Playas y familia", ru: "Пляжи и семья", fr: "Plages et famille", it: "Spiagge e famiglia", de: "Strände & Familie", uk: "Пляжі та сім'я", pl: "Plaże i rodzina" },
   activityBeachDesc: {
     eng: "Sandy and rocky beaches, promenades and family-friendly activities. Calpe has something for everyone.",
     esp: "Playas de arena y roca, paseos marítimos y actividades familiares. Calpe tiene algo para todos.",
@@ -690,10 +779,11 @@ const translations: TranslationMap = {
     it: "Spiagge di sabbia e roccia, passeggiate e attività per famiglie. Calpe ha qualcosa per tutti.",
     de: "Sand- und Felsstrände, Promenaden und familienfreundliche Aktivitäten. Calpe hat für jeden etwas.",
     uk: "Піщані та скелясті пляжі, набережні та сімейний відпочинок. У Кальпе є все для кожного.",
+    pl: "Plaże piaszczyste i skalne, promenady i atrakcje dla rodzin. W Calpe każdy znajdzie coś dla siebie.",
   },
 
   // Lobby
-  lobbyTitle: { eng: "Lobby", esp: "Lobby", ru: "Лобби", fr: "Lobby", it: "Lobby", de: "Lobby", uk: "Лобі" },
+  lobbyTitle: { eng: "Lobby", esp: "Lobby", ru: "Лобби", fr: "Lobby", it: "Lobby", de: "Lobby", uk: "Лобі", pl: "Lobby" },
   sectionRealEstate: {
     eng: "About us",
     esp: "Sobre nosotros",
@@ -702,6 +792,7 @@ const translations: TranslationMap = {
     it: "Chi siamo",
     de: "Über uns",
     uk: "Про нас",
+    pl: "O nas",
   },
   sectionRealEstateContent: {
     eng: "INFTOUR is a licensed tour operator offering exclusive apartment rentals in Calpe. We provide a hotel-level service with the privacy of your own home, in one of the most iconic locations on the Costa Blanca—at the foot of the Peñón de Ifach.",
@@ -711,6 +802,7 @@ const translations: TranslationMap = {
     it: "INFTOUR è un tour operator autorizzato che offre affitti esclusivi di appartamenti a Calpe. Servizio di livello alberghiero con la privacy di casa, ai piedi del Peñón de Ifach sulla Costa Blanca.",
     de: "INFTOUR ist ein lizenzierter Reiseveranstalter mit exklusiven Apartment-Vermietungen in Calpe. Hotelkomfort mit der Privatsphäre des eigenen Zuhauses am Fuße des Peñón de Ifach an der Costa Blanca.",
     uk: "INFTOUR — ліцензований туроператор, ексклюзивна оренда апартаментів у Кальпе. Сервіс рівня готелю та затишок власного дому біля підніжжя Пеньйон-де-Іфач на Коста-Бланці.",
+    pl: "INFTOUR to licencjonowany organizator turystyki oferujący ekskluzywny wynajem apartamentów w Calpe. Zapewniamy obsługę na poziomie hotelowym z prywatnością własnego domu u stóp Peñón de Ifach na Coście Blanca.",
   },
   lobbyTeamHeading: {
     eng: "Our team",
@@ -720,15 +812,16 @@ const translations: TranslationMap = {
     it: "Il nostro team",
     de: "Unser Team",
     uk: "Наша команда",
+    pl: "Nasz zespół",
   },
-  team1Name: { eng: "Alex García", esp: "Alex García", ru: "Алекс Гарсия", fr: "Alex García", it: "Alex García", de: "Alex García", uk: "Алекс Гарсія" },
-  team1Title: { eng: "Managing Director", esp: "Director general", ru: "Генеральный директор", fr: "Directeur général", it: "Direttore generale", de: "Geschäftsführer", uk: "Генеральний директор" },
-  team2Name: { eng: "Maria López", esp: "María López", ru: "Мария Лопес", fr: "Maria López", it: "Maria López", de: "Maria López", uk: "Марія Лопес" },
-  team2Title: { eng: "Operations & Guest Experience", esp: "Operaciones y experiencia del huésped", ru: "Операции и работа с гостями", fr: "Opérations et expérience client", it: "Operazioni e esperienza ospiti", de: "Betrieb & Gästebetreuung", uk: "Операції та робота з гостями" },
-  team3Name: { eng: "Carlos Ruiz", esp: "Carlos Ruiz", ru: "Карлос Руис", fr: "Carlos Ruiz", it: "Carlos Ruiz", de: "Carlos Ruiz", uk: "Карлос Руїс" },
-  team3Title: { eng: "Property & Partnerships", esp: "Propiedades y alianzas", ru: "Недвижимость и партнёрства", fr: "Biens et partenariats", it: "Immobili e partnership", de: "Immobilien & Partnerschaften", uk: "Нерухомість та партнерства" },
-  team4Name: { eng: "Elena Martínez", esp: "Elena Martínez", ru: "Елена Мартинес", fr: "Elena Martínez", it: "Elena Martínez", de: "Elena Martínez", uk: "Олена Мартінес" },
-  team4Title: { eng: "Marketing & Reservations", esp: "Marketing y reservas", ru: "Маркетинг и бронирования", fr: "Marketing et réservations", it: "Marketing e prenotazioni", de: "Marketing & Buchungen", uk: "Маркетинг та бронювання" },
+  team1Name: { eng: "Alex García", esp: "Alex García", ru: "Алекс Гарсия", fr: "Alex García", it: "Alex García", de: "Alex García", uk: "Алекс Гарсія", pl: "Alex García" },
+  team1Title: { eng: "Managing Director", esp: "Director general", ru: "Генеральный директор", fr: "Directeur général", it: "Direttore generale", de: "Geschäftsführer", uk: "Генеральний директор", pl: "Dyrektor zarządzający" },
+  team2Name: { eng: "Maria López", esp: "María López", ru: "Мария Лопес", fr: "Maria López", it: "Maria López", de: "Maria López", uk: "Марія Лопес", pl: "Maria López" },
+  team2Title: { eng: "Operations & Guest Experience", esp: "Operaciones y experiencia del huésped", ru: "Операции и работа с гостями", fr: "Opérations et expérience client", it: "Operazioni e esperienza ospiti", de: "Betrieb & Gästebetreuung", uk: "Операції та робота з гостями", pl: "Operacje i obsługa gości" },
+  team3Name: { eng: "Carlos Ruiz", esp: "Carlos Ruiz", ru: "Карлос Руис", fr: "Carlos Ruiz", it: "Carlos Ruiz", de: "Carlos Ruiz", uk: "Карлос Руїс", pl: "Carlos Ruiz" },
+  team3Title: { eng: "Property & Partnerships", esp: "Propiedades y alianzas", ru: "Недвижимость и партнёрства", fr: "Biens et partenariats", it: "Immobili e partnership", de: "Immobilien & Partnerschaften", uk: "Нерухомість та партнерства", pl: "Nieruchomości i partnerstwa" },
+  team4Name: { eng: "Elena Martínez", esp: "Elena Martínez", ru: "Елена Мартинес", fr: "Elena Martínez", it: "Elena Martínez", de: "Elena Martínez", uk: "Олена Мартінес", pl: "Elena Martínez" },
+  team4Title: { eng: "Marketing & Reservations", esp: "Marketing y reservas", ru: "Маркетинг и бронирования", fr: "Marketing et réservations", it: "Marketing e prenotazioni", de: "Marketing & Buchungen", uk: "Маркетинг та бронювання", pl: "Marketing i rezerwacje" },
   lobbyOfficeHeading: {
     eng: "Our office",
     esp: "Nuestra oficina",
@@ -737,6 +830,7 @@ const translations: TranslationMap = {
     it: "Il nostro ufficio",
     de: "Unser Büro",
     uk: "Наш офіс",
+    pl: "Nasze biuro",
   },
   lobbyOpenInMaps: {
     eng: "Open in Google Maps",
@@ -746,6 +840,7 @@ const translations: TranslationMap = {
     it: "Apri in Google Maps",
     de: "In Google Maps öffnen",
     uk: "Відкрити в Google Картах",
+    pl: "Otwórz w Google Maps",
   },
   sectionAIChat: {
     eng: "What the AI assistant can do",
@@ -755,6 +850,7 @@ const translations: TranslationMap = {
     it: "Cosa può fare l'assistente IA",
     de: "Was der KI-Assistent kann",
     uk: "Можливості ШІ-асистента",
+    pl: "Co potrafi asystent AI",
   },
   sectionAIChatContent: {
     eng: "Our AI assistant can help you with: booking enquiries and availability, information about experiences and activities in Calpe, recommendations for restaurants and sights, and general questions about your stay. Open the chat from the menu to get started.",
@@ -764,6 +860,7 @@ const translations: TranslationMap = {
     it: "Il nostro assistente IA può aiutarti con: richieste di prenotazione e disponibilità, informazioni su esperienze e attività a Calpe, consigli su ristoranti e luoghi, domande generali. Apri la chat dal menu.",
     de: "Unser KI-Assistent hilft bei: Buchungsanfragen und Verfügbarkeit, Infos zu Erlebnissen und Aktivitäten in Calpe, Restaurant- und Sehenswürdigkeits-Empfehlungen, allgemeinen Fragen. Chat im Menü öffnen.",
     uk: "ШІ-асистент підкаже: з бронювання та наявності, з вражень та активностей у Кальпе, з ресторанів та пам'яток, з загальних питань відпочинку. Відкрийте чат у меню.",
+    pl: "Nasz asystent AI pomoże z: zapytaniami o rezerwację i dostępność, informacjami o atrakcjach i aktywnościach w Calpe, rekomendacjami restauracji i zabytków, ogólnymi pytaniami o pobyt. Otwórz czat z menu.",
   },
   sectionContact: {
     eng: "Contact us",
@@ -773,6 +870,7 @@ const translations: TranslationMap = {
     it: "Contattaci",
     de: "Kontakt",
     uk: "Написати нам",
+    pl: "Skontaktuj się z nami",
   },
   sectionContactSubtitle: {
     eng: "Have a question or want to book? We usually reply within 24 hours.",
@@ -782,10 +880,11 @@ const translations: TranslationMap = {
     it: "Hai una domanda o vuoi prenotare? Di solito rispondiamo entro 24 ore.",
     de: "Frage oder Buchungswunsch? Wir antworten in der Regel innerhalb von 24 Stunden.",
     uk: "Питання чи бронювання? Зазвичай відповідаємо протягом 24 годин.",
+    pl: "Masz pytanie lub chcesz zarezerwować? Zazwyczaj odpowiadamy w ciągu 24 godzin.",
   },
-  formEmailLabel: { eng: "Your email", esp: "Tu email", ru: "Ваш email", fr: "Votre email", it: "La tua email", de: "Ihre E-Mail", uk: "Ваш email" },
-  formEmailPlaceholder: { eng: "name@example.com", esp: "nombre@ejemplo.com", ru: "nombre@ejemplo.com", fr: "nom@exemple.com", it: "nome@esempio.com", de: "name@beispiel.de", uk: "ім'я@приклад.com" },
-  formMessageLabel: { eng: "Message", esp: "Mensaje", ru: "Сообщение", fr: "Message", it: "Messaggio", de: "Nachricht", uk: "Повідомлення" },
+  formEmailLabel: { eng: "Your email", esp: "Tu email", ru: "Ваш email", fr: "Votre email", it: "La tua email", de: "Ihre E-Mail", uk: "Ваш email", pl: "Twój email" },
+  formEmailPlaceholder: { eng: "name@example.com", esp: "nombre@ejemplo.com", ru: "nombre@ejemplo.com", fr: "nom@exemple.com", it: "nome@esempio.com", de: "name@beispiel.de", uk: "ім'я@приклад.com", pl: "imie@przyklad.pl" },
+  formMessageLabel: { eng: "Message", esp: "Mensaje", ru: "Сообщение", fr: "Message", it: "Messaggio", de: "Nachricht", uk: "Повідомлення", pl: "Wiadomość" },
   formMessagePlaceholder: {
     eng: "Tell us about your dates, group size or any question...",
     esp: "Cuéntanos fechas, número de personas o tu pregunta...",
@@ -794,8 +893,9 @@ const translations: TranslationMap = {
     it: "Indica date, numero di persone o la tua domanda...",
     de: "Daten, Gästeanzahl oder Ihre Frage...",
     uk: "Дати, кількість гостей або ваше питання...",
+    pl: "Podaj daty, liczbę osób lub swoje pytanie...",
   },
-  formSubmit: { eng: "Send message", esp: "Enviar mensaje", ru: "Отправить сообщение", fr: "Envoyer le message", it: "Invia messaggio", de: "Nachricht senden", uk: "Надіслати повідомлення" },
+  formSubmit: { eng: "Send message", esp: "Enviar mensaje", ru: "Отправить сообщение", fr: "Envoyer le message", it: "Invia messaggio", de: "Nachricht senden", uk: "Надіслати повідомлення", pl: "Wyślij wiadomość" },
   formSendsTo: {
     eng: "Replies go to your email. We'll copy booking@inftour.com.",
     esp: "Las respuestas irán a tu email. Nosotros recibimos en booking@inftour.com.",
@@ -804,6 +904,7 @@ const translations: TranslationMap = {
     it: "Le risposte andranno alla tua email. Noi riceviamo su booking@inftour.com.",
     de: "Antworten gehen an Ihre E-Mail. Wir erhalten eine Kopie an booking@inftour.com.",
     uk: "Відповідь надійде на ваш email. Ми отримаємо копію на booking@inftour.com.",
+    pl: "Odpowiedzi trafią na Twój email. Otrzymamy kopię na booking@inftour.com.",
   },
   formSuccess: {
     eng: "Thank you. We will reply soon.",
@@ -813,6 +914,7 @@ const translations: TranslationMap = {
     it: "Grazie. Risponderemo presto.",
     de: "Danke. Wir werden bald antworten.",
     uk: "Дякуємо. Ми відповімо найближчим часом.",
+    pl: "Dziękujemy. Odpowiemy wkrótce.",
   },
   formError: {
     eng: "Something went wrong. Please try again.",
@@ -822,6 +924,7 @@ const translations: TranslationMap = {
     it: "Qualcosa è andato storto. Riprova.",
     de: "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     uk: "Щось пішло не так. Спробуйте ще раз.",
+    pl: "Coś poszło nie tak. Spróbuj ponownie.",
   },
   sectionPolicies: {
     eng: "Policies & legal",
@@ -831,6 +934,7 @@ const translations: TranslationMap = {
     it: "Politiche e legale",
     de: "Richtlinien & Rechtliches",
     uk: "Політики та умови",
+    pl: "Polityki i kwestie prawne",
   },
   cancellationPolicy: {
     eng: "Cancellation policy",
@@ -840,6 +944,7 @@ const translations: TranslationMap = {
     it: "Politica di cancellazione",
     de: "Stornobedingungen",
     uk: "Політика скасування",
+    pl: "Polityka anulowania",
   },
   paymentPolicy: {
     eng: "Payment",
@@ -849,6 +954,7 @@ const translations: TranslationMap = {
     it: "Pagamento",
     de: "Zahlung",
     uk: "Оплата",
+    pl: "Płatność",
   },
   termsPolicy: {
     eng: "Terms & conditions",
@@ -858,8 +964,9 @@ const translations: TranslationMap = {
     it: "Termini e condizioni",
     de: "AGB",
     uk: "Умови",
+    pl: "Regulamin",
   },
-  sectionFaq: { eng: "FAQ", esp: "Preguntas frecuentes", ru: "Частые вопросы", fr: "FAQ", it: "Domande frequenti", de: "FAQ", uk: "Часті питання" },
+  sectionFaq: { eng: "FAQ", esp: "Preguntas frecuentes", ru: "Частые вопросы", fr: "FAQ", it: "Domande frequenti", de: "FAQ", uk: "Часті питання", pl: "FAQ" },
   faq1Q: {
     eng: "What is the check-in time?",
     esp: "¿Cuál es la hora de entrada?",
@@ -868,6 +975,7 @@ const translations: TranslationMap = {
     it: "Qual è l'orario di check-in?",
     de: "Wann ist der Check-in?",
     uk: "О котрій заїзд?",
+    pl: "O której godzinie jest zameldowanie?",
   },
   faq1A: {
     eng: "Check-in is from 16:00. Check-out is by 11:00.",
@@ -877,6 +985,7 @@ const translations: TranslationMap = {
     it: "Check-in dalle 16:00. Check-out entro le 11:00.",
     de: "Check-in ab 16:00 Uhr. Check-out bis 11:00 Uhr.",
     uk: "Заїзд з 16:00, виїзд до 11:00.",
+    pl: "Zameldowanie od 16:00. Wymeldowanie do 11:00.",
   },
   faq2Q: {
     eng: "Is there parking?",
@@ -886,6 +995,7 @@ const translations: TranslationMap = {
     it: "C'è parcheggio?",
     de: "Gibt es Parkplätze?",
     uk: "Чи є парковка?",
+    pl: "Czy jest parking?",
   },
   faq2A: {
     eng: "Parking options depend on the property. Details are in your booking confirmation.",
@@ -895,6 +1005,7 @@ const translations: TranslationMap = {
     it: "Le opzioni di parcheggio dipendono dalla proprietà. I dettagli sono nella conferma di prenotazione.",
     de: "Parkmöglichkeiten hängen von der Immobilie ab. Details stehen in Ihrer Buchungsbestätigung.",
     uk: "Залежить від об'єкта. Подробиці в підтвердженні бронювання.",
+    pl: "Opcje parkingowe zależą od nieruchomości. Szczegóły znajdziesz w potwierdzeniu rezerwacji.",
   },
   faq3Q: {
     eng: "How can I modify or cancel my booking?",
@@ -904,6 +1015,7 @@ const translations: TranslationMap = {
     it: "Come posso modificare o cancellare la prenotazione?",
     de: "Wie kann ich meine Buchung ändern oder stornieren?",
     uk: "Як змінити або скасувати бронювання?",
+    pl: "Jak mogę zmienić lub anulować rezerwację?",
   },
   faq3A: {
     eng: "Contact us by email or through the AI chat. We will assist you according to our cancellation policy.",
@@ -913,11 +1025,12 @@ const translations: TranslationMap = {
     it: "Contattaci per email o tramite chat IA. Ti assisteremo secondo la nostra politica di cancellazione.",
     de: "Kontaktieren Sie uns per E-Mail oder über den KI-Chat. Wir helfen Ihnen gemäß unserer Stornobedingungen.",
     uk: "Напишіть нам на email або в ШІ-чат. Допоможемо згідно з політикою скасування.",
+    pl: "Skontaktuj się z nami przez email lub czat AI. Pomożemy zgodnie z naszą polityką anulowania.",
   },
 
   // Lobby page (ejemplos/lobby.html)
-  lobHeroLabel: { eng: "Virtual Reception", esp: "Recepción Virtual", ru: "Виртуальная рецепция", fr: "Réception virtuelle", it: "Reception virtuale", de: "Virtuelle Rezeption", uk: "Віртуальна рецепція" },
-  lobHeroTitle: { eng: "Welcome to the Lobby", esp: "Bienvenido al Lobby", ru: "Добро пожаловать в лобби", fr: "Bienvenue au Lobby", it: "Benvenuto nella Lobby", de: "Willkommen in der Lobby", uk: "Ласкаво просимо до лобі" },
+  lobHeroLabel: { eng: "Virtual Reception", esp: "Recepción Virtual", ru: "Виртуальная рецепция", fr: "Réception virtuelle", it: "Reception virtuale", de: "Virtuelle Rezeption", uk: "Віртуальна рецепція", pl: "Wirtualna recepcja" },
+  lobHeroTitle: { eng: "Welcome to the Lobby", esp: "Bienvenido al Lobby", ru: "Добро пожаловать в лобби", fr: "Bienvenue au Lobby", it: "Benvenuto nella Lobby", de: "Willkommen in der Lobby", uk: "Ласкаво просимо до лобі", pl: "Witaj w Lobby" },
   lobHeroDesc: {
     eng: "Your information and assistance centre. Here you will find everything you need to know about us, our policies and how to act in any situation.",
     esp: "Su centro de información y asistencia. Aquí encontrará todo lo que necesita saber sobre nosotros, nuestras políticas y cómo actuar ante cualquier situación.",
@@ -926,8 +1039,9 @@ const translations: TranslationMap = {
     it: "Il vostro centro di informazione e assistenza. Qui troverete tutto quello che serve su di noi, le nostre politiche e come agire in ogni situazione.",
     de: "Ihr Informations- und Assistenzzentrum. Hier finden Sie alles über uns, unsere Richtlinien und das Verhalten in jeder Situation.",
     uk: "Ваш центр інформації та допомоги. Тут ви знайдете все про нас, наші політики та дії в будь-якій ситуації.",
+    pl: "Twoje centrum informacji i pomocy. Znajdziesz tu wszystko o nas, naszych zasadach i tym, jak postępować w każdej sytuacji.",
   },
-  lobAboutTitle: { eng: "About us", esp: "Sobre Nosotros", ru: "О нас", fr: "À propos de nous", it: "Chi siamo", de: "Über uns", uk: "Про нас" },
+  lobAboutTitle: { eng: "About us", esp: "Sobre Nosotros", ru: "О нас", fr: "À propos de nous", it: "Chi siamo", de: "Über uns", uk: "Про нас", pl: "O nas" },
   lobAboutIntro: {
     eng: "INFTOUR is a boutique holiday rental agency in Calpe. We combine the privacy of an exclusive apartment with the service standards of a premium hotel.",
     esp: "INFTOUR es una agencia boutique de alquiler vacacional en Calpe. Combinamos la privacidad de un apartamento exclusivo con los estándares de servicio de un hotel premium.",
@@ -936,8 +1050,9 @@ const translations: TranslationMap = {
     it: "INFTOUR è un'agenzia boutique di affitti per le vacanze a Calpe. Uniamo la privacy di un appartamento esclusivo agli standard di servizio di un hotel premium.",
     de: "INFTOUR ist eine Boutique-Ferienvermietungsagentur in Calpe. Wir verbinden die Privatsphäre einer exklusiven Ferienwohnung mit dem Service eines Premium-Hotels.",
     uk: "INFTOUR — бутикове агентство оренди в Кальпе. Ми поєднуємо затишок ексклюзивного апартаменту зі стандартами сервісу преміум-готелю.",
+    pl: "INFTOUR to butikowa agencja wynajmu wakacyjnego w Calpe. Łączymy prywatność ekskluzywnego apartamentu ze standardami obsługi hotelu premium.",
   },
-  lobAboutReadMore: { eng: "Read our full story", esp: "Leer nuestra historia completa", ru: "Прочитать нашу историю", fr: "Lire notre histoire complète", it: "Leggi la nostra storia completa", de: "Unsere vollständige Geschichte lesen", uk: "Прочитати нашу історію" },
+  lobAboutReadMore: { eng: "Read our full story", esp: "Leer nuestra historia completa", ru: "Прочитать нашу историю", fr: "Lire notre histoire complète", it: "Leggi la nostra storia completa", de: "Unsere vollständige Geschichte lesen", uk: "Прочитати нашу історію", pl: "Przeczytaj naszą historię" },
   lobAboutStory1: {
     eng: "Founded with the aim of raising the standard of accommodation on the Costa Blanca, INFTOUR manages a carefully curated collection of first-line properties. We are not an aggregator; we are direct managers focused on quality, not quantity.",
     esp: "Fundada con el objetivo de elevar el estándar del alojamiento en la Costa Blanca, INFTOUR gestiona una cuidada colección de propiedades de primera línea. No somos un agregador; somos gestores directos enfocados en la calidad, no en la cantidad.",
@@ -946,6 +1061,7 @@ const translations: TranslationMap = {
     it: "Fondata con l'obiettivo di elevare lo standard dell'alloggio sulla Costa Blanca, INFTOUR gestisce una collezione curata di proprietà di prima linea. Non siamo un aggregatore; siamo gestori diretti focalizzati sulla qualità.",
     de: "Mit dem Ziel gegründet, den Standard der Unterkünfte an der Costa Blanca zu heben, verwaltet INFTOUR eine sorgfältig kuratierte Sammlung erstklassiger Objekte. Wir sind kein Aggregator; wir sind direkte Verwalter mit Fokus auf Qualität.",
     uk: "Заснована з метою підвищити рівень проживання на Коста-Бланці, INFTOUR керує ретельно підібраною колекцією об'єктів. Ми не агрегатор; ми прямі управителі, орієнтовані на якість.",
+    pl: "Założona w celu podniesienia standardu zakwaterowania na Coście Blanca, INFTOUR zarządza starannie dobranymi obiektami pierwszej linii. Nie jesteśmy agregatorem; jesteśmy bezpośrednimi zarządcami skupionymi na jakości, nie ilości.",
   },
   lobAboutStory2: {
     eng: "Our philosophy is based on 'Concierge Service': we believe that true luxury lies in peace of mind. That is why we have physical offices in the heart of Calpe and a team dedicated to making your stay an unforgettable experience.",
@@ -955,21 +1071,22 @@ const translations: TranslationMap = {
     it: "La nostra filosofia si basa sul 'Concierge Service': crediamo che il vero lusso risieda nella tranquillità. Per questo abbiamo uffici fisici nel cuore di Calpe e un team dedicato a rendere il vostro soggiorno indimenticabile.",
     de: "Unsere Philosophie basiert auf 'Concierge Service': Wir glauben, dass wahrer Luxus in der Ruhe des Geistes liegt. Daher haben wir Büros im Herzen von Calpe und ein Team, das Ihren Aufenthalt unvergesslich macht.",
     uk: "Наша філософія — «Concierge Service»: ми віримо, що справжня розкіш — це спокій. Тому у нас є офіс у центрі Кальпе та команда, яка зробить ваш відпочинок незабутнім.",
+    pl: "Nasza filozofia opiera się na 'Concierge Service': wierzymy, że prawdziwy luksus tkwi w spokoju ducha. Dlatego mamy biura fizyczne w sercu Calpe i zespół dedykowany temu, by Twój pobyt był niezapomnianym doświadczeniem.",
   },
-  lobAITitle: { eng: "Your AI Assistant", esp: "Tu Asistente AI", ru: "Ваш ИИ-ассистент", fr: "Votre assistant IA", it: "Il tuo assistente IA", de: "Ihr KI-Assistent", uk: "Ваш ШІ-асистент" },
-  lobAI1: { eng: "24/7 instant support", esp: "Soporte instantáneo 24/7", ru: "Мгновенная поддержка 24/7", fr: "Support instantané 24h/24", it: "Supporto istantaneo 24/7", de: "24/7 Sofort-Support", uk: "Миттєва підтримка 24/7" },
-  lobAI2: { eng: "Help with any issue during your stay", esp: "Asistencia ante cualquier incidencia durante su estancia", ru: "Помощь при любом инциденте во время проживания", fr: "Assistance pour tout incident pendant votre séjour", it: "Assistenza per qualsiasi evenienza durante il soggiorno", de: "Hilfe bei jedem Vorfall während Ihres Aufenthalts", uk: "Допомога при будь-якому інциденті під час проживання" },
-  lobAI3: { eng: "Quick guide to urban services and concierge", esp: "Guía rápida de servicios urbanos y conserjería", ru: "Краткий гид по городским услугам и консьержу", fr: "Guide rapide des services urbains et de la conciergerie", it: "Guida rapida ai servizi urbani e alla concierge", de: "Schnellführer zu städtischen Diensten und Concierge", uk: "Короткий гід по міських послугах та консьєржу" },
-  lobAI4: { eng: "Support in your native language", esp: "Atención fluida en su idioma nativo", ru: "Поддержка на вашем родном языке", fr: "Prise en charge fluide dans votre langue", it: "Assistenza fluida nella vostra lingua", de: "Unterstützung in Ihrer Muttersprache", uk: "Підтримка рідною мовою" },
-  lobAIStartChat: { eng: "Start chat", esp: "Iniciar Chat", ru: "Начать чат", fr: "Démarrer le chat", it: "Avvia chat", de: "Chat starten", uk: "Почати чат" },
-  lobContactWeAreHere: { eng: "We are here to help you", esp: "Estamos aquí para ayudarle", ru: "Мы здесь, чтобы помочь", fr: "Nous sommes là pour vous aider", it: "Siamo qui per aiutarti", de: "Wir sind für Sie da", uk: "Ми тут, щоб допомогти" },
-  formNamePlaceholder: { eng: "Name", esp: "Nombre", ru: "Имя", fr: "Nom", it: "Nome", de: "Name", uk: "Ім'я" },
-  lobFormHelpPlaceholder: { eng: "How can we help you?", esp: "¿En qué podemos ayudarle?", ru: "Чем мы можем помочь?", fr: "Comment pouvons-nous vous aider ?", it: "Come possiamo aiutarti?", de: "Wie können wir Ihnen helfen?", uk: "Чим ми можемо допомогти?" },
-  lobAddressLine: { eng: "c. Jardin 3 Local INFTOUR, Calpe", esp: "c. Jardin 3 Local INFTOUR, Calpe", ru: "c. Jardin 3 Local INFTOUR, Кальпе", fr: "c. Jardin 3 Local INFTOUR, Calpe", it: "c. Jardin 3 Local INFTOUR, Calpe", de: "c. Jardin 3 Local INFTOUR, Calpe", uk: "c. Jardin 3 Local INFTOUR, Кальпе" },
-  lobPhoneLine: { eng: "+34 600 000 000", esp: "+34 600 000 000", ru: "+34 600 000 000", fr: "+34 600 000 000", it: "+34 600 000 000", de: "+34 600 000 000", uk: "+34 600 000 000" },
-  lobEmailLine: { eng: "mail@inftour.net", esp: "mail@inftour.net", ru: "mail@inftour.net", fr: "mail@inftour.net", it: "mail@inftour.net", de: "mail@inftour.net", uk: "mail@inftour.net" },
-  lobInstructionsTitle: { eng: "Instructions: What to do if...?", esp: "Instrucciones: ¿Qué hacer si...?", ru: "Инструкции: Что делать, если...?", fr: "Instructions : Que faire si... ?", it: "Istruzioni: Cosa fare se...?", de: "Anweisungen: Was tun, wenn...?", uk: "Інструкції: Що робити, якщо...?" },
-  lobInstr1Q: { eng: "...I have a medical emergency?", esp: "...tengo una emergencia médica?", ru: "...у меня медицинская чрезвычайная ситуация?", fr: "...j'ai une urgence médicale ?", it: "...ho un'emergenza medica?", de: "...ich einen medizinischen Notfall habe?", uk: "...у мене медична надзвичайна ситуація?" },
+  lobAITitle: { eng: "Your AI Assistant", esp: "Tu Asistente AI", ru: "Ваш ИИ-ассистент", fr: "Votre assistant IA", it: "Il tuo assistente IA", de: "Ihr KI-Assistent", uk: "Ваш ШІ-асистент", pl: "Twój asystent AI" },
+  lobAI1: { eng: "24/7 instant support", esp: "Soporte instantáneo 24/7", ru: "Мгновенная поддержка 24/7", fr: "Support instantané 24h/24", it: "Supporto istantaneo 24/7", de: "24/7 Sofort-Support", uk: "Миттєва підтримка 24/7", pl: "Natychmiastowe wsparcie 24/7" },
+  lobAI2: { eng: "Help with any issue during your stay", esp: "Asistencia ante cualquier incidencia durante su estancia", ru: "Помощь при любом инциденте во время проживания", fr: "Assistance pour tout incident pendant votre séjour", it: "Assistenza per qualsiasi evenienza durante il soggiorno", de: "Hilfe bei jedem Vorfall während Ihres Aufenthalts", uk: "Допомога при будь-якому інциденті під час проживання", pl: "Pomoc przy każdym problemie podczas pobytu" },
+  lobAI3: { eng: "Quick guide to urban services and concierge", esp: "Guía rápida de servicios urbanos y conserjería", ru: "Краткий гид по городским услугам и консьержу", fr: "Guide rapide des services urbains et de la conciergerie", it: "Guida rapida ai servizi urbani e alla concierge", de: "Schnellführer zu städtischen Diensten und Concierge", uk: "Короткий гід по міських послугах та консьєржу", pl: "Szybki przewodnik po usługach miejskich i concierge" },
+  lobAI4: { eng: "Support in your native language", esp: "Atención fluida en su idioma nativo", ru: "Поддержка на вашем родном языке", fr: "Prise en charge fluide dans votre langue", it: "Assistenza fluida nella vostra lingua", de: "Unterstützung in Ihrer Muttersprache", uk: "Підтримка рідною мовою", pl: "Wsparcie w Twoim ojczystym języku" },
+  lobAIStartChat: { eng: "Start chat", esp: "Iniciar Chat", ru: "Начать чат", fr: "Démarrer le chat", it: "Avvia chat", de: "Chat starten", uk: "Почати чат", pl: "Rozpocznij czat" },
+  lobContactWeAreHere: { eng: "We are here to help you", esp: "Estamos aquí para ayudarle", ru: "Мы здесь, чтобы помочь", fr: "Nous sommes là pour vous aider", it: "Siamo qui per aiutarti", de: "Wir sind für Sie da", uk: "Ми тут, щоб допомогти", pl: "Jesteśmy tu, by Ci pomóc" },
+  formNamePlaceholder: { eng: "Name", esp: "Nombre", ru: "Имя", fr: "Nom", it: "Nome", de: "Name", uk: "Ім'я", pl: "Imię" },
+  lobFormHelpPlaceholder: { eng: "How can we help you?", esp: "¿En qué podemos ayudarle?", ru: "Чем мы можем помочь?", fr: "Comment pouvons-nous vous aider ?", it: "Come possiamo aiutarti?", de: "Wie können wir Ihnen helfen?", uk: "Чим ми можемо допомогти?", pl: "W czym możemy Ci pomóc?" },
+  lobAddressLine: { eng: "c. Jardin 3 Local INFTOUR, Calpe", esp: "c. Jardin 3 Local INFTOUR, Calpe", ru: "c. Jardin 3 Local INFTOUR, Кальпе", fr: "c. Jardin 3 Local INFTOUR, Calpe", it: "c. Jardin 3 Local INFTOUR, Calpe", de: "c. Jardin 3 Local INFTOUR, Calpe", uk: "c. Jardin 3 Local INFTOUR, Кальпе", pl: "c. Jardin 3 Local INFTOUR, Calpe" },
+  lobPhoneLine: { eng: "+34 600 000 000", esp: "+34 600 000 000", ru: "+34 600 000 000", fr: "+34 600 000 000", it: "+34 600 000 000", de: "+34 600 000 000", uk: "+34 600 000 000", pl: "+34 600 000 000" },
+  lobEmailLine: { eng: "mail@inftour.net", esp: "mail@inftour.net", ru: "mail@inftour.net", fr: "mail@inftour.net", it: "mail@inftour.net", de: "mail@inftour.net", uk: "mail@inftour.net", pl: "mail@inftour.net" },
+  lobInstructionsTitle: { eng: "Instructions: What to do if...?", esp: "Instrucciones: ¿Qué hacer si...?", ru: "Инструкции: Что делать, если...?", fr: "Instructions : Que faire si... ?", it: "Istruzioni: Cosa fare se...?", de: "Anweisungen: Was tun, wenn...?", uk: "Інструкції: Що робити, якщо...?", pl: "Instrukcje: Co zrobić, jeśli...?" },
+  lobInstr1Q: { eng: "...I have a medical emergency?", esp: "...tengo una emergencia médica?", ru: "...у меня медицинская чрезвычайная ситуация?", fr: "...j'ai une urgence médicale ?", it: "...ho un'emergenza medica?", de: "...ich einen medizinischen Notfall habe?", uk: "...у мене медична надзвичайна ситуація?", pl: "...mam nagły wypadek medyczny?" },
   lobInstr1A: {
     eng: "Call 112 immediately for emergencies. You can find the nearest on-duty pharmacy or health centre in the 'Reference numbers' section of our AI Assistant.",
     esp: "Llame inmediatamente al 112 para emergencias. Puede encontrar la farmacia de guardia más cercana o el centro de salud en la sección de 'Números de Referencia' de nuestro Asistente AI.",
@@ -978,8 +1095,9 @@ const translations: TranslationMap = {
     it: "Chiamate immediatamente il 112 per le emergenze. Potete trovare la farmacia di turno o il centro di salute nella sezione 'Numeri di riferimento' del nostro assistente IA.",
     de: "Rufen Sie sofort 112 für Notfälle an. Die nächste Notdienst-Apotheke oder das Gesundheitszentrum finden Sie im Abschnitt 'Referenznummern' unseres KI-Assistenten.",
     uk: "Негайно телефонуйте 112. Найближчу чергову аптеку або медцентр можна знайти в розділі «Довідкові номери» у нашого ШІ-асистента.",
+    pl: "Natychmiast zadzwoń pod 112 w nagłych wypadkach. Najbliższą dyżurującą aptekę lub centrum zdrowia znajdziesz w sekcji 'Numery referencyjne' naszego asystenta AI.",
   },
-  lobInstr2Q: { eng: "...I lose the apartment keys?", esp: "...pierdo las llaves del apartamento?", ru: "...я потерял ключи от апартаментов?", fr: "...je perds les clés de l'appartement ?", it: "...perdo le chiavi dell'appartamento?", de: "...ich den Wohnungsschlüssel verliere?", uk: "...я загубив ключі від апартаментів?" },
+  lobInstr2Q: { eng: "...I lose the apartment keys?", esp: "...pierdo las llaves del apartamento?", ru: "...я потерял ключи от апартаментов?", fr: "...je perds les clés de l'appartement ?", it: "...perdo le chiavi dell'appartamento?", de: "...ich den Wohnungsschlüssel verliere?", uk: "...я загубив ключі від апартаментів?", pl: "...zgubię klucze do apartamentu?" },
   lobInstr2A: {
     eng: "Contact our support team immediately via the on-call number. Key replacement may incur an additional charge according to the booking terms.",
     esp: "Contacte con nuestro equipo de soporte inmediatamente a través del número de guardia. La reposición de llaves puede conllevar un cargo adicional según los términos de reserva.",
@@ -988,8 +1106,9 @@ const translations: TranslationMap = {
     it: "Contattate immediatamente il nostro team di supporto tramite il numero di guardia. La sostituzione delle chiavi può comportare un costo aggiuntivo secondo i termini di prenotazione.",
     de: "Kontaktieren Sie sofort unser Support-Team über die Rufbereitschaft. Der Schlüsselaustausch kann laut Buchungsbedingungen zusätzliche Kosten verursachen.",
     uk: "Негайно зв'яжіться з нашою підтримкою за номером чергового. Заміна ключів може бути платною згідно з умовами бронювання.",
+    pl: "Natychmiast skontaktuj się z naszym zespołem wsparcia pod numerem dyżurującym. Wymiana kluczy może wiązać się z dodatkową opłatą zgodnie z warunkami rezerwacji.",
   },
-  lobInstr3Q: { eng: "...I need a late check-out?", esp: "...necesito un Late Check-out?", ru: "...мне нужен поздний выезд?", fr: "...j'ai besoin d'un check-out tardif ?", it: "...ho bisogno di un check-out tardivo?", de: "...ich einen späten Check-out brauche?", uk: "...мені потрібен пізній виїзд?" },
+  lobInstr3Q: { eng: "...I need a late check-out?", esp: "...necesito un Late Check-out?", ru: "...мне нужен поздний выезд?", fr: "...j'ai besoin d'un check-out tardif ?", it: "...ho bisogno di un check-out tardivo?", de: "...ich einen späten Check-out brauche?", uk: "...мені потрібен пізній виїзд?", pl: "...potrzebuję późnego wymeldowania?" },
   lobInstr3A: {
     eng: "Standard check-out is at 11:00 AM. If you need to extend your stay by a few hours, contact our office one day in advance. It is subject to availability and possible supplements.",
     esp: "El check-out estándar es a las 11:00 AM. Si necesita extender su estancia unas horas, contacte con nuestra oficina un día antes. Estará sujeto a disponibilidad y posibles suplementos.",
@@ -998,8 +1117,9 @@ const translations: TranslationMap = {
     it: "Il check-out standard è alle 11:00. Se dovete prolungare il soggiorno di qualche ora, contattate il nostro ufficio il giorno prima. È soggetto a disponibilità e possibili supplementi.",
     de: "Der Standard-Check-out ist um 11:00 Uhr. Wenn Sie Ihren Aufenthalt um einige Stunden verlängern möchten, kontaktieren Sie unser Büro einen Tag im Voraus. Abhängig von Verfügbarkeit und möglichen Zuschlägen.",
     uk: "Стандартний виїзд до 11:00. Якщо потрібно продовжити перебування на кілька годин, зв'яжіться з офісом за день. Можливість залежить від наявності та може бути платною.",
+    pl: "Standardowe wymeldowanie o 11:00. Jeśli potrzebujesz przedłużyć pobyt o kilka godzin, skontaktuj się z biurem dzień wcześniej. Zależy od dostępności i możliwych dopłat.",
   },
-  lobInstr4Q: { eng: "...something in the apartment doesn't work?", esp: "...algo no funciona en el apartamento?", ru: "...что-то в апартаментах не работает?", fr: "...quelque chose ne fonctionne pas dans l'appartement ?", it: "...qualcosa non funziona nell'appartamento?", de: "...etwas in der Wohnung nicht funktioniert?", uk: "...щось в апартаментах не працює?" },
+  lobInstr4Q: { eng: "...something in the apartment doesn't work?", esp: "...algo no funciona en el apartamento?", ru: "...что-то в апартаментах не работает?", fr: "...quelque chose ne fonctionne pas dans l'appartement ?", it: "...qualcosa non funziona nell'appartamento?", de: "...etwas in der Wohnung nicht funktioniert?", uk: "...щось в апартаментах не працює?", pl: "...coś w apartamencie nie działa?" },
   lobInstr4A: {
     eng: "Message our concierge WhatsApp describing the problem. Our maintenance team will attend as soon as possible to resolve the issue without disrupting your holiday.",
     esp: "Escriba a nuestro WhatsApp de conserjería detallando el problema. Nuestro equipo de mantenimiento acudirá lo antes posible para resolver la incidencia sin interrumpir sus vacaciones.",
@@ -1008,8 +1128,9 @@ const translations: TranslationMap = {
     it: "Scrivete al nostro WhatsApp della concierge descrivendo il problema. Il nostro team di manutenzione interverrà il prima possibile per risolvere il problema senza disturbare le vostre vacanze.",
     de: "Schreiben Sie unserem Concierge-WhatsApp mit einer Beschreibung des Problems. Unser Wartungsteam wird sich so schnell wie möglich kümmern, ohne Ihren Urlaub zu stören.",
     uk: "Напишіть у WhatsApp консьєржа з описом проблеми. Наша служба обслуговування приїде якомога швидше, щоб вирішити питання без порушення вашого відпочинку.",
+    pl: "Napisz na WhatsApp concierge opisując problem. Nasz zespół konserwacyjny przyjedzie tak szybko, jak to możliwe, aby rozwiązać problem bez zakłócania Twoich wakacji.",
   },
-  lobPoliciesTitle: { eng: "Policies and privacy", esp: "Políticas y Privacidad", ru: "Политики и конфиденциальность", fr: "Politiques et confidentialité", it: "Politiche e privacy", de: "Richtlinien und Datenschutz", uk: "Політики та конфіденційність" },
+  lobPoliciesTitle: { eng: "Policies and privacy", esp: "Políticas y Privacidad", ru: "Политики и конфиденциальность", fr: "Politiques et confidentialité", it: "Politiche e privacy", de: "Richtlinien und Datenschutz", uk: "Політики та конфіденційність", pl: "Polityki i prywatność" },
   cancellationPolicyDesc: {
     eng: "Refund conditions and free cancellation deadlines.",
     esp: "Conozca las condiciones de reembolso y plazos de cancelación gratuita.",
@@ -1018,6 +1139,7 @@ const translations: TranslationMap = {
     it: "Condizioni di rimborso e termini di cancellazione gratuita.",
     de: "Rückerstattungsbedingungen und Fristen für kostenlose Stornierung.",
     uk: "Умови повернення та терміни безкоштовного скасування.",
+    pl: "Warunki zwrotu i terminy bezpłatnego anulowania.",
   },
   paymentPolicyDesc: {
     eng: "Information on deposits, accepted cards and secure payments.",
@@ -1027,6 +1149,7 @@ const translations: TranslationMap = {
     it: "Informazioni su depositi, carte accettate e pagamenti sicuri.",
     de: "Informationen zu Anzahlungen, akzeptierten Karten und sicheren Zahlungen.",
     uk: "Інформація про депозити, прийнятні картки та безпечна оплата.",
+    pl: "Informacje o depozytach, akceptowanych kartach i bezpiecznych płatnościach.",
   },
   termsPolicyDesc: {
     eng: "House rules, deposits and guest responsibilities.",
@@ -1036,6 +1159,7 @@ const translations: TranslationMap = {
     it: "Regole della casa, cauzioni e responsabilità dell'ospite.",
     de: "Hausregeln, Kautionen und Gästepflichten.",
     uk: "Правила будинку, застави та обов'язки гостя.",
+    pl: "Regulamin domu, kaucje i obowiązki gościa.",
   },
   privacyPolicyDesc: {
     eng: "How we protect your data and handle your personal information.",
@@ -1045,6 +1169,7 @@ const translations: TranslationMap = {
     it: "Come proteggiamo i vostri dati e gestiamo le vostre informazioni personali.",
     de: "Wie wir Ihre Daten schützen und mit Ihren personenbezogenen Daten umgehen.",
     uk: "Як ми захищаємо ваші дані та обробляємо персональну інформацію.",
+    pl: "Jak chronimy Twoje dane i przetwarzamy Twoje informacje osobowe.",
   },
 };
 

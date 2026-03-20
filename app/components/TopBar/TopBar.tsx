@@ -1,0 +1,98 @@
+"use client";
+
+import Link from "next/link";
+import { useLangStore } from "@/app/lib/langStore";
+
+import WeatherIcon from "./WeatherIcon";
+import type { CalpWeather } from "@/lib/weather";
+
+const WEBCAM_URL =
+  "https://ibericam.com/player/modern/player.html?s=4&a=live&v=calpe-playa-del-arenal-bol&i=image-4&l=ibericam";
+
+const SKYLINE_PAGE_URL =
+  "https://www.skylinewebcams.com/es/webcam/espana/comunidad-valenciana/alicante/calpe-penon-de-ifach.html";
+const WEBCAM_3_URL =
+  "https://www.comunitatvalenciana.com/es/alacant-alicante/calp/webcams/calp-playa-de-la-fossa";
+
+type TopBarProps = {
+  weather: CalpWeather | null;
+  seaTemp: number | null;
+};
+
+
+export default function TopBar({ weather, seaTemp }: TopBarProps) {
+  const t = useLangStore((s) => s.t);
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-100 bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-6 flex justify-between items-center tracking-wide">
+      <div className="flex items-center gap-1.5">
+        <span className="text-white/70">{t("nowInCalpe")}</span>
+        <span className="font-medium">
+          {weather != null ? `${weather.temperature}°C` : "—°C"}
+        </span>
+        <span
+          className="flex items-center shrink-0"
+          title={weather?.condition ?? undefined}
+        >
+          {weather != null ? (
+            <WeatherIcon code={weather.weatherCode} className="w-4 h-4" />
+          ) : (
+            <span className="w-4 h-4 rounded-full bg-white/20 block" aria-hidden />
+          )}
+        </span>
+        <Link
+          href="https://www.seatemperature.org/europe/spain/calp.htm"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 hover:text-brand-gold transition"
+          title={t("seaTempTitle")}
+        >
+          <span className="text-white/70">{t("agua")}:</span>
+          <span className="font-medium">
+            {seaTemp != null ? `${seaTemp}°C` : "—°C"}
+          </span>
+        </Link>
+      </div>
+      <div className="flex items-center gap-6">
+        <Link
+          href={WEBCAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 hover:text-brand-gold transition"
+        >
+          <span
+            className="w-2 h-2 rounded-full bg-red-500 shrink-0"
+            aria-hidden
+          />
+          <span>{t("webcam1")}</span>
+        </Link>
+
+        <Link
+          href={SKYLINE_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 hover:text-brand-gold transition"
+        >
+          <span
+            className="w-2 h-2 rounded-full bg-brand-gold shrink-0"
+            aria-hidden
+          />
+          <span>{t("webcam2")}</span>
+        </Link>
+
+        <Link
+          href={WEBCAM_3_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 hover:text-brand-gold transition"
+        >
+          <span
+            className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"
+            aria-hidden
+          />
+          <span>{t("webcam3")}</span>
+        </Link>
+      </div>
+    </div>
+  );
+}

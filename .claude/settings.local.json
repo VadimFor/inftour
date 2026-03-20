@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p app/experiencias/components app/services/components app/revista/components app/lobby/components)",
+      "Bash(git mv:*)",
+      "Bash(grep -rn RevistaContent . --include=*.tsx --include=*.ts --include=*.js --include=*.json)",
+      "Bash(node -e \":*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 \"c:/Users/vadim/Desktop/INFTOUR/scripts/create_modal.py\")",
+      "Bash(powershell -Command \":*)"
+    ]
+  }
+}

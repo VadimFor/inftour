@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useShallow } from "zustand/react/shallow";
-import { useLangStore } from "../lib/langStore";
-import featuredImage from "./pictures/salon.png";
-import article1Image from "./pictures/jabon.png";
-import article2Image from "./pictures/restaurante.png";
+import { useLangStore } from "../../lib/langStore";
+import featuredImage from "../pictures/salon.png";
+import article1Image from "../pictures/jabon.png";
+import article2Image from "../pictures/restaurante.png";
 
 type Props = { pdfPath: string | null };
 

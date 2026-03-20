@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useShallow } from "zustand/react/shallow";
-import { useLangStore } from "../lib/langStore";
-import heroImage from "./pictures/chica_con_portatil.png";
+import { useLangStore } from "../../lib/langStore";
+import heroImage from "../pictures/chica_con_portatil.png";
 
 function IconAI({ className }: { className?: string }) {
   return (

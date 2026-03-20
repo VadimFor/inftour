@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -34,6 +35,8 @@ export default function RootLayout({
       >
         <RestoreLang />
         {children}
+        <elevenlabs-convai agent-id="agent_3801key34mpyfv68wzexyb1xb1z8" />
+        <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />
       </body>
     </html>
   );

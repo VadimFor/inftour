@@ -1,5 +1,5 @@
 import PageShell from "../components/PageShell";
-import RevistaContent from "./RevistaContent";
+import RevistaContent from "./components/RevistaContent";
 import { MAGAZINE_PDF_PATH } from "../config/magazine";
 
 export default function RevistaPage() {
