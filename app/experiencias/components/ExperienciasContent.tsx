@@ -209,15 +209,17 @@ export default function ExperienciasContent() {
             <ul className="space-y-3 text-sm text-gray-600">
               <li className="font-bold">{t("expCycling")}</li>
               <li className="font-bold">{t("expSportsFacilities")}</li>
-              <li className="font-bold">{t("expEquipmentRental")}</li>
               <li className="font-bold text-gray-800">
                 <button
                   type="button"
                   onClick={() => setSportsEventsOpen(true)}
                   className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
                 >
-                  {t("expSportsEvents")}
+                  {t("expEquipmentRental")}
                 </button>
+              </li>
+              <li className="font-bold text-gray-800">
+                {t("expSportsEvents")}
               </li>
             </ul>
           </article>

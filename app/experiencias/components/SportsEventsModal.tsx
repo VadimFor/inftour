@@ -66,9 +66,6 @@ export default function SportsEventsModal({ isOpen, onClose }: SportsEventsModal
           <h3 id="sports-events-modal-title" className="text-3xl font-serif text-gray-900 leading-tight">
             {t("expSportsEventsModalTitle")}
           </h3>
-          <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
-            {t("expSportsEventsModalSubtitle")}
-          </p>
           <button
             type="button"
             onClick={onClose}
