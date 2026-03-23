@@ -21,6 +21,7 @@ type TopBarProps = {
 
 
 export default function TopBar({ weather, seaTemp }: TopBarProps) {
+  useLangStore((s) => s.lang);
   const t = useLangStore((s) => s.t);
 
   return (
@@ -49,7 +50,7 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
           title={t("seaTempTitle")}
         >
           <span className="hidden sm:inline text-white/70">{t("agua")}:</span>
-          <span className="sm:hidden text-white/70">Sea:</span>
+          <span className="sm:hidden text-white/70">{t("sea")}:</span>
           <span className="font-medium">
             {seaTemp != null ? `${seaTemp}°C` : "—°C"}
           </span>
@@ -67,7 +68,7 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             aria-hidden
           />
           <span className="hidden sm:inline">{t("webcam1")}</span>
-          <span className="sm:hidden">Cam 1</span>
+          <span className="sm:hidden">{t("cam1")}</span>
         </Link>
 
         <Link
@@ -81,7 +82,7 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             aria-hidden
           />
           <span className="hidden sm:inline">{t("webcam2")}</span>
-          <span className="sm:hidden">Cam 2</span>
+          <span className="sm:hidden">{t("cam2")}</span>
         </Link>
 
         <Link
@@ -95,7 +96,7 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             aria-hidden
           />
           <span className="hidden sm:inline">{t("webcam3")}</span>
-          <span className="sm:hidden">Cam 3</span>
+          <span className="sm:hidden">{t("cam3")}</span>
         </Link>
       </div>
     </div>
