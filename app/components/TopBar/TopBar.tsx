@@ -24,9 +24,10 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
   const t = useLangStore((s) => s.t);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-100 bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-6 flex justify-between items-center tracking-wide">
+    <div className="fixed top-0 left-0 right-0 z-100 bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-4 md:px-6 flex justify-between items-center tracking-wide">
       <div className="flex items-center gap-1.5">
-        <span className="text-white/70">{t("nowInCalpe")}</span>
+        <span className="hidden sm:inline text-white/70">{t("nowInCalpe")}</span>
+        <span className="sm:hidden text-white/70">Calpe:</span>
         <span className="font-medium">
           {weather != null ? `${weather.temperature}°C` : "—°C"}
         </span>
@@ -47,50 +48,54 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
           className="flex items-center gap-1 hover:text-brand-gold transition"
           title={t("seaTempTitle")}
         >
-          <span className="text-white/70">{t("agua")}:</span>
+          <span className="hidden sm:inline text-white/70">{t("agua")}:</span>
+          <span className="sm:hidden text-white/70">Sea:</span>
           <span className="font-medium">
             {seaTemp != null ? `${seaTemp}°C` : "—°C"}
           </span>
         </Link>
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 md:gap-6">
         <Link
           href={WEBCAM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:text-brand-gold transition"
+          className="flex items-center gap-1.5 hover:text-brand-gold transition"
         >
           <span
             className="w-2 h-2 rounded-full bg-red-500 shrink-0"
             aria-hidden
           />
-          <span>{t("webcam1")}</span>
+          <span className="hidden sm:inline">{t("webcam1")}</span>
+          <span className="sm:hidden">Cam 1</span>
         </Link>
 
         <Link
           href={SKYLINE_PAGE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:text-brand-gold transition"
+          className="flex items-center gap-1.5 hover:text-brand-gold transition"
         >
           <span
             className="w-2 h-2 rounded-full bg-brand-gold shrink-0"
             aria-hidden
           />
-          <span>{t("webcam2")}</span>
+          <span className="hidden sm:inline">{t("webcam2")}</span>
+          <span className="sm:hidden">Cam 2</span>
         </Link>
 
         <Link
           href={WEBCAM_3_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:text-brand-gold transition"
+          className="flex items-center gap-1.5 hover:text-brand-gold transition"
         >
           <span
             className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"
             aria-hidden
           />
-          <span>{t("webcam3")}</span>
+          <span className="hidden sm:inline">{t("webcam3")}</span>
+          <span className="sm:hidden">Cam 3</span>
         </Link>
       </div>
     </div>
