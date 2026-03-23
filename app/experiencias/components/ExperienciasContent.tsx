@@ -13,7 +13,7 @@ import relaxImage from "../pictures/jabon.png";
 import RestaurantsModal from "./RestaurantsModal";
 import MarketsModal from "./MarketsModal";
 import RecipesModal from "./RecipesModal";
-import SportsEventsModal from "./SportsEventsModal";
+import SportRentingModal from "./SportRentingModal";
 import BBQParksModal from "./BBQParksModal";
 import FeriaModal from "./FeriaModal";
 import CyclingModal from "./CyclingModal";
@@ -307,7 +307,7 @@ export default function ExperienciasContent() {
         isOpen={recipesOpen}
         onClose={() => setRecipesOpen(false)}
       />
-      <SportsEventsModal
+      <SportRentingModal
         isOpen={sportsEventsOpen}
         onClose={() => setSportsEventsOpen(false)}
       />
