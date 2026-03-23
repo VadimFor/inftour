@@ -8,27 +8,22 @@ type CyclingModalProps = {
   onClose: () => void;
 };
 
-const routeNames = [
-  "Coll de Rates",
-  "Cumbre del Sol",
-  "Puerto de Tudons",
-  "Sierra de Aitana",
-  "Vall de Pop",
-  "El Castell de Guadalest",
-  "Port de Bernia",
-  "Cap de la Nau",
-  "Calpe",
-];
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-const routeNamesRegex = new RegExp(
-  `(${routeNames
-    .sort((a, b) => b.length - a.length)
-    .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("|")})`,
-  "g",
-);
+function renderTextWithBoldRoutes(text: string, routeNames: string[]) {
+  if (!routeNames.length) return text;
 
-function renderTextWithBoldRoutes(text: string) {
+  const routeNamesRegex = new RegExp(
+    `(${routeNames
+      .slice()
+      .sort((a, b) => b.length - a.length)
+      .map((name) => escapeRegExp(name))
+      .join("|")})`,
+    "g",
+  );
+
   const parts = text.split(routeNamesRegex);
   return parts.map((part, idx) =>
     routeNames.includes(part) ? <strong key={`${part}-${idx}`}>{part}</strong> : part,
@@ -37,6 +32,19 @@ function renderTextWithBoldRoutes(text: string) {
 
 export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
   const t = useLangStore((s) => s.t);
+  const routeNames = [
+    "Coll de Rates",
+    "Cumbre del Sol",
+    "Puerto de Tudons",
+    "Sierra de Aitana",
+    "Vall de Pop",
+    "El Castell de Guadalest",
+    "Port de Bèrnia",
+    "Port de Bernia",
+    "Sierra de Bernia",
+    "Cap de la Nau",
+    "Calpe",
+  ];
   const introParagraphs = [t("expCyclingRichIntro1"), t("expCyclingRichIntro2")];
   const quotes = [t("expCyclingRichQuote1"), t("expCyclingRichQuote2"), t("expCyclingRichQuote3")];
   const routes = [
@@ -92,7 +100,7 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
           <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
             {introParagraphs.map((p, idx) => (
               <p key={`intro-${idx}`} className={idx === 0 ? "border-l-2 border-brand-gold pl-4" : ""}>
-                {renderTextWithBoldRoutes(p)}
+                {renderTextWithBoldRoutes(p, routeNames)}
               </p>
             ))}
 
@@ -110,7 +118,7 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
                     <span className="absolute -top-2 left-3 text-brand-gold text-xl leading-none">
                       &quot;
                     </span>
-                    <p className="text-sm leading-relaxed">{renderTextWithBoldRoutes(q)}</p>
+                    <p className="text-sm leading-relaxed">{renderTextWithBoldRoutes(q, routeNames)}</p>
                   </blockquote>
                 ))}
               </div>
@@ -128,7 +136,7 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
                     className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors"
                   >
                     <p className="text-xs leading-relaxed">
-                      {renderTextWithBoldRoutes(route)}
+                      {renderTextWithBoldRoutes(route, routeNames)}
                     </p>
                   </div>
                 ))}
@@ -142,7 +150,7 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
               <p className="mb-3">{t("expCyclingRichCalendarIntro")}</p>
               <ul className="list-disc pl-5 space-y-2">
                 {calendarItems.map((item, idx) => (
-                  <li key={`cal-${idx}`}>{renderTextWithBoldRoutes(item)}</li>
+                  <li key={`cal-${idx}`}>{renderTextWithBoldRoutes(item, routeNames)}</li>
                 ))}
               </ul>
             </div>
@@ -153,7 +161,7 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
               </h4>
               <div className="space-y-3">
                 {baseCampParagraphs.map((p, idx) => (
-                  <p key={`base-${idx}`}>{renderTextWithBoldRoutes(p)}</p>
+                  <p key={`base-${idx}`}>{renderTextWithBoldRoutes(p, routeNames)}</p>
                 ))}
               </div>
             </div>

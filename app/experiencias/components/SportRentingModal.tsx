@@ -83,7 +83,7 @@ export default function SportRentingModal({
     {
       subtitle: string;
       intro: string;
-      items: Array<{ title: string; description: string; address: string }>;
+      items: Array<{ title: string; description: string; address: string; website: string }>;
     }
   > = {
     expSportsEventsModalSection1: {
@@ -94,16 +94,19 @@ export default function SportRentingModal({
           title: t("expSportsEventsCyclingItem1Title"),
           description: t("expSportsEventsCyclingItem1Desc"),
           address: t("expSportsEventsCyclingItem1Address"),
+          website: "https://www.solybike.com/",
         },
         {
           title: t("expSportsEventsCyclingItem2Title"),
           description: t("expSportsEventsCyclingItem2Desc"),
           address: t("expSportsEventsCyclingItem2Address"),
+          website: "http://www.ciclostonycalpe.com/",
         },
         {
           title: t("expSportsEventsCyclingItem3Title"),
           description: t("expSportsEventsCyclingItem3Desc"),
           address: t("expSportsEventsCyclingItem3Address"),
+          website: "https://www.collderatescycling.com/",
         },
       ],
     },
@@ -115,16 +118,19 @@ export default function SportRentingModal({
           title: t("expSportsEventsWaterItem1Title"),
           description: t("expSportsEventsWaterItem1Desc"),
           address: t("expSportsEventsWaterItem1Address"),
+          website: "https://diveanddive.com/",
         },
         {
           title: t("expSportsEventsWaterItem2Title"),
           description: t("expSportsEventsWaterItem2Desc"),
           address: t("expSportsEventsWaterItem2Address"),
+          website: "https://euronautica.com/",
         },
         {
           title: t("expSportsEventsWaterItem3Title"),
           description: t("expSportsEventsWaterItem3Desc"),
           address: t("expSportsEventsWaterItem3Address"),
+          website: "http://lasantipodas.com/",
         },
       ],
     },
@@ -136,6 +142,7 @@ export default function SportRentingModal({
           title: t("expSportsEventsTennisItem1Title"),
           description: t("expSportsEventsTennisItem1Desc"),
           address: t("expSportsEventsTennisItem1Address"),
+          website: "https://www.clubdeteniscalpe.net/",
         },
       ],
     },
@@ -147,11 +154,13 @@ export default function SportRentingModal({
           title: t("expSportsEventsRetailItem1Title"),
           description: t("expSportsEventsRetailItem1Desc"),
           address: t("expSportsEventsRetailItem1Address"),
+          website: "https://www.sprintersports.com/tienda-sprinter-calpe",
         },
         {
           title: t("expSportsEventsRetailItem2Title"),
           description: t("expSportsEventsRetailItem2Desc"),
           address: t("expSportsEventsRetailItem2Address"),
+          website: "https://www.joma-sport.com/",
         },
       ],
     },
@@ -222,7 +231,15 @@ export default function SportRentingModal({
                   <ul className="list-disc pl-5 space-y-3">
                     {sectionContentByKey[key]?.items.map((item) => (
                       <li key={item.title}>
-                        <span className="font-semibold">{item.title}:</span>{" "}
+                        <a
+                          href={item.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-blue-700 underline hover:text-blue-900"
+                        >
+                          {item.title}
+                        </a>
+                        :{" "}
                         {item.description}
                         <div className="list-disc pl-5 mt-1">
                           <span className="italic">{t("expSportsEventsAddressLabel")}:</span>{" "}
