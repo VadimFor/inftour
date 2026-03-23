@@ -13,12 +13,14 @@ import relaxImage from "../pictures/jabon.png";
 import RestaurantsModal from "./RestaurantsModal";
 import MarketsModal from "./MarketsModal";
 import RecipesModal from "./RecipesModal";
+import SportsEventsModal from "./SportsEventsModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   const [restaurantsOpen, setRestaurantsOpen] = useState(false);
   const [marketsOpen, setMarketsOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
+  const [sportsEventsOpen, setSportsEventsOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -208,8 +210,14 @@ export default function ExperienciasContent() {
               <li className="font-bold">{t("expCycling")}</li>
               <li className="font-bold">{t("expSportsFacilities")}</li>
               <li className="font-bold">{t("expEquipmentRental")}</li>
-              <li className="font-bold text-brand-gold">
-                {t("expSportsEvents")}
+              <li className="font-bold text-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setSportsEventsOpen(true)}
+                  className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
+                >
+                  {t("expSportsEvents")}
+                </button>
               </li>
             </ul>
           </article>
@@ -270,6 +278,10 @@ export default function ExperienciasContent() {
       <RecipesModal
         isOpen={recipesOpen}
         onClose={() => setRecipesOpen(false)}
+      />
+      <SportsEventsModal
+        isOpen={sportsEventsOpen}
+        onClose={() => setSportsEventsOpen(false)}
       />
     </main>
   );

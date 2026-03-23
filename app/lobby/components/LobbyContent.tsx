@@ -8,11 +8,39 @@ import { useLangStore } from "../../lib/langStore";
 import aboutImage from "../pictures/oficina_inftour.png";
 import aiBgImage from "../pictures/ai_espacio.png";
 
-const INSTRUCTIONS = [
-  { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
-  { q: "lobInstr2Q" as const, a: "lobInstr2A" as const },
-  { q: "lobInstr3Q" as const, a: "lobInstr3A" as const },
-  { q: "lobInstr4Q" as const, a: "lobInstr4A" as const },
+const INSTRUCTION_GROUPS = [
+  {
+    title: "lobFaqGroupReservations" as const,
+    items: [
+      { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
+      { q: "lobInstr2Q" as const, a: "lobInstr2A" as const },
+      { q: "lobInstr3Q" as const, a: "lobInstr3A" as const },
+      { q: "lobInstr4Q" as const, a: "lobInstr4A" as const },
+    ],
+  },
+  {
+    title: "lobFaqGroupArrival" as const,
+    items: [
+      { q: "lobInstr5Q" as const, a: "lobInstr5A" as const },
+      { q: "lobInstr6Q" as const, a: "lobInstr6A" as const },
+      { q: "lobInstr7Q" as const, a: "lobInstr7A" as const },
+      { q: "lobInstr8Q" as const, a: "lobInstr8A" as const },
+      { q: "lobInstr9Q" as const, a: "lobInstr9A" as const },
+    ],
+  },
+  {
+    title: "lobFaqGroupStay" as const,
+    items: [
+      { q: "lobInstr10Q" as const, a: "lobInstr10A" as const },
+      { q: "lobInstr11Q" as const, a: "lobInstr11A" as const },
+      { q: "lobInstr12Q" as const, a: "lobInstr12A" as const },
+      { q: "lobInstr13Q" as const, a: "lobInstr13A" as const },
+      { q: "lobInstr14Q" as const, a: "lobInstr14A" as const },
+      { q: "lobInstr15Q" as const, a: "lobInstr15A" as const },
+      { q: "lobInstr16Q" as const, a: "lobInstr16A" as const },
+      { q: "lobInstr17Q" as const, a: "lobInstr17A" as const },
+    ],
+  },
 ];
 
 const POLICIES = [
@@ -295,29 +323,42 @@ export default function LobbyContent() {
       </section>
 
       {/* Instructions + Policies */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section className="space-y-10">
         <div>
           <h3 className="text-2xl font-serif text-brand-black mb-6">
             {t("lobInstructionsTitle")}
           </h3>
-          <div className="space-y-3">
-            {INSTRUCTIONS.map(({ q, a }) => (
-              <details
-                key={q}
-                className="group bg-white border border-gray-100 rounded-lg overflow-hidden"
-              >
-                <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition list-none">
-                  {t(q)}
-                  <span className="text-gray-400 group-open:rotate-45 transition duration-300 text-xl leading-none shrink-0 ml-2">
-                    +
-                  </span>
-                </summary>
-                <div className="px-4 pb-4 text-sm text-gray-600 font-light border-t border-gray-50 pt-3">
-                  {t(a)}
-                </div>
-              </details>
-            ))}
-          </div>
+          <p className="text-sm text-gray-600 font-light">
+            {t("lobInstructionsIntro")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {INSTRUCTION_GROUPS.map(({ title, items }) => (
+            <div key={title}>
+              <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold mb-3">
+                {t(title)}
+              </h4>
+              <div className="space-y-3">
+                {items.map(({ q, a }) => (
+                  <details
+                    key={q}
+                    className="group bg-white border border-gray-100 rounded-lg overflow-hidden"
+                  >
+                    <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition list-none">
+                      {t(q)}
+                      <span className="text-gray-400 group-open:rotate-45 transition duration-300 text-xl leading-none shrink-0 ml-2">
+                        +
+                      </span>
+                    </summary>
+                    <div className="px-4 pb-4 text-sm text-gray-600 font-light border-t border-gray-50 pt-3">
+                      {t(a)}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div>
