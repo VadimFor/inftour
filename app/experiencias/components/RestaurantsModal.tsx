@@ -21,6 +21,13 @@ function splitAdviceFromContent(html: string) {
   };
 }
 
+function splitIntoSectionCards(html: string) {
+  return html
+    .split(/(?=<p><strong>\d+\.)/g)
+    .map((section) => section.trim())
+    .filter(Boolean);
+}
+
 export default function RestaurantsModal({
   isOpen,
   onClose,
@@ -28,6 +35,7 @@ export default function RestaurantsModal({
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
   const { contentHtml, adviceHtml } = splitAdviceFromContent(restaurantsDocSectionsByLang[lang]);
+  const sectionCards = splitIntoSectionCards(contentHtml);
 
   if (!isOpen || typeof document === "undefined") return null;
 
@@ -74,10 +82,15 @@ export default function RestaurantsModal({
             {t("expRestaurantsModalIntro")}
           </p>
 
-          <div
-            className="text-sm text-gray-700 leading-relaxed space-y-3 [&_p]:mb-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline hover:[&_a]:text-blue-900"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
-          />
+          <div className="space-y-4">
+            {sectionCards.map((sectionHtml, index) => (
+              <section
+                key={index}
+                className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors text-sm text-gray-700 leading-relaxed [&_p]:mb-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline hover:[&_a]:text-blue-900"
+                dangerouslySetInnerHTML={{ __html: sectionHtml }}
+              />
+            ))}
+          </div>
 
           <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 shrink-0 text-brand-gold mt-0.5" aria-hidden>
