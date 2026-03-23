@@ -16,6 +16,7 @@ import RecipesModal from "./RecipesModal";
 import SportsEventsModal from "./SportsEventsModal";
 import BBQParksModal from "./BBQParksModal";
 import FeriaModal from "./FeriaModal";
+import CyclingModal from "./CyclingModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -25,11 +26,12 @@ export default function ExperienciasContent() {
   const [sportsEventsOpen, setSportsEventsOpen] = useState(false);
   const [bbqOpen, setBbqOpen] = useState(false);
   const [feriaOpen, setFeriaOpen] = useState(false);
+  const [cyclingOpen, setCyclingOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
       {/* Hero */}
-      <section className="container mx-auto px-4 py-16 md:py-24 text-center max-w-4xl">
+      <section className="container mx-auto px-4 pt-8 pb-16 md:pt-12 md:pb-24 text-center max-w-4xl">
         <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
           {t("expHeroLabel")}
         </span>
@@ -223,7 +225,15 @@ export default function ExperienciasContent() {
               </div>
             </div>
             <ul className="space-y-3 text-sm text-gray-600">
-              <li className="font-bold">{t("expCycling")}</li>
+              <li className="font-bold text-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setCyclingOpen(true)}
+                  className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
+                >
+                  {t("expCycling")}
+                </button>
+              </li>
               <li className="font-bold">{t("expSportsFacilities")}</li>
               <li className="font-bold text-gray-800">
                 <button
@@ -300,6 +310,10 @@ export default function ExperienciasContent() {
       <SportsEventsModal
         isOpen={sportsEventsOpen}
         onClose={() => setSportsEventsOpen(false)}
+      />
+      <CyclingModal
+        isOpen={cyclingOpen}
+        onClose={() => setCyclingOpen(false)}
       />
       <BBQParksModal isOpen={bbqOpen} onClose={() => setBbqOpen(false)} />
       <FeriaModal isOpen={feriaOpen} onClose={() => setFeriaOpen(false)} />
