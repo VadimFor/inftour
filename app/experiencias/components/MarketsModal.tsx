@@ -9,58 +9,27 @@ type MarketsModalProps = {
 };
 
 const sectionsMeta = [
-  {
-    key: "expMarketsModalSection1",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h16.5m0 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5" />
-      </svg>
-    ),
-  },
-  {
-    key: "expMarketsModalSection2",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 103 0m-3 0h3m6-3V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v9.75m13.5 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 103 0m-3 0h3" />
-      </svg>
-    ),
-  },
-  {
-    key: "expMarketsModalSection3",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-4.5-9h9m-9 6h9" />
-      </svg>
-    ),
-  },
-  {
-    key: "expMarketsModalSection4",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a8.25 8.25 0 100-16.5A8.25 8.25 0 0012 21zM12 9v6m3-3H9" />
-      </svg>
-    ),
-  },
-  {
-    key: "expMarketsModalSection5",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M4.5 7.5l1.5 12h12l1.5-12M9 11.25h6" />
-      </svg>
-    ),
-  },
-  {
-    key: "expMarketsModalSection6",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636" />
-      </svg>
-    ),
-  },
+  { key: "expMarketsModalSection1" },
+  { key: "expMarketsModalSection2" },
+  { key: "expMarketsModalSection3" },
+  { key: "expMarketsModalSection4" },
+  { key: "expMarketsModalSection5" },
 ] as const;
 
 export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
   const t = useLangStore((s) => s.t);
+  const parseSection = (key: string) => {
+    const lines = t(key)
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    return {
+      title: lines[0] ?? "",
+      description: lines[1] ?? "",
+      bullets: lines.slice(2),
+    };
+  };
 
   if (!isOpen || typeof document === "undefined") return null;
 
@@ -101,15 +70,40 @@ export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
             {t("expMarketsModalIntro")}
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sectionsMeta.map(({ key, icon }) => (
-              <div
-                key={key}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
-              >
-                <div className="text-brand-gold">{icon}</div>
-                <p className="text-xs text-gray-700 leading-relaxed">{t(key)}</p>
-              </div>
+          <div className="grid grid-cols-1 gap-4">
+            {sectionsMeta.map(({ key }) => (
+              (() => {
+                const section = parseSection(key);
+                return (
+                  <div
+                    key={key}
+                    className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+                  >
+                    <h4 className="text-base font-semibold text-gray-900 leading-snug">{section.title}</h4>
+                    <p className="text-sm text-gray-700 leading-relaxed">{section.description}</p>
+
+                    {section.bullets.length > 0 && (
+                      <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700 leading-relaxed">
+                        {section.bullets.map((bullet) => {
+                          const [label, ...rest] = bullet.split(":");
+                          const hasLabel = rest.length > 0;
+                          return (
+                            <li key={bullet}>
+                              {hasLabel ? (
+                                <>
+                                  <strong>{label}:</strong> {rest.join(":").trim()}
+                                </>
+                              ) : (
+                                bullet
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })()
             ))}
           </div>
 
