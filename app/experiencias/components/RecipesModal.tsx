@@ -77,7 +77,7 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
   const parseStepNumber = (step: string) => {
     const clean = step.replace(/^○\s*/, "");
     const match = clean.match(
-      /^(Step|Étape|Paso|Passo|Schritt|Krok|Шаг|Крок)\s+(\d+):\s*(.*)/s,
+      /^(Step|Étape|Paso|Passo|Schritt|Krok|Шаг|Крок)\s+(\d+):\s*([\s\S]*)/,
     );
     if (match) {
       return { body: match[3].trim() };
