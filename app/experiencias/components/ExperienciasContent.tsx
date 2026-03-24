@@ -14,8 +14,6 @@ import RestaurantsModal from "./RestaurantsModal";
 import MarketsModal from "./MarketsModal";
 import RecipesModal from "./RecipesModal";
 import SportRentingModal from "./SportRentingModal";
-import BBQParksModal from "./BBQParksModal";
-import FeriaModal from "./FeriaModal";
 import CyclingModal from "./CyclingModal";
 
 export default function ExperienciasContent() {
@@ -24,8 +22,6 @@ export default function ExperienciasContent() {
   const [marketsOpen, setMarketsOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
   const [sportsEventsOpen, setSportsEventsOpen] = useState(false);
-  const [bbqOpen, setBbqOpen] = useState(false);
-  const [feriaOpen, setFeriaOpen] = useState(false);
   const [cyclingOpen, setCyclingOpen] = useState(false);
 
   return (
@@ -164,23 +160,11 @@ export default function ExperienciasContent() {
               <ul className="space-y-3 text-sm text-gray-600">
                 <li className="flex items-center gap-2">
                   <span className="text-brand-gold">▪</span>
-                  <button
-                    type="button"
-                    onClick={() => setBbqOpen(true)}
-                    className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
-                  >
-                    {t("expBBQ")}
-                  </button>
+                  <span className="text-gray-800">{t("expBBQ")}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-brand-gold">▪</span>
-                  <button
-                    type="button"
-                    onClick={() => setFeriaOpen(true)}
-                    className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
-                  >
-                    {t("expFeria")}
-                  </button>
+                  <span className="text-gray-800">{t("expFeria")}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-brand-gold">▪</span>
@@ -315,8 +299,6 @@ export default function ExperienciasContent() {
         isOpen={cyclingOpen}
         onClose={() => setCyclingOpen(false)}
       />
-      <BBQParksModal isOpen={bbqOpen} onClose={() => setBbqOpen(false)} />
-      <FeriaModal isOpen={feriaOpen} onClose={() => setFeriaOpen(false)} />
     </main>
   );
 }
