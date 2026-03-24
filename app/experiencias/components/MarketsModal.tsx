@@ -2,6 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../lib/langStore";
+import { MODAL_TITLE_CLASS } from "./modalStyles";
 
 type MarketsModalProps = {
   isOpen: boolean;
@@ -42,30 +43,30 @@ export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative bg-brand-bg border-b border-gray-200 px-8 py-6">
-          <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-          <h3 id="markets-modal-title" className="text-3xl font-serif text-gray-900 leading-tight">
-            {t("expMarketsModalTitle")}
-          </h3>
-          <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
-            {t("expMarketsModalSubtitle")}
-          </p>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
         <div className="overflow-y-auto flex-1 px-8 py-6">
+          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
+            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+            <h3 id="markets-modal-title" className={MODAL_TITLE_CLASS}>
+              {t("expMarketsModalTitle")}
+            </h3>
+            <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
+              {t("expMarketsModalSubtitle")}
+            </p>
+          </div>
           <p className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4">
             {t("expMarketsModalIntro")}
           </p>

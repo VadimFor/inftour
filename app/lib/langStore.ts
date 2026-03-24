@@ -1,13 +1,13 @@
 "use client";
 
 import { create } from "zustand";
-import { experienciasTranslations } from "./experiencias_translations";
-import { revistaTranslations } from "./revista_translations";
-import { servicesTranslations } from "./services_translations";
-import { lobbyTranslations } from "./lobby_translations";
+import { experienciasTranslations } from "../experiencias/translations/experiencias_translations";
+import { revistaTranslations } from "../revista/translations/revista_translations";
+import { servicesTranslations } from "../services/translations/services_translations";
+import { lobbyTranslations } from "../lobby/translations/lobby_translations";
 import { menuTranslations } from "./menu_translations";
 import { footerTranslations } from "./footer_translations";
-import { topBarTranslations } from "./topbar_translations";
+import { topBarTranslations } from "../components/TopBar/topbar_translations";
 
 export type Lang = "eng" | "esp" | "ru" | "fr" | "it" | "de" | "uk" | "pl";
 

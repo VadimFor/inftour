@@ -1,4 +1,4 @@
-import type { Lang } from "./langStore";
+import type { Lang } from "../../lib/langStore";
 
 export type RecipesModalSection = {
   title: string;

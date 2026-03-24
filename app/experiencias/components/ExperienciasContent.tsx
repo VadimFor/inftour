@@ -16,6 +16,8 @@ import RecipesModal from "./RecipesModal";
 import SportRentingModal from "./SportRentingModal";
 import CyclingModal from "./CyclingModal";
 import BBQParksModal from "./BBQParksModal";
+import FeriaModal from "./FeriaModal";
+import CalpeGrandezaModal from "./CalpeGrandezaModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -25,6 +27,8 @@ export default function ExperienciasContent() {
   const [sportsEventsOpen, setSportsEventsOpen] = useState(false);
   const [cyclingOpen, setCyclingOpen] = useState(false);
   const [bbqParksOpen, setBbqParksOpen] = useState(false);
+  const [feriaOpen, setFeriaOpen] = useState(false);
+  const [calpeGrandeurOpen, setCalpeGrandeurOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -170,9 +174,25 @@ export default function ExperienciasContent() {
                     {t("expBBQ")}
                   </button>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-brand-gold">▪</span>
-                  <span className="text-gray-800">{t("expFeria")}</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
+                  <button
+                    type="button"
+                    onClick={() => setFeriaOpen(true)}
+                    className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
+                  >
+                    {t("expFeria")}
+                  </button>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
+                  <button
+                    type="button"
+                    onClick={() => setCalpeGrandeurOpen(true)}
+                    className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
+                  >
+                    {t("expCalpeGrandeur")}
+                  </button>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-brand-gold">▪</span>
@@ -308,6 +328,11 @@ export default function ExperienciasContent() {
         onClose={() => setCyclingOpen(false)}
       />
       <BBQParksModal isOpen={bbqParksOpen} onClose={() => setBbqParksOpen(false)} />
+      <FeriaModal isOpen={feriaOpen} onClose={() => setFeriaOpen(false)} />
+      <CalpeGrandezaModal
+        isOpen={calpeGrandeurOpen}
+        onClose={() => setCalpeGrandeurOpen(false)}
+      />
     </main>
   );
 }

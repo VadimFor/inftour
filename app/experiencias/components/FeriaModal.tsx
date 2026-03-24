@@ -4,15 +4,15 @@ import { createPortal } from "react-dom";
 import { useLangStore } from "../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "./modalStyles";
 
-type BBQParksModalProps = {
+type FeriaModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
 const sectionsMeta = [
-  { key: "expBBQParksModalSection1" },
-  { key: "expBBQParksModalSection2" },
-  { key: "expBBQParksModalSection3" },
+  { key: "expFeriaModalSection1" },
+  { key: "expFeriaModalSection2" },
+  { key: "expFeriaModalSection3" },
 ] as const;
 
 function renderLabeledLine(line: string) {
@@ -26,7 +26,7 @@ function renderLabeledLine(line: string) {
   );
 }
 
-export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
+export default function FeriaModal({ isOpen, onClose }: FeriaModalProps) {
   const t = useLangStore((s) => s.t);
 
   const parseSection = (key: string) => {
@@ -42,22 +42,6 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
     };
   };
 
-  const parseSpotBlock = (key: string) => {
-    const lines = t(key)
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    return {
-      title: lines[0] ?? "",
-      description: lines[1] ?? "",
-      addressLines: lines.slice(2),
-    };
-  };
-
-  const section4Lead = parseSection("expBBQParksModalSection4Lead");
-  const section4Spot1 = parseSpotBlock("expBBQParksModalSection4Spot1");
-  const section4Spot2 = parseSpotBlock("expBBQParksModalSection4Spot2");
-
   if (!isOpen || typeof document === "undefined") return null;
 
   return createPortal(
@@ -65,7 +49,7 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
       className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="bbq-parks-modal-title"
+      aria-labelledby="feria-modal-title"
       onClick={onClose}
     >
       <div
@@ -86,15 +70,15 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
         <div className="overflow-y-auto flex-1 px-8 py-6">
           <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
             <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3 id="bbq-parks-modal-title" className={MODAL_TITLE_CLASS}>
-              {t("expBBQParksModalTitle")}
+            <h3 id="feria-modal-title" className={MODAL_TITLE_CLASS}>
+              {t("expFeriaModalTitle")}
             </h3>
             <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
-              {t("expBBQParksModalSubtitle")}
+              {t("expFeriaModalSubtitle")}
             </p>
           </div>
           <p className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4">
-            {t("expBBQParksModalIntro")}
+            {t("expFeriaModalIntro")}
           </p>
 
           <div className="grid grid-cols-1 gap-4">
@@ -118,26 +102,6 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
                 </div>
               );
             })}
-
-            <div className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors">
-              <h4 className="text-base font-semibold text-gray-900 leading-snug">{section4Lead.title}</h4>
-              <p className="text-sm text-gray-700 leading-relaxed">{section4Lead.description}</p>
-              <div className="mt-2 pt-4 border-t border-gray-200 space-y-5">
-                {[section4Spot1, section4Spot2].map((spot, i) => (
-                  <div key={`bbq-parks-s4-${i}`} className="space-y-2">
-                    <h5 className="text-sm font-semibold text-gray-900 leading-snug">{spot.title}</h5>
-                    <p className="text-sm text-gray-700 leading-relaxed">{spot.description}</p>
-                    {spot.addressLines.length > 0 && (
-                      <ul className="list-disc pl-6 space-y-1.5 text-sm text-gray-700 leading-relaxed">
-                        {spot.addressLines.map((line) => (
-                          <li key={line}>{renderLabeledLine(line)}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
@@ -155,7 +119,7 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
                 d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
               />
             </svg>
-            <p className="text-xs leading-relaxed text-gray-300">{t("expBBQParksModalTip")}</p>
+            <p className="text-xs leading-relaxed text-gray-300">{t("expFeriaModalTip")}</p>
           </div>
         </div>
       </div>

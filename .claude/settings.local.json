@@ -10,7 +10,8 @@
       "Bash(powershell -Command \":*)",
       "Bash(python3:*)",
       "Bash(npx next:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git -C c:/Users/vadim/Desktop/INFTOUR mv app/lib/calpe_grandeza_modal_translations.ts app/experiencias/translations/calpe_grandeza_modal_translations.ts)"
     ]
   }
 }

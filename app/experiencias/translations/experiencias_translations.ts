@@ -1,4 +1,6 @@
 import { bbqParksModalTranslations } from "./bbqparks_modal_translations";
+import { feriaModalTranslations } from "./feria_modal_translations";
+import { calpeGrandezaModalTranslations } from "./calpe_grandeza_translations";
 
 type LangStrings = {
   eng: string;
@@ -267,5 +269,7 @@ export const experienciasTranslations: Record<string, LangStrings> = {
     pl: "Odkryj ukryte zatoczki z krystalicznie czystą wodą, szerokie piaszczyste plaże i najlepsze centra wellness, by się odprężyć.",
   },
   ...bbqParksModalTranslations,
+  ...feriaModalTranslations,
+  ...calpeGrandezaModalTranslations,
   expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 };

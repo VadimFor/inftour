@@ -30,6 +30,26 @@
   background: #D4AF37;
 }
 
+/* Neutral scrollbar for modals / long panels (global gold thumb is too loud on white dialogs) */
+.scrollbar-modal::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-modal::-webkit-scrollbar-track {
+  background: #f0f1f3;
+  border-radius: 4px;
+}
+.scrollbar-modal::-webkit-scrollbar-thumb {
+  background: #c5cad1;
+  border-radius: 4px;
+}
+.scrollbar-modal::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+.scrollbar-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #c5cad1 #f0f1f3;
+}
+
 /* Glass header */
 .glass-header {
   background: rgba(255, 255, 255, 0.85);
