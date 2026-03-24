@@ -1,3 +1,5 @@
+import { bbqParksModalTranslations } from "./bbqparks_modal_translations";
+
 type LangStrings = {
   eng: string;
   esp: string;
@@ -264,5 +266,6 @@ export const experienciasTranslations: Record<string, LangStrings> = {
     uk: "Відкрийте для себе укриті бухти з кришталево чистою водою, широкі піщані пляжі та найкращі спа-центри для відпочинку.",
     pl: "Odkryj ukryte zatoczki z krystalicznie czystą wodą, szerokie piaszczyste plaże i najlepsze centra wellness, by się odprężyć.",
   },
+  ...bbqParksModalTranslations,
   expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 };

@@ -15,6 +15,7 @@ import MarketsModal from "./MarketsModal";
 import RecipesModal from "./RecipesModal";
 import SportRentingModal from "./SportRentingModal";
 import CyclingModal from "./CyclingModal";
+import BBQParksModal from "./BBQParksModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -23,6 +24,7 @@ export default function ExperienciasContent() {
   const [recipesOpen, setRecipesOpen] = useState(false);
   const [sportsEventsOpen, setSportsEventsOpen] = useState(false);
   const [cyclingOpen, setCyclingOpen] = useState(false);
+  const [bbqParksOpen, setBbqParksOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -158,9 +160,15 @@ export default function ExperienciasContent() {
                 {t("expFamilySub")}
               </p>
               <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex items-center gap-2">
-                  <span className="text-brand-gold">▪</span>
-                  <span className="text-gray-800">{t("expBBQ")}</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
+                  <button
+                    type="button"
+                    onClick={() => setBbqParksOpen(true)}
+                    className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
+                  >
+                    {t("expBBQ")}
+                  </button>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-brand-gold">▪</span>
@@ -299,6 +307,7 @@ export default function ExperienciasContent() {
         isOpen={cyclingOpen}
         onClose={() => setCyclingOpen(false)}
       />
+      <BBQParksModal isOpen={bbqParksOpen} onClose={() => setBbqParksOpen(false)} />
     </main>
   );
 }
