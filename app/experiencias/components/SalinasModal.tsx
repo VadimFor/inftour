@@ -16,6 +16,7 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
 
   const title = t("expSalinasModalTitle");
   const subtitle = t("expSalinasModalSubtitle");
+  const tip = t("expSalinasModalInftourAdvice");
 
   return createPortal(
     <div
@@ -61,6 +62,28 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
               {subtitle}
             </p>
           </div>
+
+          {tip ? (
+            <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                />
+              </svg>
+              <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
+                {tip}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>,
