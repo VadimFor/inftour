@@ -20,6 +20,10 @@ import FeriaModal from "./FeriaModal";
 import CalpeGrandezaModal from "./CalpeGrandezaModal";
 import ParquesAtraccionesModal from "./ParquesAtraccionesModal";
 import EcosistemaDeportivoModal from "./EcosistemaDeportivoModal";
+import RelaxModal from "./RelaxModal";
+import IfachModal from "./IfachModal";
+import HorizontesMarinosModal from "./HorizontesMarinosModal";
+import SalinasModal from "./SalinasModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -33,6 +37,10 @@ export default function ExperienciasContent() {
   const [calpeGrandeurOpen, setCalpeGrandeurOpen] = useState(false);
   const [parquesAtraccionesOpen, setParquesAtraccionesOpen] = useState(false);
   const [ecosistemaDeportivoOpen, setEcosistemaDeportivoOpen] = useState(false);
+  const [relaxOpen, setRelaxOpen] = useState(false);
+  const [ifachOpen, setIfachOpen] = useState(false);
+  const [horizontesMarinosOpen, setHorizontesMarinosOpen] = useState(false);
+  const [salinasOpen, setSalinasOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -131,28 +139,31 @@ export default function ExperienciasContent() {
               </p>
               <ul className="space-y-6 text-sm text-gray-600 flex-1">
                 <li className="border-b border-gray-100 pb-3">
-                  <span className="font-bold text-gray-800 block mb-1">
+                  <button
+                    type="button"
+                    onClick={() => setIfachOpen(true)}
+                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                  >
                     {t("expIfach")}
-                  </span>
-                  <p className="text-xs font-light leading-relaxed">
-                    {t("expIfachDesc")}
-                  </p>
+                  </button>
                 </li>
                 <li className="border-b border-gray-100 pb-3">
-                  <span className="font-bold text-gray-800 block mb-1">
-                    {t("expSalinas")}
-                  </span>
-                  <p className="text-xs font-light leading-relaxed">
-                    {t("expSalinasDesc")}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setHorizontesMarinosOpen(true)}
+                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                  >
+                    {t("expSeaside")}
+                  </button>
                 </li>
                 <li>
-                  <span className="font-bold text-gray-800 block mb-1">
-                    {t("expSeaside")}
-                  </span>
-                  <p className="text-xs font-light leading-relaxed">
-                    {t("expSeasideDesc")}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSalinasOpen(true)}
+                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                  >
+                    {t("expSalinas")}
+                  </button>
                 </li>
               </ul>
             </div>
@@ -275,7 +286,14 @@ export default function ExperienciasContent() {
                 </button>
               </li>
               <li className="font-bold text-gray-800">
-                {t("expSportsEvents")}
+                <a
+                  href="https://cultura.calp.es/en/agendaweb/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-gray-800 hover:text-brand-gold transition"
+                >
+                  {t("expSportsEvents")}
+                </a>
               </li>
             </ul>
           </article>
@@ -292,8 +310,9 @@ export default function ExperienciasContent() {
               <p className="text-sm text-gray-600 leading-relaxed mb-6">
                 {t("expRelaxDescLong")}
               </p>
-              <Link
-                href="/revista"
+              <button
+                type="button"
+                onClick={() => setRelaxOpen(true)}
                 className="text-brand-link text-sm font-bold flex items-center gap-2 hover:underline"
               >
                 {t("expExploreCatalog")}
@@ -311,7 +330,7 @@ export default function ExperienciasContent() {
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-              </Link>
+              </button>
             </div>
             <div className="md:w-2/3 h-64 md:h-80 lg:h-96 relative overflow-hidden">
               <Image
@@ -359,6 +378,10 @@ export default function ExperienciasContent() {
         isOpen={ecosistemaDeportivoOpen}
         onClose={() => setEcosistemaDeportivoOpen(false)}
       />
+      <RelaxModal isOpen={relaxOpen} onClose={() => setRelaxOpen(false)} />
+      <IfachModal isOpen={ifachOpen} onClose={() => setIfachOpen(false)} />
+      <HorizontesMarinosModal isOpen={horizontesMarinosOpen} onClose={() => setHorizontesMarinosOpen(false)} />
+      <SalinasModal isOpen={salinasOpen} onClose={() => setSalinasOpen(false)} />
     </main>
   );
 }

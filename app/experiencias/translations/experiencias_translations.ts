@@ -3,6 +3,10 @@ import { feriaModalTranslations } from "./feria_modal_translations";
 import { calpeGrandezaModalTranslations } from "./calpe_grandeza_translations";
 import { parquesAtraccionesModalTranslations } from "./parques_atracciones_modal_translations";
 import { ecosistemaDeportivoModalTranslations } from "./ecosistema_deportivo_modal_translations";
+import { relaxModalTranslations } from "./relax_modal_translate";
+import { ifachModalTranslations } from "./ifach_modal_translations";
+import { horizontesMarinosModalTranslations } from "./horizontes_marinos_modal_translations";
+import { salinasModalTranslations } from "./salinas_modal_translations";
 
 type LangStrings = {
   eng: string;
@@ -83,9 +87,9 @@ export const experienciasTranslations: Record<string, LangStrings> = {
     uk: "Стежки в природних заповідниках: поради щодо Іфачу, маршрути вздовж Салінас, прогулянки біля моря.",
     pl: "Szlaki w rezerwatach przyrody: wskazówki dotyczące wspinaczki na Ifach, trasy wzdłuż Salinas, spacery nadmorskie.",
   },
-  expIfach: { eng: "Climbing Ifach", esp: "Subida al Ifach", ru: "Восхождение на Ифач", fr: "Ascension de l'Ifach", it: "Salita all'Ifach", de: "Ifach besteigen", uk: "Підйом на Іфач", pl: "Wspinaczka na Ifach" },
-  expSalinas: { eng: "Hiking along Salinas", esp: "Rutas por Salinas", ru: "Пешие маршруты вдоль Салинас", fr: "Randonnées Salinas", it: "Escursioni Salinas", de: "Wanderungen an den Salinas", uk: "Піші маршрути вздовж Салінас", pl: "Wędrówki wzdłuż Salinas" },
-  expSeaside: { eng: "Seaside walks", esp: "Paseos junto al mar", ru: "Прогулки вдоль моря", fr: "Promenades en bord de mer", it: "Passeggiate sul mare", de: "Strandspaziergänge", uk: "Прогулянки вздовж моря", pl: "Spacery nadmorskie" },
+  expIfach: { eng: "Magic and danger on the Peñón de Ifach", esp: "Magia y riesgo en el Peñón de Ifach", ru: "Магия и риск на скале Пеньон де Ифач", fr: "Magie et risque sur le Peñón de Ifach", it: "Magia e rischio sul Peñón de Ifach", de: "Magie und Risiko am Peñón de Ifach", uk: "Магія та ризик на скелі Пеньйон де Іфач", pl: "Magia i ryzyko na Peñón de Ifach" },
+  expSalinas: { eng: "Las Salinas", esp: "Las Salinas", ru: "Лас Салинас", fr: "Las Salinas", it: "Las Salinas", de: "Las Salinas", uk: "Лас Салінас", pl: "Las Salinas" },
+  expSeaside: { eng: "Marine horizons", esp: "Horizontes marinos", ru: "Морские горизонты", fr: "Horizons marins", it: "Orizzonti marini", de: "Meereshorizonte", uk: "Морські горизонти", pl: "Morskie horyzonty" },
   expFamily: { eng: "Family", esp: "Familia", ru: "Семья", fr: "Famille", it: "Famiglia", de: "Familie", uk: "Сім'я", pl: "Rodzina" },
   expFamilyDesc: {
     eng: "Leisure with family and friends.",
@@ -276,5 +280,9 @@ export const experienciasTranslations: Record<string, LangStrings> = {
   ...calpeGrandezaModalTranslations,
   ...parquesAtraccionesModalTranslations,
   ...ecosistemaDeportivoModalTranslations,
+  ...relaxModalTranslations,
+  ...ifachModalTranslations,
+  ...horizontesMarinosModalTranslations,
+  ...salinasModalTranslations,
   expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 };
