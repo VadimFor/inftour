@@ -146,6 +146,9 @@ export default function ExperienciasContent() {
                   >
                     {t("expIfach")}
                   </button>
+                  <span className="block mt-1 text-xs font-light">
+                    {t("expIfachDesc")}
+                  </span>
                 </li>
                 <li className="border-b border-gray-100 pb-3">
                   <button
@@ -155,6 +158,9 @@ export default function ExperienciasContent() {
                   >
                     {t("expSeaside")}
                   </button>
+                  <span className="block mt-1 text-xs font-light">
+                    {t("expSeasideDesc")}
+                  </span>
                 </li>
                 <li>
                   <button
@@ -164,6 +170,9 @@ export default function ExperienciasContent() {
                   >
                     {t("expSalinas")}
                   </button>
+                  <span className="block mt-1 text-xs font-light">
+                    {t("expSalinasDesc")}
+                  </span>
                 </li>
               </ul>
             </div>

@@ -9,6 +9,33 @@ type IfachModalProps = {
   onClose: () => void;
 };
 
+function renderLabeledLine(line: string) {
+  const colonIdx = line.indexOf(":");
+  if (colonIdx === -1) return <>{line}</>;
+
+  const rawLabel = line.slice(0, colonIdx).trim();
+  const rest = line.slice(colonIdx + 1).trim();
+  if (!rest) return <>{line}</>;
+
+  const labelWords = rawLabel.split(/\s+/).filter(Boolean).length;
+  if (labelWords > 6) return <>{line}</>;
+
+  return (
+    <>
+      <span className="font-semibold">{rawLabel}</span>: {rest}
+    </>
+  );
+}
+
+function isHeaderLike(line: string) {
+  const t = line.trim();
+  if (!t) return false;
+  if (/^inftour\s*:/i.test(t)) return true;
+  if (t.endsWith(".") || t.endsWith("!") || t.endsWith("?")) return false;
+  // Short-ish lines are usually headings in the DOCX structure
+  return t.length <= 72;
+}
+
 export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
   const t = useLangStore((s) => s.t);
 
@@ -16,7 +43,67 @@ export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
 
   const title = t("expIfachModalTitle");
   const subtitle = t("expIfachModalSubtitle");
+  const bodyIntro = t("expIfachModalBodyIntro");
+  const bodyTitan = t("expIfachModalBodyTitan");
+  const bodyHeroRoute = t("expIfachModalBodyHeroRoute");
+  const bodyRisk = t("expIfachModalBodyRisk");
+  const inftourParagraph = t("expIfachModalInftourParagraph");
   const tip = t("expIfachModalInftourAdvice");
+  const postscript = t("expIfachModalBodyPostscript");
+
+  const parts = [
+    bodyIntro,
+    bodyTitan,
+    bodyHeroRoute,
+    bodyRisk,
+    inftourParagraph,
+    postscript,
+  ]
+    .filter(Boolean)
+    .map((part) =>
+      (part || "")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean),
+    )
+    .filter((lines) => lines.length > 0);
+
+  const sections = parts.map((lines) => {
+    const first = lines[0] ?? "";
+    const title = isHeaderLike(first) ? first : null;
+    const rest = title ? lines.slice(1) : lines;
+
+    const isSubBullet = (l: string) => l.startsWith("--");
+
+    const isBulletLine = (l: string) => {
+      const text = isSubBullet(l) ? l.slice(2) : l;
+      const colonIdx = text.indexOf(":");
+      if (colonIdx === -1) return false;
+      const rawLabel = text.slice(0, colonIdx).trim();
+      const after = text.slice(colonIdx + 1).trim();
+      if (!after) return false;
+      const labelWords = rawLabel.split(/\s+/).filter(Boolean).length;
+      return labelWords <= 3;
+    };
+
+    const allBullets = rest.filter(isBulletLine);
+    const mainLines = rest.filter((l) => !allBullets.includes(l));
+
+    // Group sub-bullets under their preceding parent bullet
+    type BulletItem = { text: string; subItems: string[] };
+    const bulletLines: BulletItem[] = [];
+    for (const l of allBullets) {
+      if (isSubBullet(l)) {
+        if (bulletLines.length > 0) {
+          bulletLines[bulletLines.length - 1].subItems.push(l.slice(2));
+        }
+      } else {
+        bulletLines.push({ text: l, subItems: [] });
+      }
+    }
+
+    return { title, mainLines, bulletLines };
+  });
 
   return createPortal(
     <div
@@ -63,6 +150,55 @@ export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
             </p>
           </div>
 
+          <div className="grid grid-cols-1 gap-4">
+            {sections.map((section, sIdx) => (
+              <div
+                key={`s-${sIdx}-${(section.title ?? section.mainLines[0] ?? "").slice(0, 20)}`}
+                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+              >
+                {section.title ? (
+                  <p className="text-sm font-semibold text-gray-800">
+                    {section.title}
+                  </p>
+                ) : null}
+
+                {section.mainLines.map((line, idx) => (
+                  <p
+                    key={`m-${idx}-${line.slice(0, 18)}`}
+                    className="text-sm text-gray-900 leading-relaxed"
+                  >
+                    {renderLabeledLine(line)}
+                  </p>
+                ))}
+
+                {section.bulletLines.length ? (
+                  <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                    {section.bulletLines.map((b) => (
+                      <li
+                        key={b.text}
+                        className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
+                      >
+                        {renderLabeledLine(b.text)}
+                        {b.subItems.length > 0 && (
+                          <ul className="flex flex-col gap-1 mt-1 pl-4 border-l border-brand-gold/20">
+                            {b.subItems.map((sub) => (
+                              <li
+                                key={sub}
+                                className="text-sm text-gray-600 leading-relaxed list-disc list-inside"
+                              >
+                                {renderLabeledLine(sub)}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))}
+          </div>
+
           {tip ? (
             <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
               <svg
@@ -79,7 +215,9 @@ export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
                   d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
                 />
               </svg>
-              <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">{tip}</p>
+              <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
+                {tip}
+              </p>
             </div>
           ) : null}
         </div>
