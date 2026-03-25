@@ -2,6 +2,7 @@ import { bbqParksModalTranslations } from "./bbqparks_modal_translations";
 import { feriaModalTranslations } from "./feria_modal_translations";
 import { calpeGrandezaModalTranslations } from "./calpe_grandeza_translations";
 import { parquesAtraccionesModalTranslations } from "./parques_atracciones_modal_translations";
+import { ecosistemaDeportivoModalTranslations } from "./ecosistema_deportivo_modal_translations";
 
 type LangStrings = {
   eng: string;
@@ -274,5 +275,6 @@ export const experienciasTranslations: Record<string, LangStrings> = {
   ...feriaModalTranslations,
   ...calpeGrandezaModalTranslations,
   ...parquesAtraccionesModalTranslations,
+  ...ecosistemaDeportivoModalTranslations,
   expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 };

@@ -13,7 +13,9 @@
       "Bash(npx tsc:*)",
       "Bash(git -C c:/Users/vadim/Desktop/INFTOUR mv app/lib/calpe_grandeza_modal_translations.ts app/experiencias/translations/calpe_grandeza_modal_translations.ts)",
       "Bash(node -e \"const d = require\\(''''./parques_atracciones_body_extract.json''''\\); console.log\\(JSON.stringify\\(d.eng, null, 2\\)\\)\")",
-      "Bash(node -e \"const d = require\\(''./parques_atracciones_body_extract.json''\\); console.log\\(''ESP body:'', d.esp.body\\)\")"
+      "Bash(node -e \"const d = require\\(''./parques_atracciones_body_extract.json''\\); console.log\\(''ESP body:'', d.esp.body\\)\")",
+      "Bash(python -c \"import docx; doc=docx.Document\\(''c:/Users/vadim/Desktop/INFTOUR/ejemplos/experiencias/estilo_de_vida/Ecosistema deportivo de Calpe.docx''\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
+      "Bash(python -c \":*)"
     ]
   }
 }

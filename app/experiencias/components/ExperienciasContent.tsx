@@ -19,6 +19,7 @@ import BBQParksModal from "./BBQParksModal";
 import FeriaModal from "./FeriaModal";
 import CalpeGrandezaModal from "./CalpeGrandezaModal";
 import ParquesAtraccionesModal from "./ParquesAtraccionesModal";
+import EcosistemaDeportivoModal from "./EcosistemaDeportivoModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -31,6 +32,7 @@ export default function ExperienciasContent() {
   const [feriaOpen, setFeriaOpen] = useState(false);
   const [calpeGrandeurOpen, setCalpeGrandeurOpen] = useState(false);
   const [parquesAtraccionesOpen, setParquesAtraccionesOpen] = useState(false);
+  const [ecosistemaDeportivoOpen, setEcosistemaDeportivoOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -254,7 +256,15 @@ export default function ExperienciasContent() {
                   {t("expCycling")}
                 </button>
               </li>
-              <li className="font-bold">{t("expSportsFacilities")}</li>
+              <li className="font-bold text-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setEcosistemaDeportivoOpen(true)}
+                  className="text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition text-left"
+                >
+                  {t("expEcosistemaDeportivoLabel")}
+                </button>
+              </li>
               <li className="font-bold text-gray-800">
                 <button
                   type="button"
@@ -344,6 +354,10 @@ export default function ExperienciasContent() {
       <ParquesAtraccionesModal
         isOpen={parquesAtraccionesOpen}
         onClose={() => setParquesAtraccionesOpen(false)}
+      />
+      <EcosistemaDeportivoModal
+        isOpen={ecosistemaDeportivoOpen}
+        onClose={() => setEcosistemaDeportivoOpen(false)}
       />
     </main>
   );
