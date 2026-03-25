@@ -18,6 +18,7 @@ import CyclingModal from "./CyclingModal";
 import BBQParksModal from "./BBQParksModal";
 import FeriaModal from "./FeriaModal";
 import CalpeGrandezaModal from "./CalpeGrandezaModal";
+import ParquesAtraccionesModal from "./ParquesAtraccionesModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -29,6 +30,7 @@ export default function ExperienciasContent() {
   const [bbqParksOpen, setBbqParksOpen] = useState(false);
   const [feriaOpen, setFeriaOpen] = useState(false);
   const [calpeGrandeurOpen, setCalpeGrandeurOpen] = useState(false);
+  const [parquesAtraccionesOpen, setParquesAtraccionesOpen] = useState(false);
 
   return (
     <main className="relative z-20 pb-24">
@@ -194,9 +196,15 @@ export default function ExperienciasContent() {
                     {t("expCalpeGrandeur")}
                   </button>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-brand-gold">▪</span>
-                  <span>{t("expCityGuide")}</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
+                  <button
+                    type="button"
+                    onClick={() => setParquesAtraccionesOpen(true)}
+                    className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
+                  >
+                    {t("expFamilyAttractions")}
+                  </button>
                 </li>
               </ul>
             </div>
@@ -332,6 +340,10 @@ export default function ExperienciasContent() {
       <CalpeGrandezaModal
         isOpen={calpeGrandeurOpen}
         onClose={() => setCalpeGrandeurOpen(false)}
+      />
+      <ParquesAtraccionesModal
+        isOpen={parquesAtraccionesOpen}
+        onClose={() => setParquesAtraccionesOpen(false)}
       />
     </main>
   );

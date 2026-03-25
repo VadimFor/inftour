@@ -1,6 +1,7 @@
 import { bbqParksModalTranslations } from "./bbqparks_modal_translations";
 import { feriaModalTranslations } from "./feria_modal_translations";
 import { calpeGrandezaModalTranslations } from "./calpe_grandeza_translations";
+import { parquesAtraccionesModalTranslations } from "./parques_atracciones_modal_translations";
 
 type LangStrings = {
   eng: string;
@@ -107,6 +108,7 @@ export const experienciasTranslations: Record<string, LangStrings> = {
   },
   expFeria: { eng: "Feria", esp: "Feria", ru: "Feria", fr: "Feria", it: "Feria", de: "Feria", uk: "Feria", pl: "Feria" },
   expCityGuide: { eng: "Electronic city guide", esp: "Guía electrónica de la ciudad", ru: "Электронный гид по городу", fr: "Guide électronique de la ville", it: "Guida elettronica della città", de: "Elektronischer Stadtführer", uk: "Електронний гід по місту", pl: "Elektroniczny przewodnik po mieście" },
+  expFamilyAttractions: { eng: "Amusement Parks.", esp: "Parques de atracciones.", ru: "Парки аттракционов.", fr: "Parcs d'attractions.", it: "Parchi divertimento.", de: "Freizeitparks.", uk: "Парки атракцій.", pl: "Parki rozrywki." },
   expEventsCalendar: { eng: "Events calendar", esp: "Calendario de eventos", ru: "Календарь событий", fr: "Calendrier des événements", it: "Calendario eventi", de: "Veranstaltungskalender", uk: "Календар подій", pl: "Kalendarz wydarzeń" },
   expRelax: { eng: "Relax", esp: "Relax", ru: "Релакс", fr: "Relax", it: "Relax", de: "Entspannung", uk: "Релакс", pl: "Relaks" },
   expRelaxDesc: { eng: "Beaches and SPA.", esp: "Playas y SPA.", ru: "Пляжи и СПА.", fr: "Plages et SPA.", it: "Spiagge e SPA.", de: "Strände und SPA.", uk: "Пляжі та СПА.", pl: "Plaże i SPA." },
@@ -271,5 +273,6 @@ export const experienciasTranslations: Record<string, LangStrings> = {
   ...bbqParksModalTranslations,
   ...feriaModalTranslations,
   ...calpeGrandezaModalTranslations,
+  ...parquesAtraccionesModalTranslations,
   expExploreCatalog: { eng: "Explore catalog", esp: "Explorar catálogo", ru: "Каталог", fr: "Explorer le catalogue", it: "Esplora catalogo", de: "Katalog entdecken", uk: "Переглянути каталог", pl: "Przeglądaj katalog" },
 };
