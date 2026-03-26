@@ -9,6 +9,36 @@ type SalinasModalProps = {
   onClose: () => void;
 };
 
+function isHeaderLike(line: string) {
+  const t = line.trim();
+  if (!t) return false;
+  if (t.endsWith(".") || t.endsWith("!") || t.endsWith("?")) return false;
+  return t.length <= 96;
+}
+
+function isSubgroupLine(line: string) {
+  const colonIdx = line.indexOf(":");
+  if (colonIdx === -1) return false;
+  const rawLabel = line.slice(0, colonIdx).trim();
+  const rest = line.slice(colonIdx + 1).trim();
+  if (!rest) return false;
+  const labelWords = rawLabel.split(/\s+/).filter(Boolean).length;
+  return labelWords <= 5;
+}
+
+function renderLabeledLine(line: string) {
+  const colonIdx = line.indexOf(":");
+  if (colonIdx === -1) return <>{line}</>;
+  const rawLabel = line.slice(0, colonIdx).trim();
+  const rest = line.slice(colonIdx + 1).trim();
+  if (!rest) return <>{line}</>;
+  return (
+    <>
+      <span className="font-semibold">{rawLabel}</span>: {rest}
+    </>
+  );
+}
+
 export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
   const t = useLangStore((s) => s.t);
 
@@ -16,7 +46,36 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
 
   const title = t("expSalinasModalTitle");
   const subtitle = t("expSalinasModalSubtitle");
+  const paragraphs = [
+    t("expSalinasModalParagraph1"),
+    t("expSalinasModalParagraph2"),
+    t("expSalinasModalParagraph3"),
+    t("expSalinasModalParagraph4"),
+    t("expSalinasModalParagraph5"),
+    t("expSalinasModalParagraph6"),
+    t("expSalinasModalParagraph7"),
+    t("expSalinasModalParagraph8"),
+    t("expSalinasModalParagraph9"),
+    t("expSalinasModalParagraph10"),
+    t("expSalinasModalParagraph11"),
+    t("expSalinasModalParagraph12"),
+    t("expSalinasModalParagraph13"),
+    t("expSalinasModalParagraph14"),
+    t("expSalinasModalParagraph15"),
+  ].filter(Boolean);
   const tip = t("expSalinasModalInftourAdvice");
+
+  type Section = { title: string | null; body: string[] };
+  const sections: Section[] = [];
+  for (const p of paragraphs) {
+    if (isHeaderLike(p)) {
+      sections.push({ title: p, body: [] });
+      continue;
+    }
+    const current = sections[sections.length - 1];
+    if (current) current.body.push(p);
+    else sections.push({ title: null, body: [p] });
+  }
 
   return createPortal(
     <div
@@ -61,6 +120,45 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
             <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
               {subtitle}
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {sections.map((section, idx) => (
+              <div
+                key={`s-${idx}-${(section.title ?? section.body[0] ?? "").slice(0, 24)}`}
+                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+              >
+                {section.title ? (
+                  <p className="text-sm font-semibold text-gray-800">{section.title}</p>
+                ) : null}
+                {(() => {
+                  const subgroupLines = section.body.filter(isSubgroupLine);
+                  const mainLines = section.body.filter((line) => !isSubgroupLine(line));
+                  const useSubgroups = subgroupLines.length >= 2;
+                  return (
+                    <>
+                      {(useSubgroups ? mainLines : section.body).map((line) => (
+                        <p key={line} className="text-sm text-gray-900 leading-relaxed">
+                          {line}
+                        </p>
+                      ))}
+                      {useSubgroups ? (
+                        <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                          {subgroupLines.map((line) => (
+                            <li
+                              key={line}
+                              className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
+                            >
+                              {renderLabeledLine(line)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </>
+                  );
+                })()}
+              </div>
+            ))}
           </div>
 
           {tip ? (
