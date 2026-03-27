@@ -283,7 +283,7 @@ export const servicesTranslations: Record<string, LangStrings> = {
     uk: "Дайв-школи та місця для снорклінгу. Прозора вода та підводний світ.",
     pl: "Szkoły nurkowania i miejsca do snorkelingu wzdłuż wybrzeża. Czysta woda i życie morskie.",
   },
-  activityCycling: { eng: "Cycling", esp: "Ciclismo", ru: "Велоспорт", fr: "Vélo", it: "Ciclismo", de: "Radfahren", uk: "Велоспорт", pl: "Kolarstwo" },
+  activityCycling: { eng: "Professional cycling routes", esp: "Rutas de ciclismo profesionales", ru: "Профессиональные велосипедные маршруты", fr: "Itinéraires cyclistes professionnels", it: "Percorsi ciclistici professionali", de: "Professionelle Radrouten", uk: "Професійні велосипедні маршрути", pl: "Profesjonalne trasy kolarskie" },
   activityCyclingDesc: {
     eng: "Road and mountain biking. Calpe is a popular base for cyclists; routes for all levels.",
     esp: "Ciclismo en carretera y montaña. Calpe es base ideal para ciclistas; rutas para todos los niveles.",

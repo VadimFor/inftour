@@ -11,14 +11,14 @@ type LangStrings = {
 
 export const horizontesMarinosModalTranslations: Record<string, LangStrings> = {
   expHorizontesMarinosModalTitle: {
-    eng: "Marine horizons",
-    esp: "Horizontes marinos",
-    ru: "Морские горизонты",
-    fr: "Horizons marins",
-    it: "Orizzonti marini",
-    de: "Meereshorizonte",
-    uk: "Морські горизонти",
-    pl: "Morskie horyzonty",
+    eng: "Seaside walks",
+    esp: "Paseos junto al mar",
+    ru: "Прогулки у моря",
+    fr: "Promenades en bord de mer",
+    it: "Passeggiate sul mare",
+    de: "Spaziergänge am Meer",
+    uk: "Прогулянки біля моря",
+    pl: "Spacery nad morzem",
   },
   expHorizontesMarinosModalSubtitle: {
     eng: "Benissa Ecological Walk and Calpe promenades",

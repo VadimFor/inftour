@@ -43,7 +43,7 @@ export default function ExperienciasContent() {
   const [salinasOpen, setSalinasOpen] = useState(false);
 
   return (
-    <main className="relative z-20 pb-24">
+    <main className="relative z-20 pb-24 font-bold">
       {/* Hero */}
       <section className="container mx-auto px-4 pt-8 pb-16 md:pt-12 md:pb-24 text-center max-w-4xl">
         <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
@@ -52,7 +52,7 @@ export default function ExperienciasContent() {
         <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-6 leading-tight">
           {t("expPageTitle")}
         </h1>
-        <p className="text-lg text-gray-600 font-light leading-relaxed">
+        <p className="text-lg text-gray-600 leading-relaxed">
           {t("expHeroDescLong")}
         </p>
       </section>
@@ -78,16 +78,16 @@ export default function ExperienciasContent() {
               <p className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">
                 {t("expGastronomySub")}
               </p>
-              <ul className="space-y-4 text-sm text-gray-600 border-l-2 border-brand-gold pl-4">
+              <ul className="space-y-4 text-sm text-gray-600 border-l-2 border-brand-gold pl-4 font-normal">
                 <li>
                   <button
                     type="button"
                     onClick={() => setRestaurantsOpen(true)}
-                    className="block font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    className="block text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
                     1. {t("expRestaurants")}
                   </button>
-                  <span className="text-xs font-light">
+                  <span className="text-xs leading-relaxed">
                     {t("expRestaurantsDesc")}
                   </span>
                 </li>
@@ -95,11 +95,11 @@ export default function ExperienciasContent() {
                   <button
                     type="button"
                     onClick={() => setMarketsOpen(true)}
-                    className="block font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    className="block text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
                     2. {t("expMarkets")}
                   </button>
-                  <span className="text-xs font-light">
+                  <span className="text-xs leading-relaxed">
                     {t("expMarketsDesc")}
                   </span>
                 </li>
@@ -107,11 +107,11 @@ export default function ExperienciasContent() {
                   <button
                     type="button"
                     onClick={() => setRecipesOpen(true)}
-                    className="block font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    className="block text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
                     3. {t("expRecipes")}
                   </button>
-                  <span className="text-xs font-light">
+                  <span className="text-xs leading-relaxed">
                     {t("expRecipesDesc")}
                   </span>
                 </li>
@@ -137,41 +137,41 @@ export default function ExperienciasContent() {
               <p className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">
                 {t("expNatureSub")}
               </p>
-              <ul className="space-y-6 text-sm text-gray-600 flex-1">
+              <ul className="space-y-6 text-sm text-gray-600 flex-1 font-normal">
                 <li className="border-b border-gray-100 pb-3">
                   <button
                     type="button"
                     onClick={() => setIfachOpen(true)}
-                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    className="text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
                     {t("expIfach")}
                   </button>
-                  <span className="block mt-1 text-xs font-light">
+                  <span className="block mt-1 text-xs leading-relaxed">
                     {t("expIfachDesc")}
                   </span>
                 </li>
                 <li className="border-b border-gray-100 pb-3">
                   <button
                     type="button"
-                    onClick={() => setHorizontesMarinosOpen(true)}
-                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    onClick={() => setSalinasOpen(true)}
+                    className="text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
-                    {t("expSeaside")}
+                    {t("expSalinas")}
                   </button>
-                  <span className="block mt-1 text-xs font-light">
-                    {t("expSeasideDesc")}
+                  <span className="block mt-1 text-xs leading-relaxed">
+                    {t("expSalinasDesc")}
                   </span>
                 </li>
                 <li>
                   <button
                     type="button"
-                    onClick={() => setSalinasOpen(true)}
-                    className="font-bold text-gray-800 hover:text-brand-gold transition text-left"
+                    onClick={() => setHorizontesMarinosOpen(true)}
+                    className="text-gray-800 hover:text-brand-gold transition text-left font-bold"
                   >
-                    {t("expSalinas")}
+                    {t("expSeaside")}
                   </button>
-                  <span className="block mt-1 text-xs font-light">
-                    {t("expSalinasDesc")}
+                  <span className="block mt-1 text-xs leading-relaxed">
+                    {t("expSeasideDesc")}
                   </span>
                 </li>
               </ul>
@@ -202,20 +202,20 @@ export default function ExperienciasContent() {
                   <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
                   <button
                     type="button"
-                    onClick={() => setFeriaOpen(true)}
+                    onClick={() => setCalpeGrandeurOpen(true)}
                     className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
                   >
-                    {t("expFeria")}
+                    {t("expCalpeGrandeur")}
                   </button>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-brand-gold shrink-0 mt-0.5">▪</span>
                   <button
                     type="button"
-                    onClick={() => setCalpeGrandeurOpen(true)}
+                    onClick={() => setFeriaOpen(true)}
                     className="text-left font-bold text-gray-800 hover:text-brand-gold focus:text-brand-gold active:text-brand-gold transition"
                   >
-                    {t("expCalpeGrandeur")}
+                    {t("expFeria")}
                   </button>
                 </li>
                 <li className="flex items-start gap-2">
@@ -299,9 +299,9 @@ export default function ExperienciasContent() {
                   href="https://cultura.calp.es/en/agendaweb/"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-gray-800 hover:text-brand-gold transition"
+                  className="hover:text-brand-link transition block font-bold text-brand-gold"
                 >
-                  {t("expSportsEvents")}
+                  <span className="font-bold">{t("expSportsEvents")}</span>
                 </a>
               </li>
             </ul>

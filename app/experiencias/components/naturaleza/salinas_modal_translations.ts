@@ -11,14 +11,14 @@ type LangStrings = {
 
 export const salinasModalTranslations: Record<string, LangStrings> = {
   expSalinasModalTitle: {
-    eng: "Las Salinas",
-    esp: "Las Salinas",
-    ru: "Лас Салинас",
-    fr: "Las Salinas",
-    it: "Las Salinas",
-    de: "Las Salinas",
-    uk: "Лас Салінас",
-    pl: "Las Salinas",
+    eng: "Routes through Las Salinas",
+    esp: "Rutas por las Salinas",
+    ru: "Маршруты по Лас-Салинас",
+    fr: "Itinéraires dans Las Salinas",
+    it: "Percorsi per Las Salinas",
+    de: "Routen durch Las Salinas",
+    uk: "Маршрути Лас-Салінас",
+    pl: "Trasy po Las Salinas",
   },
   expSalinasModalSubtitle: {
     eng: "Mirror of history and pink paradise in the heart of the city",

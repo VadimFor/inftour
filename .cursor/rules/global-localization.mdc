@@ -1,0 +1,15 @@
+---
+description: Global localization rule template for all prompts
+alwaysApply: true
+---
+
+# Global Localization Rule
+
+- Every user-facing text change must be translated to all supported languages: `eng`, `esp`, `ru`, `fr`, `it`, `de`, `uk`, `pl`.
+- Update related labels, titles, subtitles, descriptions, and modal copy where applicable.
+- Keep wording consistent across card/list text and corresponding modal translations.
+- Before finishing, verify there are no leftover old strings in any language.
+
+# Pending Rules To Define
+
+Replace this section with the exact rules you want to enforce globally.

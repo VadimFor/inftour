@@ -11,14 +11,14 @@ type LangStrings = {
 
 export const ifachModalTranslations: Record<string, LangStrings> = {
   expIfachModalTitle: {
-    eng: "Magic and danger on the Peñón de Ifach",
-    esp: "Magia y riesgo en el Peñón de Ifach",
-    ru: "Магия и риск на скале Пеньон де Ифач",
-    fr: "Magie et risque sur le Peñón de Ifach",
-    it: "Magia e rischio sul Peñón de Ifach",
-    de: "Magie und Risiko am Peñón de Ifach",
-    uk: "Магія та ризик на скелі Пеньйон де Іфач",
-    pl: "Magia i ryzyko na Peñón de Ifach",
+    eng: "Ascent to Peñón de Ifach",
+    esp: "Ascenso al Peñón de Ifach",
+    ru: "Подъём на Пеньон-де-Ифач",
+    fr: "Ascension du Peñón de Ifach",
+    it: "Ascesa al Peñón de Ifach",
+    de: "Aufstieg zum Peñón de Ifach",
+    uk: "Підйом на Пеньйон-де-Іфач",
+    pl: "Wejście na Peñón de Ifach",
   },
   expIfachModalSubtitle: {
     eng: "TRAILS AND RESERVES",

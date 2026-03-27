@@ -11,14 +11,14 @@ type LangStrings = {
 
 export const ecosistemaDeportivoModalTranslations: Record<string, LangStrings> = {
   expEcosistemaDeportivoLabel: {
-    eng: "Calpe sports ecosystem",
-    esp: "Ecosistema deportivo de Calpe",
-    ru: "Спортивная экосистема Кальпе",
-    fr: "Écosystème sportif de Calpe",
-    it: "Ecosistema sportivo di Calpe",
-    de: "Sport-Ökosystem Calpe",
-    uk: "Спортивна екосистема Кальпе",
-    pl: "Sportowy ekosystem Calpe",
+    eng: "Sports facilities",
+    esp: "Instalaciones deportivas",
+    ru: "Спортивные сооружения",
+    fr: "Installations sportives",
+    it: "Impianti sportivi",
+    de: "Sportanlagen",
+    uk: "Спортивні споруди",
+    pl: "Obiekty sportowe",
   },
   expEcosistemaDeportivoModalTitle: {
     eng: "Calpe's sports ecosystem: From elite golf courses to maritime regattas",
