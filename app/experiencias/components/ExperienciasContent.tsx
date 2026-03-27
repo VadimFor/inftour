@@ -10,20 +10,20 @@ import natureImage from "../pictures/bosque.png";
 import cyclingImage from "../pictures/ciclistas.png";
 import sportsImage from "../pictures/papeles.png";
 import relaxImage from "../pictures/jabon.png";
-import RestaurantsModal from "./RestaurantsModal";
-import MarketsModal from "./MarketsModal";
-import RecipesModal from "./RecipesModal";
-import SportRentingModal from "./SportRentingModal";
-import CyclingModal from "./CyclingModal";
-import BBQParksModal from "./BBQParksModal";
-import FeriaModal from "./FeriaModal";
-import CalpeGrandezaModal from "./CalpeGrandezaModal";
-import ParquesAtraccionesModal from "./ParquesAtraccionesModal";
-import EcosistemaDeportivoModal from "./EcosistemaDeportivoModal";
-import RelaxModal from "./RelaxModal";
-import IfachModal from "./IfachModal";
-import HorizontesMarinosModal from "./HorizontesMarinosModal";
-import SalinasModal from "./SalinasModal";
+import RestaurantsModal from "./sabores/RestaurantsModal";
+import MarketsModal from "./sabores/MarketsModal";
+import RecipesModal from "./sabores/RecipesModal";
+import SportRentingModal from "./estilo_de_vida/SportRentingModal";
+import CyclingModal from "./estilo_de_vida/CyclingModal";
+import BBQParksModal from "./familia/BBQParksModal";
+import FeriaModal from "./familia/FeriaModal";
+import CalpeGrandezaModal from "./familia/CalpeGrandezaModal";
+import ParquesAtraccionesModal from "./familia/ParquesAtraccionesModal";
+import EcosistemaDeportivoModal from "./estilo_de_vida/EcosistemaDeportivoModal";
+import RelaxModal from "./relax/RelaxModal";
+import IfachModal from "./naturaleza/IfachModal";
+import HorizontesMarinosModal from "./naturaleza/HorizontesMarinosModal";
+import SalinasModal from "./naturaleza/SalinasModal";
 
 export default function ExperienciasContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
@@ -373,7 +373,10 @@ export default function ExperienciasContent() {
         isOpen={cyclingOpen}
         onClose={() => setCyclingOpen(false)}
       />
-      <BBQParksModal isOpen={bbqParksOpen} onClose={() => setBbqParksOpen(false)} />
+      <BBQParksModal
+        isOpen={bbqParksOpen}
+        onClose={() => setBbqParksOpen(false)}
+      />
       <FeriaModal isOpen={feriaOpen} onClose={() => setFeriaOpen(false)} />
       <CalpeGrandezaModal
         isOpen={calpeGrandeurOpen}
@@ -389,8 +392,14 @@ export default function ExperienciasContent() {
       />
       <RelaxModal isOpen={relaxOpen} onClose={() => setRelaxOpen(false)} />
       <IfachModal isOpen={ifachOpen} onClose={() => setIfachOpen(false)} />
-      <HorizontesMarinosModal isOpen={horizontesMarinosOpen} onClose={() => setHorizontesMarinosOpen(false)} />
-      <SalinasModal isOpen={salinasOpen} onClose={() => setSalinasOpen(false)} />
+      <HorizontesMarinosModal
+        isOpen={horizontesMarinosOpen}
+        onClose={() => setHorizontesMarinosOpen(false)}
+      />
+      <SalinasModal
+        isOpen={salinasOpen}
+        onClose={() => setSalinasOpen(false)}
+      />
     </main>
   );
 }
