@@ -1,8 +1,85 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
+import { useMemo } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import terra1 from "./pictures/Terra 1.png";
+import terra2 from "./pictures/Terra 2.png";
+import terra3 from "./pictures/Terra 3.png";
+import terra4 from "./pictures/Terra 4.png";
+import terra5 from "./pictures/Terra 5.png";
+import terra6 from "./pictures/Terra 6.png";
+
+import type { StaticImageData } from "next/image";
+
+/** Imágenes por parque (orden de contenido: Aqualandia → Terra Natura → Terra Mítica → Safari Aitana) */
+const TERRA_IMAGES_BY_PARK: Record<string, StaticImageData[]> = {
+  "park-aqualandia": [terra2, terra3],
+  "park-terra-natura": [terra4],
+  "park-terra-mitica": [terra1],
+  "park-safari-aitana": [terra5, terra6],
+};
+
+function TerraImagesForPark({ parkId, imgClassName }: { parkId: string; imgClassName?: string }) {
+  const imgs = TERRA_IMAGES_BY_PARK[parkId];
+  if (!imgs?.length) return null;
+  const cols = imgs.length >= 2 ? "grid-cols-2" : "grid-cols-1";
+  return (
+    <div className={`grid ${cols} gap-2 mb-0`}>
+      {imgs.map((img, i) => (
+        <button
+          key={`${parkId}-${i}`}
+          type="button"
+          onClick={() => scrollToParkSection(parkId)}
+          className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100 text-left cursor-pointer hover:border-brand-gold/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 transition-colors"
+          aria-label={parkId.replace(/^park-/, "").replace(/-/g, " ")}
+        >
+          <Image
+            src={img}
+            alt=""
+            width={img.width}
+            height={img.height}
+            className={`w-full object-cover pointer-events-none${imgClassName ? ` ${imgClassName}` : " h-auto"}`}
+            sizes="(max-width: 640px) 50vw, 33vw"
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function getParkAnchorIdFromText(text: string): string | null {
+  const s = text.replace(/^•\s*/, "").trim().toLowerCase();
+  if (s.includes("safari aitana")) return "park-safari-aitana";
+  if (s.includes("terra mítica") || s.includes("terra mitica"))
+    return "park-terra-mitica";
+  if (s.includes("terra natura")) return "park-terra-natura";
+  if (s.includes("aqualandia")) return "park-aqualandia";
+  return null;
+}
+
+function assignScrollIds(groups: ParkGroup[]) {
+  const used = new Set<string>();
+  function take(text: string): string | undefined {
+    const id = getParkAnchorIdFromText(text);
+    if (!id || used.has(id)) return undefined;
+    used.add(id);
+    return id;
+  }
+  return groups.map((g) => ({
+    group: g,
+    mainId: take(g.main),
+    bulletIds: g.bullets.map((b) => take(b)),
+  }));
+}
+
+function scrollToParkSection(id: string) {
+  if (!id) return;
+  const el = document.getElementById(id);
+  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
 
 type ParquesAtraccionesModalProps = {
   isOpen: boolean;
@@ -64,21 +141,32 @@ export default function ParquesAtraccionesModal({
 }: ParquesAtraccionesModalProps) {
   const t = useLangStore((s) => s.t);
 
+  const bodyRaw = t("expParquesAtraccionesModalBody");
+  const bodyLines = useMemo(
+    () =>
+      bodyRaw
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean),
+    [bodyRaw],
+  );
+
+  const { parkGroups, tip } = useMemo(() => {
+    const tipLine = bodyLines.length > 0 ? bodyLines[bodyLines.length - 1] : "";
+    const rawContentLines = tipLine ? bodyLines.slice(0, -1) : bodyLines;
+    return {
+      parkGroups: groupBodyLines(rawContentLines),
+      tip: tipLine,
+    };
+  }, [bodyLines]);
+
+  const rowsWithIds = useMemo(() => assignScrollIds(parkGroups), [parkGroups]);
+
   if (!isOpen || typeof document === "undefined") return null;
 
   const title = t("expParquesAtraccionesModalTitle");
   const subtitle = t("expParquesAtraccionesModalSubtitle");
   const intro = t("expParquesAtraccionesModalIntro");
-
-  const bodyRaw = t("expParquesAtraccionesModalBody");
-  const bodyLines = bodyRaw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const tip = bodyLines.length > 0 ? bodyLines[bodyLines.length - 1] : "";
-  const rawContentLines = tip ? bodyLines.slice(0, -1) : bodyLines;
-  const parkGroups = groupBodyLines(rawContentLines);
 
   return createPortal(
     <div
@@ -129,32 +217,45 @@ export default function ParquesAtraccionesModal({
           </div>
 
           {intro ? (
-            <p className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4 whitespace-pre-line">
+            <p className="text-sm text-gray-700 leading-relaxed mb-6 border-l-2 border-brand-gold pl-4 whitespace-pre-line">
               {intro}
             </p>
           ) : null}
 
           <div className="grid grid-cols-1 gap-4">
-            {parkGroups.map((group, idx) => (
+            {rowsWithIds.map(({ group, mainId, bulletIds }, idx) => (
               <div
                 key={`${idx}-${group.main.slice(0, 20)}`}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+                id={mainId}
+                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors scroll-mt-6"
               >
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                  {renderLabeledLine(group.main)}
-                </p>
-                {group.bullets.length > 0 && (
-                  <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
-                    {group.bullets.map((bullet, bIdx) => (
-                      <li
-                        key={bIdx}
-                        className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
-                      >
-                        {renderLabeledLine(bullet)}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <>
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                    {renderLabeledLine(group.main)}
+                  </p>
+                  {group.bullets.length > 0 && (
+                    <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                      {group.bullets.map((bullet, bIdx) => {
+                        const bid = bulletIds[bIdx];
+                        return (
+                          <li
+                            key={bIdx}
+                            id={bid}
+                            className="text-sm text-gray-700 leading-relaxed list-disc list-inside scroll-mt-6"
+                          >
+                            {bid && TERRA_IMAGES_BY_PARK[bid] && (
+                              <TerraImagesForPark parkId={bid} />
+                            )}
+                            {renderLabeledLine(bullet)}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                  {mainId && TERRA_IMAGES_BY_PARK[mainId] && (
+                    <TerraImagesForPark parkId={mainId} imgClassName={mainId === "park-terra-mitica" ? "max-h-24 object-cover" : undefined} />
+                  )}
+                </>
               </div>
             ))}
           </div>

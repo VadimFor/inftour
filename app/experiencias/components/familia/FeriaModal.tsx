@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import feria1 from "./pictures/Feria 1.png";
 
 type FeriaModalProps = {
   isOpen: boolean;
@@ -88,9 +90,22 @@ export default function FeriaModal({ isOpen, onClose }: FeriaModalProps) {
               {t("expFeriaModalSubtitle")}
             </p>
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4">
+          <p className="text-sm text-gray-700 leading-relaxed mb-6 border-l-2 border-brand-gold pl-4">
             {t("expFeriaModalIntro")}
           </p>
+
+          <div className="w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden mb-6">
+            <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+              <Image
+                src={feria1}
+                alt={t("expFeriaModalTitle")}
+                width={feria1.width}
+                height={feria1.height}
+                className="w-full h-auto"
+                sizes="100vw"
+              />
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-4">
             {sectionsMeta.map(({ key }) => {
