@@ -113,7 +113,7 @@ export default function ServicesContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
 
   return (
-    <main className="relative z-20 pb-24">
+    <main className="relative z-20">
       {/* Hero */}
       <section className="container mx-auto px-4 py-10 md:py-24">
         <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
@@ -159,12 +159,12 @@ export default function ServicesContent() {
             {CARDS.map((card) => (
               <article
                 key={card.titleKey}
-                className="group p-8 border border-gray-100 hover:border-brand-gold transition duration-300 shadow-sm rounded-sm bg-[#F8F9FA] hover:bg-white flex flex-col items-start"
+                className="group p-8 border border-gray-100 hover:border-brand-gold transition duration-300 shadow-sm rounded-sm bg-brand-bg hover:bg-white flex flex-col items-start"
               >
                 <div className="w-12 h-12 flex items-center justify-center bg-white text-brand-gold rounded-full shadow-sm mb-6 group-hover:scale-110 transition">
                   <card.Icon className="w-6 h-6" />
                 </div>
-                <h2 className="text-xl font-serif font-bold text-gray-900 mb-4">
+                <h2 className="text-xl font-serif font-bold text-gray-900 mb-3">
                   {t(card.titleKey)}
                 </h2>
                 {"items" in card ? (

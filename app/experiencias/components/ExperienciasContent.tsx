@@ -43,16 +43,16 @@ export default function ExperienciasContent() {
   const [salinasOpen, setSalinasOpen] = useState(false);
 
   return (
-    <main className="relative z-20 pb-24 font-bold">
+    <main className="relative z-20 font-bold pb-18">
       {/* Hero */}
-      <section className="container mx-auto px-4 pt-8 pb-16 md:pt-12 md:pb-24 text-center max-w-4xl">
+      <section className="container mx-auto px-4 py-16 md:py-24 text-center max-w-4xl">
         <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
           {t("expHeroLabel")}
         </span>
         <h1 className="text-4xl md:text-6xl font-serif text-gray-900 mb-6 leading-tight">
           {t("expPageTitle")}
         </h1>
-        <p className="text-lg text-gray-600 leading-relaxed">
+        <p className="text-lg text-gray-600 font-light leading-relaxed">
           {t("expHeroDescLong")}
         </p>
       </section>
@@ -120,7 +120,7 @@ export default function ExperienciasContent() {
           </article>
 
           {/* Nature – 4 cols, row-span-2 */}
-          <article className="md:col-span-4 md:row-span-2 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col">
+          <article className="md:col-span-4 md:row-span-2 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col group">
             <div className="h-64 md:h-2/5 relative overflow-hidden min-h-48">
               <Image
                 src={natureImage}
@@ -308,8 +308,8 @@ export default function ExperienciasContent() {
           </article>
 
           {/* Relax – full width */}
-          <article className="md:col-span-12 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row">
-            <div className="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center">
+          <article className="md:col-span-12 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group">
+            <div className="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center shrink-0">
               <h2 className="text-3xl font-serif text-gray-900 mb-2">
                 {t("expRelax")}
               </h2>
@@ -322,7 +322,7 @@ export default function ExperienciasContent() {
               <button
                 type="button"
                 onClick={() => setRelaxOpen(true)}
-                className="text-brand-link text-sm font-bold flex items-center gap-2 hover:underline"
+                className="text-brand-link text-sm font-bold inline-flex items-center gap-2 hover:underline"
               >
                 {t("expExploreCatalog")}
                 <svg
@@ -341,14 +341,14 @@ export default function ExperienciasContent() {
                 </svg>
               </button>
             </div>
-            <div className="md:w-2/3 h-64 md:h-80 lg:h-96 relative overflow-hidden">
-              <Image
-                src={relaxImage}
-                alt={t("expRelax")}
-                fill
-                className="object-cover transition duration-700"
-                sizes="(max-width: 768px) 100vw, 66vw"
-              />
+            <div className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden">
+              <div className="w-full transition duration-700">
+                <Image
+                  src={relaxImage}
+                  alt={t("expRelax")}
+                  className="w-full h-auto object-contain group-hover:scale-105 duration-700"
+                />
+              </div>
             </div>
           </article>
         </div>

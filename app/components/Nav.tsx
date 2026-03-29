@@ -15,7 +15,7 @@ export default function Nav() {
   );
   return (
     <nav
-      className="sticky top-10 z-50 transition-all duration-300 bg-white border-b border-gray-200 min-w-0"
+      className="sticky top-10 z-50 bg-white border-b border-gray-200 min-w-0"
       data-lang={lang}
     >
       <div className="container mx-auto px-6 h-20 flex justify-between items-center min-w-0">

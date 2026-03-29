@@ -19,15 +19,17 @@ type TopBarProps = {
   seaTemp: number | null;
 };
 
-
 export default function TopBar({ weather, seaTemp }: TopBarProps) {
   useLangStore((s) => s.lang);
   const t = useLangStore((s) => s.t);
-
   return (
-    <div className="fixed top-0 left-0 right-0 z-100 bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-4 md:px-6 flex justify-between items-center tracking-wide">
+    <div
+      className="fixed top-0 left-0 right-0 z-100 bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-4 md:px-6 flex justify-between items-center tracking-wide font-bold"
+    >
       <div className="flex items-center gap-1.5">
-        <span className="hidden sm:inline text-white/70">{t("nowInCalpe")}</span>
+        <span className="hidden sm:inline text-white/70">
+          {t("nowInCalpe")}
+        </span>
         <span className="sm:hidden text-white/70">Calpe:</span>
         <span className="font-medium">
           {weather != null ? `${weather.temperature}°C` : "—°C"}
@@ -39,22 +41,19 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
           {weather != null ? (
             <WeatherIcon code={weather.weatherCode} className="w-4 h-4" />
           ) : (
-            <span className="w-4 h-4 rounded-full bg-white/20 block" aria-hidden />
+            <span
+              className="w-4 h-4 rounded-full bg-white/20 block"
+              aria-hidden
+            />
           )}
         </span>
-        <Link
-          href="https://www.seatemperature.org/europe/spain/calp.htm"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 hover:text-brand-gold transition"
-          title={t("seaTempTitle")}
-        >
+        <span className="flex items-center gap-1">
           <span className="hidden sm:inline text-white/70">{t("agua")}:</span>
           <span className="sm:hidden text-white/70">{t("sea")}:</span>
           <span className="font-medium">
             {seaTemp != null ? `${seaTemp}°C` : "—°C"}
           </span>
-        </Link>
+        </span>
       </div>
       <div className="flex items-center gap-3 md:gap-6">
         <Link
