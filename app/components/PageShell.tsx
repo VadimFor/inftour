@@ -16,14 +16,12 @@ export default async function PageShell({
   ]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen">
       <ScrollHeaderProvider>
         <TopBar weather={weather} seaTemp={seaTemp} />
-        <div className="pt-10">
-          <Nav />
-          {children}
-          <Footer />
-        </div>
+        <Nav />
+        {children}
+        <Footer />
       </ScrollHeaderProvider>
     </div>
   );
