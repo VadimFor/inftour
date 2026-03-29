@@ -1,8 +1,17 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useState } from "react";
+import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+
+const MARKET_IMAGES = [
+  "/sabores/pictures/Mercado Lonja 1.png",
+  "/sabores/pictures/Mercado Lonja 2.jpg",
+  "/sabores/pictures/Mercado Lonja 3.png",
+  "/sabores/pictures/Mercado Lonja 4.jpg",
+];
 
 type MarketsModalProps = {
   isOpen: boolean;
@@ -19,6 +28,7 @@ const sectionsMeta = [
 
 export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
   const t = useLangStore((s) => s.t);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const parseSection = (key: string) => {
     const lines = t(key)
       .split("\n")
@@ -83,41 +93,60 @@ export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
           </p>
 
           <div className="grid grid-cols-1 gap-4">
-            {sectionsMeta.map(({ key }) =>
+            {sectionsMeta.map(({ key }, index) =>
               (() => {
                 const section = parseSection(key);
                 return (
                   <div
                     key={key}
-                    className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+                    className="group bg-brand-bg border border-gray-100 rounded-sm overflow-hidden flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
                   >
-                    <h4 className="text-base font-semibold text-gray-900 leading-snug">
-                      {section.title}
-                    </h4>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      {section.description}
-                    </p>
+                    <div className="px-5 pt-7">
+                      <div className="h-px w-8 bg-brand-gold mb-3" />
+                      <h4 className="text-base font-semibold text-gray-900 leading-snug">
+                        {section.title}
+                      </h4>
+                    </div>
 
-                    {section.bullets.length > 0 && (
-                      <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700 leading-relaxed">
-                        {section.bullets.map((bullet) => {
-                          const [label, ...rest] = bullet.split(":");
-                          const hasLabel = rest.length > 0;
-                          return (
-                            <li key={bullet}>
-                              {hasLabel ? (
-                                <>
-                                  <strong>{label}:</strong>{" "}
-                                  {rest.join(":").trim()}
-                                </>
-                              ) : (
-                                bullet
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
+                    {MARKET_IMAGES[index] && !failedImages.has(index) && (
+                      <div className="relative w-full h-72 overflow-hidden">
+                        <Image
+                          src={MARKET_IMAGES[index]}
+                          alt={section.title}
+                          fill
+                          onError={() => setFailedImages((prev) => new Set(prev).add(index))}
+                          className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
+                          sizes="(max-width: 896px) 100vw, 896px"
+                        />
+                      </div>
                     )}
+
+                    <div className="px-5 pb-5 flex flex-col gap-3">
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {section.description}
+                      </p>
+
+                      {section.bullets.length > 0 && (
+                        <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700 leading-relaxed">
+                          {section.bullets.map((bullet) => {
+                            const [label, ...rest] = bullet.split(":");
+                            const hasLabel = rest.length > 0;
+                            return (
+                              <li key={bullet}>
+                                {hasLabel ? (
+                                  <>
+                                    <strong>{label}:</strong>{" "}
+                                    {rest.join(":").trim()}
+                                  </>
+                                ) : (
+                                  bullet
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 );
               })(),

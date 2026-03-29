@@ -1,8 +1,17 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useState } from "react";
+import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+
+const CYCLING_IMAGES = [
+  "/estilo_de_vida/pictures/El Vaticano del ciclismo 1.png",
+  "/estilo_de_vida/pictures/El Vaticano del ciclismo 2.jpeg",
+  "/estilo_de_vida/pictures/El Vaticano del ciclismo 3.jpeg",
+  "/estilo_de_vida/pictures/El Vaticano del ciclismo 4.png",
+];
 
 type CyclingModalProps = {
   isOpen: boolean;
@@ -37,6 +46,7 @@ function renderTextWithBoldRoutes(text: string, routeNames: string[]) {
 
 export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
   const t = useLangStore((s) => s.t);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const routeNames = [
     "Coll de Rates",
     "Cumbre del Sol",
@@ -124,6 +134,23 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
               {t("expCyclingRichTitle")}
             </h3>
           </div>
+          <div className="grid grid-cols-2 gap-2 mb-6">
+            {CYCLING_IMAGES.map((src, idx) =>
+              !failedImages.has(idx) ? (
+                <div key={idx} className="relative w-full h-48 overflow-hidden rounded-sm">
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    onError={() => setFailedImages((prev) => new Set(prev).add(idx))}
+                    className="object-cover hover:scale-105 transition-transform duration-500 ease-in-out"
+                    sizes="(max-width: 896px) 50vw, 448px"
+                  />
+                </div>
+              ) : null
+            )}
+          </div>
+
           <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
             {introParagraphs.map((p, idx) => (
               <p

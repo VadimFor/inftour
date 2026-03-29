@@ -1,32 +1,23 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useState } from "react";
 import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { recipesModalSectionsByLang } from "./recipes_modal_sections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
-import receta1 from "./pictures/Recetas 1.png";
-import receta2 from "./pictures/Recetas 2.png";
-import receta3 from "./pictures/Recetas 3.png";
-import receta4 from "./pictures/Recetas 4.png";
-import receta5 from "./pictures/Recetas 5.png";
-import receta6 from "./pictures/Recetas 6.png";
-import receta7 from "./pictures/Recetas 7.png";
-import receta8 from "./pictures/Recetas 8.png";
-import receta9 from "./pictures/Recetas 9.png";
-import receta10 from "./pictures/Recetas 10.png";
 
 const RECIPE_IMAGES = [
-  receta1,
-  receta2,
-  receta3,
-  receta4,
-  receta5,
-  receta6,
-  receta7,
-  receta8,
-  receta9,
-  receta10,
+  "/sabores/pictures/Recetas 1.png",
+  "/sabores/pictures/Recetas 2.png",
+  "/sabores/pictures/Recetas 3.png",
+  "/sabores/pictures/Recetas 4.png",
+  "/sabores/pictures/Recetas 5.png",
+  "/sabores/pictures/Recetas 6.png",
+  "/sabores/pictures/Recetas 7.png",
+  "/sabores/pictures/Recetas 8.png",
+  "/sabores/pictures/Recetas 9.png",
+  "/sabores/pictures/Recetas 10.png",
 ];
 
 type RecipesModalProps = {
@@ -50,6 +41,7 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
   const sections = recipesModalSectionsByLang[lang];
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   if (!isOpen || typeof document === "undefined") return null;
 
@@ -118,12 +110,13 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
                   )}
                 </div>
 
-                {RECIPE_IMAGES[sectionIndex] && (
+                {RECIPE_IMAGES[sectionIndex] && !failedImages.has(sectionIndex) && (
                   <div className="relative w-full h-72 rounded-sm overflow-hidden">
                     <Image
                       src={RECIPE_IMAGES[sectionIndex]}
                       alt={section.title}
                       fill
+                      onError={() => setFailedImages((prev) => new Set(prev).add(sectionIndex))}
                       className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
                       sizes="(max-width: 896px) 100vw, 896px"
                     />

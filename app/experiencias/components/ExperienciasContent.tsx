@@ -230,12 +230,14 @@ export default function ExperienciasContent() {
                 </li>
               </ul>
             </div>
-            <Link
-              href="/lobby#faq"
+            <a
+              href="https://cultura.calp.es/en/cultural-programming"
+              target="_blank"
+              rel="noopener noreferrer"
               className="mt-6 inline-block text-xs font-bold uppercase tracking-wider text-white bg-brand-darkgray hover:bg-gray-800 transition py-3 px-4 text-center rounded-sm"
             >
               {t("expViewEventsCalendar")}
-            </Link>
+            </a>
           </article>
 
           {/* Sport – 4 cols */}

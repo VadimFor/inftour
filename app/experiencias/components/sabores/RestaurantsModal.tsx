@@ -1,15 +1,17 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useState } from "react";
 import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
-import restaurante1 from "./pictures/Restaurantes 1.jpeg";
-import restaurante2 from "./pictures/Restaurantes 2.jpg";
-import restaurante3 from "./pictures/Restaurantes 3.png";
 
-const RESTAURANT_IMAGES = [restaurante1, restaurante2, restaurante3];
+const RESTAURANT_IMAGES = [
+  "/sabores/pictures/Restaurantes 1.jpeg",
+  "/sabores/pictures/Restaurantes 2.jpg",
+  "/sabores/pictures/Restaurantes 3.png",
+];
 
 type RestaurantsModalProps = {
   isOpen: boolean;
@@ -41,6 +43,7 @@ export default function RestaurantsModal({
 }: RestaurantsModalProps) {
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const { contentHtml, adviceHtml } = splitAdviceFromContent(
     restaurantsDocSectionsByLang[lang],
   );
@@ -116,12 +119,13 @@ export default function RestaurantsModal({
                       dangerouslySetInnerHTML={{ __html: titleHtml }}
                     />
                   </div>
-                  {RESTAURANT_IMAGES[index] && (
+                  {RESTAURANT_IMAGES[index] && !failedImages.has(index) && (
                     <div className="relative w-full h-72 mt-4 overflow-hidden">
                       <Image
                         src={RESTAURANT_IMAGES[index]}
                         alt=""
                         fill
+                        onError={() => setFailedImages((prev) => new Set(prev).add(index))}
                         className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
                         sizes="(max-width: 896px) 100vw, 896px"
                       />
