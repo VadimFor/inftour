@@ -1,9 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import ecosistemaCalpe1 from "./pictures/Ecosistema deportivo de Calpe 1.png";
+import ecosistemaCalpe2 from "./pictures/Ecosistema deportivo de Calpe 2.jpg";
+import ecosistemaCalpe3 from "./pictures/Ecosistema deportivo de Calpe 3.png";
+import ecosistemaCalpe4 from "./pictures/Ecosistema deportivo de Calpe 4.png";
+import ecosistemaCalpe5 from "./pictures/Ecosistema deportivo de Calpe 5.jpg";
+import ecosistemaCalpe6 from "./pictures/Ecosistema deportivo de Calpe 6.png";
 
 type EcosistemaDeportivoModalProps = {
   isOpen: boolean;
@@ -211,6 +218,15 @@ function parseCalendarBullet(
   return null;
 }
 
+/** First line `1.` … `4.` for numbered body sections (Golf, Tennis, …). */
+function getNumberedSectionNumber(group: SectionGroup): number | null {
+  const firstLine = group.main.split("\n")[0]?.trim() ?? "";
+  const m = firstLine.match(/^(\d+)\./);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  return n >= 1 && n <= 4 ? n : null;
+}
+
 export default function EcosistemaDeportivoModal({
   isOpen,
   onClose,
@@ -382,10 +398,82 @@ export default function EcosistemaDeportivoModal({
                     ]
                   : [null, group.main];
 
+              const sectionNum = getNumberedSectionNumber(group);
+
+              const imagesAfterTitle =
+                sectionNum === 1 ? (
+                  <div className="w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100 mb-4">
+                    <Image
+                      src={ecosistemaCalpe1}
+                      alt={`${title} — Golf`}
+                      width={ecosistemaCalpe1.width}
+                      height={ecosistemaCalpe1.height}
+                      className="w-full h-auto"
+                      sizes="(max-width: 640px) 100vw, 400px"
+                    />
+                  </div>
+                ) : sectionNum === 2 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mb-4 border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+                    <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ecosistemaCalpe2}
+                        alt={`${title} — Tennis & padel (1)`}
+                        width={ecosistemaCalpe2.width}
+                        height={ecosistemaCalpe2.height}
+                        className="w-full h-auto"
+                        sizes="(max-width: 640px) 100vw, 200px"
+                      />
+                    </div>
+                    <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ecosistemaCalpe3}
+                        alt={`${title} — Tennis & padel (2)`}
+                        width={ecosistemaCalpe3.width}
+                        height={ecosistemaCalpe3.height}
+                        className="w-full h-auto"
+                        sizes="(max-width: 640px) 100vw, 200px"
+                      />
+                    </div>
+                  </div>
+                ) : sectionNum === 3 ? (
+                  <div className="flex flex-row gap-2 w-full mb-4 border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ecosistemaCalpe4}
+                        alt={`${title} — Nautical & water (1)`}
+                        width={ecosistemaCalpe4.width}
+                        height={ecosistemaCalpe4.height}
+                        className="w-full h-full object-cover"
+                        sizes="33vw"
+                      />
+                    </div>
+                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ecosistemaCalpe5}
+                        alt={`${title} — Nautical & water (2)`}
+                        width={ecosistemaCalpe5.width}
+                        height={ecosistemaCalpe5.height}
+                        className="w-full h-full object-cover"
+                        sizes="33vw"
+                      />
+                    </div>
+                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ecosistemaCalpe6}
+                        alt={`${title} — Nautical & water (3)`}
+                        width={ecosistemaCalpe6.width}
+                        height={ecosistemaCalpe6.height}
+                        className="w-full h-full object-cover"
+                        sizes="33vw"
+                      />
+                    </div>
+                  </div>
+                ) : null;
+
               return (
                 <div
                   key={`${idx}-${group.main.slice(0, 20)}`}
-                  className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+                  className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors overflow-hidden"
                 >
                   {mainHeader ? (
                     <>
@@ -408,6 +496,7 @@ export default function EcosistemaDeportivoModal({
                           {renderLinkedText(mainHeader)}
                         </p>
                       )}
+                      {imagesAfterTitle}
                       {mainBody.split("\n").map((para, pIdx) => (
                         <p
                           key={pIdx}
@@ -418,23 +507,28 @@ export default function EcosistemaDeportivoModal({
                       ))}
                     </>
                   ) : /^\d+\./.test(group.main) ? (
-                    <p className="text-sm text-gray-800">
-                      {(() => {
-                        const ci = group.main.indexOf(":");
-                        if (ci === -1)
+                    <>
+                      <p className="text-sm text-gray-800">
+                        {(() => {
+                          const ci = group.main.indexOf(":");
+                          if (ci === -1)
+                            return (
+                              <strong>{renderLinkedText(group.main)}</strong>
+                            );
                           return (
-                            <strong>{renderLinkedText(group.main)}</strong>
+                            <>
+                              <strong>
+                                {renderLinkedText(group.main.slice(0, ci))}:
+                              </strong>{" "}
+                              {renderLinkedText(
+                                group.main.slice(ci + 1).trim(),
+                              )}
+                            </>
                           );
-                        return (
-                          <>
-                            <strong>
-                              {renderLinkedText(group.main.slice(0, ci))}:
-                            </strong>{" "}
-                            {renderLinkedText(group.main.slice(ci + 1).trim())}
-                          </>
-                        );
-                      })()}
-                    </p>
+                        })()}
+                      </p>
+                      {imagesAfterTitle}
+                    </>
                   ) : (
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                       {renderLabeledLine(group.main)}

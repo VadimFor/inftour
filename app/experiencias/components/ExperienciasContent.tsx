@@ -1,15 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
 import gastronomyImage from "../pictures/restaurante.png";
-import natureImage from "../pictures/bosque.png";
-import cyclingImage from "../pictures/ciclistas.png";
-import sportsImage from "../pictures/papeles.png";
+import natureImage from "./naturaleza/pictures/Experiencias Naturaleza.jpeg";
 import relaxImage from "../pictures/jabon.png";
+import sportEstiloImage1 from "./estilo_de_vida/pictures/1.jpeg";
+import sportEstiloImage2 from "./estilo_de_vida/pictures/2.png";
 import RestaurantsModal from "./sabores/RestaurantsModal";
 import MarketsModal from "./sabores/MarketsModal";
 import RecipesModal from "./sabores/RecipesModal";
@@ -251,7 +250,7 @@ export default function ExperienciasContent() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="relative h-24 rounded-sm overflow-hidden">
                 <Image
-                  src={cyclingImage}
+                  src={sportEstiloImage1}
                   alt={t("expCycling")}
                   fill
                   className="object-cover"
@@ -260,7 +259,7 @@ export default function ExperienciasContent() {
               </div>
               <div className="relative h-24 rounded-sm overflow-hidden">
                 <Image
-                  src={sportsImage}
+                  src={sportEstiloImage2}
                   alt={t("expSportsFacilities")}
                   fill
                   className="object-cover"

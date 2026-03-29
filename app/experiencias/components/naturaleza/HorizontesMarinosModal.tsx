@@ -1,8 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import playas1 from "./pictures/Playas 1.jpeg";
+import playas2 from "./pictures/Playas 2.jpeg";
+import playas3 from "./pictures/Playas 3.jpeg";
+import playas4 from "./pictures/Playas 4.jpeg";
+import horizontes1 from "./pictures/Horizontes marinos 1.jpeg";
+import horizontes2 from "./pictures/Horizontes marinos 2.jpeg";
+import horizontes3 from "./pictures/Horizontes marinos 3.jpeg";
+import horizontes4 from "./pictures/Horizontes marinos 4.jpeg";
 
 type HorizontesMarinosModalProps = {
   isOpen: boolean;
@@ -197,6 +206,15 @@ export default function HorizontesMarinosModal({
                 <p className="text-sm text-gray-900 leading-relaxed">{intro}</p>
               </div>
             ) : null}
+
+            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+              {[playas1, playas2].map((src, i) => (
+                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                  <Image src={src} alt={`${title} — Playas ${i + 1}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                </div>
+              ))}
+            </div>
+
             {ecoLines.length > 0 ? (
               <div className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors">
                 {ecoTitle ? (
@@ -235,6 +253,15 @@ export default function HorizontesMarinosModal({
                 ) : null}
               </div>
             ) : null}
+
+            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+              {[playas3, playas4].map((src, i) => (
+                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                  <Image src={src} alt={`${title} — Playas ${i + 3}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                </div>
+              ))}
+            </div>
+
             {calpeLines.length > 0 ? (
               <div className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors">
                 {calpeTitle ? (
@@ -261,6 +288,14 @@ export default function HorizontesMarinosModal({
                 ) : null}
               </div>
             ) : null}
+
+            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+              {[horizontes1, horizontes2].map((src, i) => (
+                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                  <Image src={src} alt={`${title} — Horizontes marinos ${i + 1}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                </div>
+              ))}
+            </div>
             {sections.map((section, sIdx) => (
               <div
                 key={`s-${sIdx}-${(section.title ?? section.mainLines[0] ?? "").slice(0, 20)}`}
@@ -295,6 +330,14 @@ export default function HorizontesMarinosModal({
                 ) : null}
               </div>
             ))}
+
+            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+              {[horizontes3, horizontes4].map((src, i) => (
+                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                  <Image src={src} alt={`${title} — Horizontes marinos ${i + 3}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                </div>
+              ))}
+            </div>
           </div>
 
           {tip ? (

@@ -1,8 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import salinas1 from "./pictures/Las Salinas 1.jpg";
+import salinas2 from "./pictures/Las Salinas 2.jpg";
+import salinas3 from "./pictures/Las Salinas 3.png";
+import salinas4 from "./pictures/Las Salinas 4.jpg";
 
 type SalinasModalProps = {
   isOpen: boolean;
@@ -123,6 +128,20 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+              {[salinas1, salinas2, salinas3, salinas4].map((src, i) => (
+                <div key={i} className="h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                  <Image
+                    src={src}
+                    alt={`${title} — Las Salinas ${i + 1}`}
+                    width={src.width}
+                    height={src.height}
+                    className="w-full h-full object-cover"
+                    sizes="50vw"
+                  />
+                </div>
+              ))}
+            </div>
             {sections.map((section, idx) => (
               <div
                 key={`s-${idx}-${(section.title ?? section.body[0] ?? "").slice(0, 24)}`}

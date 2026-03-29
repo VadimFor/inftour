@@ -1,8 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import ascenso1 from "./pictures/Ascenso al Peñón 1.jpeg";
+import ascenso2 from "./pictures/Ascenso al Peñón 2.jpeg";
+import ascenso3 from "./pictures/Ascenso al Peñón 3.jpeg";
 
 type IfachModalProps = {
   isOpen: boolean;
@@ -194,6 +198,38 @@ export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
                       </li>
                     ))}
                   </ul>
+                ) : null}
+
+                {sIdx === 0 ? (
+                  <div className="w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+                    <div className="h-72 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <Image
+                        src={ascenso1}
+                        alt={`${title} — Ascenso al Peñón 1`}
+                        width={ascenso1.width}
+                        height={ascenso1.height}
+                        className="w-full h-full object-cover"
+                        sizes="100vw"
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
+                {sIdx === 2 ? (
+                  <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+                    {[ascenso2, ascenso3].map((src, i) => (
+                      <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                        <Image
+                          src={src}
+                          alt={`${title} — Ascenso al Peñón ${i + 2}`}
+                          width={src.width}
+                          height={src.height}
+                          className="w-full h-full object-cover"
+                          sizes="50vw"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 ) : null}
               </div>
             ))}
