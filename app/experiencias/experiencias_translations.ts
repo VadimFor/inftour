@@ -1,14 +1,14 @@
-import { bbqParksModalTranslations } from "../components/familia/bbqparks_modal_translations";
-import { feriaModalTranslations } from "../components/familia/feria_modal_translations";
-import { calpeGrandezaModalTranslations } from "../components/familia/calpe_grandeza_translations";
-import { parquesAtraccionesModalTranslations } from "./parques_atracciones_modal_translations";
-import { ecosistemaDeportivoModalTranslations } from "../components/estilo_de_vida/ecosistema_deportivo_modal_translations";
-import { relaxModalTranslations } from "../components/relax/relax_modal_translate";
-import { ifachModalTranslations } from "./ifach_modal_translations";
-import { horizontesMarinosModalTranslations } from "../components/naturaleza/horizontes_marinos_modal_translations";
-import { salinasModalTranslations } from "../components/naturaleza/salinas_modal_translations";
-import { sportRentingModalTranslations } from "../components/estilo_de_vida/sport_renting_modal_translations";
-import { cyclingModalTranslations } from "../components/estilo_de_vida/cycling_modal_translations";
+import { bbqParksModalTranslations } from "./components/familia/bbqparks_modal_translations";
+import { feriaModalTranslations } from "./components/familia/feria_modal_translations";
+import { calpeGrandezaModalTranslations } from "./components/familia/calpe_grandeza_translations";
+import { parquesAtraccionesModalTranslations } from "./components/familia/parques_atracciones_modal_translations";
+import { ecosistemaDeportivoModalTranslations } from "./components/estilo_de_vida/ecosistema_deportivo_modal_translations";
+import { relaxModalTranslations } from "./components/relax/relax_modal_translate";
+import { ifachModalTranslations } from "./components/naturaleza/ifach_modal_translations";
+import { horizontesMarinosModalTranslations } from "./components/naturaleza/horizontes_marinos_modal_translations";
+import { salinasModalTranslations } from "./components/naturaleza/salinas_modal_translations";
+import { sportRentingModalTranslations } from "./components/estilo_de_vida/sport_renting_modal_translations";
+import { cyclingModalTranslations } from "./components/estilo_de_vida/cycling_modal_translations";
 
 type LangStrings = {
   eng: string;

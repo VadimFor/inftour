@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { experienciasTranslations } from "../experiencias/translations/experiencias_translations";
+import { experienciasTranslations } from "../experiencias/experiencias_translations";
 import { revistaTranslations } from "../revista/translations/revista_translations";
 import { servicesTranslations } from "../services/translations/services_translations";
 import { lobbyTranslations } from "../lobby/translations/lobby_translations";

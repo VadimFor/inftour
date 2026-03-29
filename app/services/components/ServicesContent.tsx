@@ -152,7 +152,7 @@ export default function ServicesContent() {
       {/* 4 cards */}
       <section
         id="servicios"
-        className="bg-white py-2 border-y border-gray-200"
+        className="bg-white py-12 md:py-16 border-y border-gray-200"
       >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

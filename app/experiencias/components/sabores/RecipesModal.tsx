@@ -1,9 +1,33 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { recipesModalSectionsByLang } from "./recipes_modal_sections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import receta1 from "./pictures/Recetas 1.png";
+import receta2 from "./pictures/Recetas 2.png";
+import receta3 from "./pictures/Recetas 3.png";
+import receta4 from "./pictures/Recetas 4.png";
+import receta5 from "./pictures/Recetas 5.png";
+import receta6 from "./pictures/Recetas 6.png";
+import receta7 from "./pictures/Recetas 7.png";
+import receta8 from "./pictures/Recetas 8.png";
+import receta9 from "./pictures/Recetas 9.png";
+import receta10 from "./pictures/Recetas 10.png";
+
+const RECIPE_IMAGES = [
+  receta1,
+  receta2,
+  receta3,
+  receta4,
+  receta5,
+  receta6,
+  receta7,
+  receta8,
+  receta9,
+  receta10,
+];
 
 type RecipesModalProps = {
   isOpen: boolean;
@@ -81,7 +105,7 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
             {sections.map((section, sectionIndex) => (
               <article
                 key={`recipe-section-${sectionIndex}`}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 sm:p-6 flex flex-col gap-4 hover:border-brand-gold/40 transition-colors"
+                className="group bg-brand-bg border border-gray-100 rounded-sm p-5 sm:p-6 flex flex-col gap-4 hover:border-brand-gold/40 transition-colors"
               >
                 <div className="space-y-2">
                   <h4 className="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
@@ -93,6 +117,18 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
                     </p>
                   )}
                 </div>
+
+                {RECIPE_IMAGES[sectionIndex] && (
+                  <div className="relative w-full h-72 rounded-sm overflow-hidden">
+                    <Image
+                      src={RECIPE_IMAGES[sectionIndex]}
+                      alt={section.title}
+                      fill
+                      className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
+                      sizes="(max-width: 896px) 100vw, 896px"
+                    />
+                  </div>
+                )}
 
                 {section.source.length > 0 && (
                   <div className="bg-white/80 border border-gray-200 rounded-sm px-4 py-3">

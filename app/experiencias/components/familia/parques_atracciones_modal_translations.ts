@@ -1,4 +1,4 @@
-import parquesAtraccionesBodyExtract from "../../../parques_atracciones_body_extract.json";
+import parquesAtraccionesBodyExtract from "../../../../parques_atracciones_body_extract.json";
 
 type LangStrings = {
   eng: string;
