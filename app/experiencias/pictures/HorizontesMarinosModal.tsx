@@ -2,7 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../lib/langStore";
-import { MODAL_TITLE_CLASS } from "./modalStyles";
+import { MODAL_TITLE_CLASS } from "../components/modalStyles";
 
 type HorizontesMarinosModalProps = {
   isOpen: boolean;
