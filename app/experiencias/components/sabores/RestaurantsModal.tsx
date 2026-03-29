@@ -1,9 +1,15 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import restaurante1 from "./pictures/Restaurantes 1.jpeg";
+import restaurante2 from "./pictures/Restaurantes 2.jpg";
+import restaurante3 from "./pictures/Restaurantes 3.png";
+
+const RESTAURANT_IMAGES = [restaurante1, restaurante2, restaurante3];
 
 type RestaurantsModalProps = {
   isOpen: boolean;
@@ -92,13 +98,42 @@ export default function RestaurantsModal({
           </p>
 
           <div className="space-y-4">
-            {sectionCards.map((sectionHtml, index) => (
-              <section
-                key={index}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors text-sm text-gray-700 leading-relaxed [&_p]:mb-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline hover:[&_a]:text-blue-900"
-                dangerouslySetInnerHTML={{ __html: sectionHtml }}
-              />
-            ))}
+            {sectionCards.map((sectionHtml, index) => {
+              const splitIdx = sectionHtml.indexOf("</p>");
+              const titleHtml =
+                splitIdx !== -1 ? sectionHtml.slice(0, splitIdx + 4) : "";
+              const restHtml =
+                splitIdx !== -1 ? sectionHtml.slice(splitIdx + 4) : sectionHtml;
+              return (
+                <section
+                  key={index}
+                  className="group bg-brand-bg border border-gray-100 rounded-sm overflow-hidden hover:border-brand-gold/40 transition-colors"
+                >
+                  <div className="px-5 pt-7">
+                    <div className="h-px w-8 bg-brand-gold mb-3" />
+                    <div
+                      className="text-base sm:text-lg font-semibold text-gray-900 leading-snug [&_p]:mb-0 [&_strong]:font-semibold"
+                      dangerouslySetInnerHTML={{ __html: titleHtml }}
+                    />
+                  </div>
+                  {RESTAURANT_IMAGES[index] && (
+                    <div className="relative w-full h-72 mt-4 overflow-hidden">
+                      <Image
+                        src={RESTAURANT_IMAGES[index]}
+                        alt=""
+                        fill
+                        className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
+                        sizes="(max-width: 896px) 100vw, 896px"
+                      />
+                    </div>
+                  )}
+                  <div
+                    className="p-5 text-sm text-gray-700 leading-relaxed [&_p]:mb-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline hover:[&_a]:text-blue-900"
+                    dangerouslySetInnerHTML={{ __html: restHtml }}
+                  />
+                </section>
+              );
+            })}
           </div>
 
           <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
