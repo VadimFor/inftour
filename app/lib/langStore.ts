@@ -5,6 +5,7 @@ import { experienciasTranslations } from "../experiencias/experiencias_translati
 import { revistaTranslations } from "../revista/translations/revista_translations";
 import { servicesTranslations } from "../services/translations/services_translations";
 import { lobbyTranslations } from "../lobby/translations/lobby_translations";
+import { stayTranslations } from "../lobby/translations/stay_translations";
 import { privacyModalTranslations } from "../lobby/translations/privacymodal_translate";
 import { instrWhatIfTranslations } from "../lobby/translations/instr_whatif_merged";
 import { menuTranslations } from "./menu_translations";
@@ -106,6 +107,9 @@ const translations: TranslationMap = {
 
   // Lobby
   ...lobbyTranslations,
+
+  // Lobby – Llegada y estancia (Lobby Llegada y estancia.docx)
+  ...stayTranslations,
 
   // Lobby – "What to do if" (full text from Lobby Instrucciones docx; overrides lobInstr* in lobbyTranslations)
   ...instrWhatIfTranslations,
