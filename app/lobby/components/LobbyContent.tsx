@@ -2,46 +2,273 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
-import aboutImage from "../pictures/oficina_inftour.png";
+import lobbyAboutImage from "../../../ejemplos/lobby/Lobby.png";
 import aiBgImage from "../pictures/ai_espacio.png";
+import PrivacyModal from "./PrivacyModal";
 
-const INSTRUCTION_GROUPS = [
-  {
-    title: "lobFaqGroupReservations" as const,
-    items: [
-      { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
-      { q: "lobInstr2Q" as const, a: "lobInstr2A" as const },
-      { q: "lobInstr3Q" as const, a: "lobInstr3A" as const },
-      { q: "lobInstr4Q" as const, a: "lobInstr4A" as const },
-    ],
-  },
-  {
-    title: "lobFaqGroupArrival" as const,
-    items: [
-      { q: "lobInstr5Q" as const, a: "lobInstr5A" as const },
-      { q: "lobInstr6Q" as const, a: "lobInstr6A" as const },
-      { q: "lobInstr7Q" as const, a: "lobInstr7A" as const },
-      { q: "lobInstr8Q" as const, a: "lobInstr8A" as const },
-      { q: "lobInstr9Q" as const, a: "lobInstr9A" as const },
-    ],
-  },
-  {
-    title: "lobFaqGroupStay" as const,
-    items: [
-      { q: "lobInstr10Q" as const, a: "lobInstr10A" as const },
-      { q: "lobInstr11Q" as const, a: "lobInstr11A" as const },
-      { q: "lobInstr12Q" as const, a: "lobInstr12A" as const },
-      { q: "lobInstr13Q" as const, a: "lobInstr13A" as const },
-      { q: "lobInstr14Q" as const, a: "lobInstr14A" as const },
-      { q: "lobInstr15Q" as const, a: "lobInstr15A" as const },
-      { q: "lobInstr16Q" as const, a: "lobInstr16A" as const },
-      { q: "lobInstr17Q" as const, a: "lobInstr17A" as const },
-    ],
-  },
+const INSTRUCTION_ITEMS = [
+  { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
+  { q: "lobInstr2Q" as const, a: "lobInstr2A" as const },
+  { q: "lobInstr3Q" as const, a: "lobInstr3A" as const },
+  { q: "lobInstr4Q" as const, a: "lobInstr4A" as const },
+  { q: "lobInstr5Q" as const, a: "lobInstr5A" as const },
+  { q: "lobInstr6Q" as const, a: "lobInstr6A" as const },
+  { q: "lobInstr7Q" as const, a: "lobInstr7A" as const },
+  { q: "lobInstr8Q" as const, a: "lobInstr8A" as const },
+  { q: "lobInstr9Q" as const, a: "lobInstr9A" as const },
+  { q: "lobInstr10Q" as const, a: "lobInstr10A" as const },
+  { q: "lobInstr11Q" as const, a: "lobInstr11A" as const },
+  { q: "lobInstr12Q" as const, a: "lobInstr12A" as const },
+  { q: "lobInstr13Q" as const, a: "lobInstr13A" as const },
+  { q: "lobInstr14Q" as const, a: "lobInstr14A" as const },
+  { q: "lobInstr15Q" as const, a: "lobInstr15A" as const },
+  { q: "lobInstr16Q" as const, a: "lobInstr16A" as const },
+  { q: "lobInstr17Q" as const, a: "lobInstr17A" as const },
+  { q: "lobInstr18Q" as const, a: "lobInstr18A" as const },
+  { q: "lobInstr19Q" as const, a: "lobInstr19A" as const },
+  { q: "lobInstr20Q" as const, a: "lobInstr20A" as const },
+] as const;
+
+const ABOUT_DOC_PARAGRAPHS = [
+  "lobAboutDocP1",
+  "lobAboutDocP2",
+  "lobAboutDocP3",
+  "lobAboutDocP4",
+  "lobAboutDocP5",
+  "lobAboutDocP6",
+] as const;
+
+const ABOUT_DOC_AREAS = [
+  "lobAboutDocArea1",
+  "lobAboutDocArea2",
+  "lobAboutDocArea3",
+  "lobAboutDocArea4",
+] as const;
+
+// Icons in same order as ABOUT_DOC_AREAS: holiday rentals, property mgmt, sales, construction
+const AREA_ICONS = [
+  <svg key="home" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>,
+  <svg key="building" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>,
+  <svg key="exchange" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>,
+  <svg key="wrench" className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.585l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" /></svg>,
 ];
+
+function renderBoldFragments(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-semibold text-brand-black">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+const LOBBY_COMPLAINT_EMAIL = "mail@inftour.com";
+const LOBBY_COMPLAINT_WA_DISPLAY = "+34 640 748 732";
+const LOBBY_COMPLAINT_WA_HREF = "https://wa.me/34640748732";
+
+function renderComplaintEmailLine(text: string) {
+  const idx = text.indexOf(LOBBY_COMPLAINT_EMAIL);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <a
+        href={`mailto:${LOBBY_COMPLAINT_EMAIL}`}
+        className="font-medium text-brand-gold hover:underline"
+      >
+        {LOBBY_COMPLAINT_EMAIL}
+      </a>
+      {text.slice(idx + LOBBY_COMPLAINT_EMAIL.length)}
+    </>
+  );
+}
+
+function renderComplaintWhatsappLine(text: string) {
+  const idx = text.indexOf(LOBBY_COMPLAINT_WA_DISPLAY);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <a
+        href={LOBBY_COMPLAINT_WA_HREF}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-medium text-brand-gold hover:underline"
+      >
+        {LOBBY_COMPLAINT_WA_DISPLAY}
+      </a>
+      {text.slice(idx + LOBBY_COMPLAINT_WA_DISPLAY.length)}
+    </>
+  );
+}
+
+const URL_IN_INSTR_RE = /(https?:\/\/[^\s]+)/g;
+
+/** Matches PASO 1 –, STEP 2 –, ШАГ 3 –, ÉTAPE 1 –, etc. */
+const INSTR_STEP_RE =
+  /^(?:PASO|STEP|SCHRITT|ШАГ|ÉTAPE|ÈTAPE|ETAPE|PASSO|FASE|KROK|КРОК)\s+(\d+)\s*[–\-—]\s*(.+)$/iu;
+
+const INSTR_IMPORTANT_PREFIX =
+  /^(?:IMPORTANTE|IMPORTANT|WICHTIG|ВАЖНО|ВАЖЛИВО|WAŻNE)\s*:/iu;
+
+const INSTR_CASE_RE = /^👉\s*(.+)$/;
+
+function stripLeadingListGlyph(s: string) {
+  return s.replace(/^[•‣▪]\s*/, "");
+}
+
+function linkifyInstructionLine(s: string): ReactNode {
+  const parts = s.split(URL_IN_INSTR_RE);
+  return parts.map((part, i) => {
+    if (/^https?:\/\//.test(part)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="break-all text-brand-gold underline hover:text-amber-600"
+        >
+          {part}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+type ClassifiedBullet =
+  | { kind: "step"; num: string; body: string }
+  | { kind: "case"; marker: string; body: string }
+  | { kind: "plain"; body: string }
+  | { kind: "important"; body: string };
+
+function classifyInstructionBullet(raw: string): ClassifiedBullet {
+  const trimmed = stripLeadingListGlyph(raw.trim());
+  if (INSTR_IMPORTANT_PREFIX.test(trimmed)) {
+    return { kind: "important", body: trimmed };
+  }
+  const caso = trimmed.match(INSTR_CASE_RE);
+  if (caso) {
+    const body = caso[1];
+    const letter = body.match(/^(?:CASO|CASE|СЛУЧАЙ|FALL)\s*([AB])\b/i);
+    const marker = letter ? letter[1].toUpperCase() : "→";
+    return { kind: "case", marker, body };
+  }
+  const step = trimmed.match(INSTR_STEP_RE);
+  if (step) return { kind: "step", num: step[1], body: step[2] };
+  return { kind: "plain", body: trimmed };
+}
+
+function InstructionStepper({ items }: { items: Exclude<ClassifiedBullet, { kind: "important" }>[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="mb-4 space-y-2">
+      {items.map((item, i) => {
+        const badge =
+          item.kind === "step" ? item.num :
+          item.kind === "case" ? item.marker : "·";
+
+        const body =
+          item.kind === "case" ? (
+            <>{linkifyInstructionLine(item.body)}</>
+          ) : (
+            linkifyInstructionLine(item.body)
+          );
+
+        return (
+          <div key={i} className="flex items-start gap-3 rounded-lg bg-white border border-gray-100 px-4 py-3 shadow-sm">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-gold text-[0.65rem] font-bold text-white">
+              {badge}
+            </span>
+            <p className="text-sm font-light leading-relaxed text-gray-700">{body}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ImportantCallout({ body }: { body: string }) {
+  const sep = body.search(/:\s/);
+  const hasLabel = sep >= 0;
+  const label = hasLabel ? body.slice(0, sep + 1).trimEnd() : "";
+  const rest = hasLabel ? body.slice(sep + 1).replace(/^\s+/, "") : body;
+  return (
+    <div className="mb-4 flex items-start gap-3 rounded-lg border-l-4 border-brand-gold bg-amber-50 px-4 py-3 text-sm font-light leading-relaxed text-gray-800">
+      <div>
+        {hasLabel && (
+          <span className="mr-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-brand-gold">
+            {label}
+          </span>
+        )}
+        {linkifyInstructionLine(rest)}
+      </div>
+    </div>
+  );
+}
+
+function renderInstructionAnswer(text: string): ReactNode {
+  const lines = text.split(/\r?\n/).map((l) => l.trimEnd());
+  const nodes: ReactNode[] = [];
+  let bulletGroup: string[] = [];
+
+  function flushBullets() {
+    if (!bulletGroup.length) return;
+    const classified = bulletGroup.map(classifyInstructionBullet);
+    let buf: Exclude<ClassifiedBullet, { kind: "important" }>[] = [];
+    const flushStepper = () => {
+      if (!buf.length) return;
+      nodes.push(
+        <InstructionStepper key={nodes.length} items={buf} />,
+      );
+      buf = [];
+    };
+    for (const c of classified) {
+      if (c.kind === "important") {
+        flushStepper();
+        nodes.push(
+          <ImportantCallout key={nodes.length} body={c.body} />,
+        );
+      } else {
+        buf.push(c);
+      }
+    }
+    flushStepper();
+    bulletGroup = [];
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushBullets();
+      continue;
+    }
+    if (trimmed.startsWith("•") || trimmed.startsWith("👉")) {
+      bulletGroup.push(trimmed);
+    } else {
+      flushBullets();
+      nodes.push(
+        <p
+          key={nodes.length}
+          className="mb-3 text-sm font-light leading-relaxed text-gray-600"
+        >
+          {linkifyInstructionLine(trimmed)}
+        </p>,
+      );
+    }
+  }
+  flushBullets();
+  return <div className="space-y-1">{nodes}</div>;
+}
 
 const POLICIES = [
   {
@@ -93,6 +320,8 @@ export default function LobbyContent() {
   const [status, setStatus] = useState<
     "idle" | "sending" | "success" | "error"
   >("idle");
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [openInstr, setOpenInstr] = useState<string | null>(null);
 
   function openAIChat() {
     if (typeof window !== "undefined") {
@@ -137,57 +366,130 @@ export default function LobbyContent() {
         </p>
       </section>
 
-      {/* About us: image + text + details */}
+      {/* About us: full story + summary (lobby doc) */}
       <section className="mb-20 md:mb-24">
-        <div className="bg-white border border-gray-100 shadow-sm rounded-lg overflow-hidden flex flex-col md:flex-row">
-          <div className="md:w-1/2 relative h-64 md:min-h-[320px] overflow-hidden shrink-0">
-            <Image
-              src={aboutImage}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-          <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-            <h2 className="text-3xl font-serif text-brand-black mb-4">
+        <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] bg-white">
+          <div className="p-8 md:p-12 lg:p-14 bg-linear-to-br from-white via-brand-bg to-amber-50/30">
+            <span className="text-brand-gold font-bold uppercase tracking-[0.22em] text-[11px] mb-3 block">
               {t("lobAboutTitle")}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-serif text-brand-black mb-8 leading-tight">
+              {t("lobAboutDocMainTitle")}
             </h2>
-            <p className="text-gray-600 font-light leading-relaxed mb-6">
-              {t("lobAboutIntro")
-                .split(/\b(INFTOUR)\b/)
-                .map((part, i) =>
-                  part === "INFTOUR" ? (
-                    <strong key={i} className="font-bold text-brand-black">
-                      INFTOUR
-                    </strong>
-                  ) : (
-                    <span key={i}>{part}</span>
-                  ),
-                )}
-            </p>
-            <details className="group cursor-pointer">
-              <summary className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-brand-gold border-b border-gray-100 pb-3 list-none">
-                {t("lobAboutReadMore")}
-                <svg
-                  className="w-4 h-4 transform group-open:rotate-180 transition duration-300 shrink-0 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="pt-4 text-sm text-gray-600 font-light leading-relaxed space-y-4">
-                <p>{t("lobAboutStory1")}</p>
-                <p>{t("lobAboutStory2")}</p>
+            <div className="overflow-hidden text-[15px] md:text-base text-gray-600 font-light leading-relaxed">
+              <figure className="mb-5 sm:mb-3 sm:mt-1 sm:float-right sm:ml-6 w-full max-w-md mx-auto sm:mx-0 sm:w-[min(100%,280px)] sm:max-w-[40%] lg:w-[200px] lg:max-w-[200px] xl:w-[180px] xl:max-w-[180px] shrink-0 rounded-xl overflow-hidden border border-gray-100/90 shadow-md bg-white">
+                <Image
+                  src={lobbyAboutImage}
+                  alt={t("lobAboutDocMainTitle")}
+                  className="w-full h-auto object-cover object-center"
+                  sizes="(max-width: 640px) min(100vw - 8rem, 28rem), (max-width: 1024px) 280px, (max-width: 1280px) 200px, 180px"
+                  quality={100}
+                  priority
+                  placeholder="blur"
+                />
+              </figure>
+              {ABOUT_DOC_PARAGRAPHS.map((key) => (
+                <p key={key} className="mb-5 last:mb-0">
+                  {renderBoldFragments(t(key))}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-brand-gold/20 bg-linear-to-br from-brand-bg/90 via-white to-amber-50/20 p-8 md:p-10 relative overflow-hidden">
+            <div
+              className="absolute -right-16 -top-16 size-48 rounded-full bg-brand-gold/5 pointer-events-none"
+              aria-hidden
+            />
+            <div
+              className="absolute -left-8 bottom-0 size-32 rounded-full bg-amber-100/40 pointer-events-none"
+              aria-hidden
+            />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-8 pb-4 border-b border-brand-gold/20">
+                <span className="h-7 w-1 rounded-full bg-brand-gold shrink-0" aria-hidden />
+                <h3 className="text-xl md:text-2xl font-serif text-brand-black">
+                  {t("lobAboutDocSummaryTitle")}
+                </h3>
               </div>
-            </details>
+              <div className="grid sm:grid-cols-2 gap-4 mb-10">
+                <div className="flex gap-4 items-center bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
+                  <span
+                    className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5"
+                      />
+                    </svg>
+                  </span>
+                  <p className="text-[15px] text-gray-700 leading-snug">
+                    {renderBoldFragments(t("lobAboutDocSummaryFounded"))}
+                  </p>
+                </div>
+                <div className="flex gap-4 items-center bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
+                  <span
+                    className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                      />
+                    </svg>
+                  </span>
+                  <p className="text-[15px] text-gray-700 leading-snug">
+                    {renderBoldFragments(t("lobAboutDocSummaryLocation"))}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-10 overflow-hidden rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3 border-b border-gray-100 bg-white px-5 py-4">
+                  <span className="h-5 w-1 shrink-0 rounded-full bg-brand-gold" aria-hidden />
+                  <h4 className="font-serif text-lg text-brand-black">
+                    {t("lobAboutDocAreasTitle")}
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 gap-px bg-gray-100">
+                  {ABOUT_DOC_AREAS.map((key, i) => (
+                    <div
+                      key={key}
+                      className="flex items-center gap-3 bg-white px-5 py-4"
+                    >
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold">
+                        {AREA_ICONS[i]}
+                      </span>
+                      <span className="text-sm font-medium text-gray-700 leading-snug">{t(key)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[15px] md:text-base text-gray-600 font-light leading-relaxed border-t border-gray-100 pt-6">
+                {renderBoldFragments(t("lobAboutDocClosing"))}
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -322,6 +624,43 @@ export default function LobbyContent() {
         </div>
       </section>
 
+      {/* Canal de denuncias / reporting channel (text from Lobby Canal de denuncias.docx) */}
+      <section className="mb-20 md:mb-24">
+        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] md:p-12 lg:p-14">
+          <h2 className="mb-6 font-serif text-2xl leading-tight text-brand-black md:text-3xl">
+            {t("lobComplaintsTitle")}
+          </h2>
+          <div className="space-y-5 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+            <p>{t("lobComplaintsP1")}</p>
+            <p>{t("lobComplaintsP2")}</p>
+            <h3 className="pt-2 text-base font-semibold text-brand-black">
+              {t("lobComplaintsHowTitle")}
+            </h3>
+            <p>{renderComplaintEmailLine(t("lobComplaintsLineEmail"))}</p>
+            <p>{renderComplaintWhatsappLine(t("lobComplaintsLineWhatsapp"))}</p>
+            <p>{t("lobComplaintsP3")}</p>
+            <p>{t("lobComplaintsP4")}</p>
+            <p>{t("lobComplaintsP5")}</p>
+          </div>
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+            <a
+              href={`mailto:${LOBBY_COMPLAINT_EMAIL}`}
+              className="inline-flex items-center justify-center rounded-lg bg-brand-gold px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-amber-500"
+            >
+              {t("lobComplaintsBtnEmail")}
+            </a>
+            <a
+              href={LOBBY_COMPLAINT_WA_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-3 text-xs font-bold uppercase tracking-wider text-brand-black transition hover:border-brand-gold hover:text-brand-gold"
+            >
+              {t("lobComplaintsBtnWhatsapp")}
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Instructions + Policies */}
       <section className="space-y-10">
         <div>
@@ -333,32 +672,33 @@ export default function LobbyContent() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {INSTRUCTION_GROUPS.map(({ title, items }) => (
-            <div key={title}>
-              <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold mb-3">
-                {t(title)}
-              </h4>
-              <div className="space-y-3">
-                {items.map(({ q, a }) => (
-                  <details
-                    key={q}
-                    className="group bg-white border border-gray-100 rounded-lg overflow-hidden"
-                  >
-                    <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition list-none">
-                      {t(q)}
-                      <span className="text-gray-400 group-open:rotate-45 transition duration-300 text-xl leading-none shrink-0 ml-2">
-                        +
-                      </span>
-                    </summary>
-                    <div className="px-4 pb-4 text-sm text-gray-600 font-light border-t border-gray-50 pt-3">
-                      {t(a)}
-                    </div>
-                  </details>
-                ))}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-3 items-start">
+          {INSTRUCTION_ITEMS.map(({ q, a }) => {
+            const isOpen = openInstr === q;
+            return (
+              <div
+                key={q}
+                className="bg-white border border-gray-100 rounded-lg overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenInstr(isOpen ? null : q)}
+                  className="flex w-full items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition text-left"
+                  aria-expanded={isOpen}
+                >
+                  {t(q)}
+                  <span className={`text-gray-400 transition-transform duration-300 text-xl leading-none shrink-0 ml-2 ${isOpen ? "rotate-45" : ""}`}>
+                    +
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="scrollbar-modal max-h-[min(70vh,26rem)] overflow-y-auto border-t border-gray-50 px-4 pb-4 pt-3">
+                    {renderInstructionAnswer(t(a))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div>
@@ -366,21 +706,42 @@ export default function LobbyContent() {
             {t("lobPoliciesTitle")}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {POLICIES.map(({ titleKey, descKey, href }) => (
-              <Link
-                key={titleKey}
-                href={href}
-                className="group block p-6 bg-(--color-brand-bg) border border-gray-100 rounded-lg hover:border-brand-gold hover:bg-white transition"
-              >
-                <h4 className="font-bold text-sm text-brand-black mb-2 group-hover:text-brand-gold transition">
-                  {t(titleKey)}
-                </h4>
-                <p className="text-xs text-gray-500 font-light">{t(descKey)}</p>
-              </Link>
-            ))}
+            {POLICIES.map(({ titleKey, descKey, href }) =>
+              titleKey === "privacyPolicy" ? (
+                <button
+                  key={titleKey}
+                  type="button"
+                  onClick={() => setPrivacyModalOpen(true)}
+                  className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
+                >
+                  <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
+                    {t(titleKey)}
+                  </h4>
+                  <p className="text-xs font-light text-gray-500">
+                    {t(descKey)}
+                  </p>
+                </button>
+              ) : (
+                <Link
+                  key={titleKey}
+                  href={href}
+                  className="group block p-6 bg-(--color-brand-bg) border border-gray-100 rounded-lg hover:border-brand-gold hover:bg-white transition"
+                >
+                  <h4 className="font-bold text-sm text-brand-black mb-2 group-hover:text-brand-gold transition">
+                    {t(titleKey)}
+                  </h4>
+                  <p className="text-xs text-gray-500 font-light">{t(descKey)}</p>
+                </Link>
+              ),
+            )}
           </div>
         </div>
       </section>
+
+      <PrivacyModal
+        isOpen={privacyModalOpen}
+        onClose={() => setPrivacyModalOpen(false)}
+      />
     </main>
   );
 }

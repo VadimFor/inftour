@@ -5,6 +5,8 @@ import { experienciasTranslations } from "../experiencias/experiencias_translati
 import { revistaTranslations } from "../revista/translations/revista_translations";
 import { servicesTranslations } from "../services/translations/services_translations";
 import { lobbyTranslations } from "../lobby/translations/lobby_translations";
+import { privacyModalTranslations } from "../lobby/translations/privacymodal_translate";
+import { instrWhatIfTranslations } from "../lobby/translations/instr_whatif_merged";
 import { menuTranslations } from "./menu_translations";
 import { footerTranslations } from "./footer_translations";
 import { topBarTranslations } from "../components/TopBar/topbar_translations";
@@ -104,6 +106,12 @@ const translations: TranslationMap = {
 
   // Lobby
   ...lobbyTranslations,
+
+  // Lobby – "What to do if" (full text from Lobby Instrucciones docx; overrides lobInstr* in lobbyTranslations)
+  ...instrWhatIfTranslations,
+
+  // Lobby – Privacy Policy modal (full text from Lobby Políticas de privacidad.docx)
+  ...privacyModalTranslations,
 };
 
 type LangStore = {

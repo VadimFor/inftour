@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import RestoreLang from "./components/RestoreLang";
+import ElevenLabsWidget from "./components/ElevenLabsWidget";
 
 export default function RootLayout({
   children,
@@ -35,7 +36,7 @@ export default function RootLayout({
       >
         <RestoreLang />
         {children}
-        <elevenlabs-convai agent-id="agent_3801key34mpyfv68wzexyb1xb1z8" />
+        <ElevenLabsWidget />
         <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />
       </body>
     </html>

@@ -18,7 +18,15 @@
       "Bash(python -c \":*)",
       "Bash(cp \"c:/Users/vadim/Desktop/INFTOUR/app/experiencias/components/sabores/pictures/\"*.png \"c:/Users/vadim/Desktop/INFTOUR/public/sabores/pictures/\")",
       "Bash(cp \"c:/Users/vadim/Desktop/INFTOUR/app/experiencias/components/sabores/pictures/\"*.jpg \"c:/Users/vadim/Desktop/INFTOUR/public/sabores/pictures/\")",
-      "Bash(cp \"c:/Users/vadim/Desktop/INFTOUR/app/experiencias/components/sabores/pictures/\"*.jpeg \"c:/Users/vadim/Desktop/INFTOUR/public/sabores/pictures/\")"
+      "Bash(cp \"c:/Users/vadim/Desktop/INFTOUR/app/experiencias/components/sabores/pictures/\"*.jpeg \"c:/Users/vadim/Desktop/INFTOUR/public/sabores/pictures/\")",
+      "WebSearch",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:elevenlabs.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:app.unpkg.com)"
     ]
   }
 }
