@@ -30,6 +30,16 @@ function splitAdviceFromContent(html: string) {
   };
 }
 
+function linkifyAddresses(html: string): string {
+  return html.replace(
+    /(<li><em>[^<]+<\/em>\s*)([^<]+,\s*[^<]+)(\s*<\/li>)/g,
+    (_, before, address, after) => {
+      const query = encodeURIComponent(`${address.trim()}, Alicante, Spain`);
+      return `${before}<a href="https://www.google.com/maps/search/?api=1&query=${query}" target="_blank" rel="noopener noreferrer" class="text-brand-gold underline hover:opacity-80">${address.trim()}</a>${after}`;
+    },
+  );
+}
+
 function splitIntoSectionCards(html: string) {
   return html
     .split(/(?=<p><strong>\d+\.)/g)
@@ -133,7 +143,7 @@ export default function RestaurantsModal({
                   )}
                   <div
                     className="p-5 text-sm text-gray-700 leading-relaxed [&_p]:mb-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline hover:[&_a]:text-blue-900"
-                    dangerouslySetInnerHTML={{ __html: restHtml }}
+                    dangerouslySetInnerHTML={{ __html: linkifyAddresses(restHtml) }}
                   />
                 </section>
               );

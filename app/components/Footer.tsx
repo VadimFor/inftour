@@ -82,6 +82,14 @@ export default function Footer() {
                 </a>
               </p>
               <p>
+                <a
+                  href="tel:+34640748732"
+                  className="hover:text-brand-gold transition"
+                >
+                  +34 640 748 732
+                </a>
+              </p>
+              <p>
                 e-mail:{" "}
                 <a
                   href="mailto:mail@inftour.net"
