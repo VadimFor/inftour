@@ -5,6 +5,7 @@ declare module "react" {
     interface IntrinsicElements {
       "elevenlabs-convai": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         "agent-id"?: string;
+        placement?: string;
       };
     }
   }
