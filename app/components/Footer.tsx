@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="bg-brand-footer pt-16 border-t border-gray-200 mt-auto text-gray-800">
       <div className="container mx-auto px-6 pb-16 flex justify-center">
-        <div className="grid w-full max-w-full grid-cols-1 md:grid-cols-3 md:w-fit gap-x-14 gap-y-12 md:gap-x-16 lg:gap-x-20">
+        <div className="grid w-full max-w-full grid-cols-1 md:grid-cols-3 md:w-fit gap-x-14 gap-y-12 md:gap-x-16 lg:gap-x-20 text-center md:text-left">
           <div>
             <h4 className="text-brand-gold text-xl font-bold font-serif tracking-wider mb-6">
               INFTOUR SPAIN S.L.

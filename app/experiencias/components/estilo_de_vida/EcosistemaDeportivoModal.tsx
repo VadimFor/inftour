@@ -573,6 +573,15 @@ export default function EcosistemaDeportivoModal({
             </div>
           ) : null}
         </div>
+        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>,
     document.body,

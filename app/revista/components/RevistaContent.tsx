@@ -14,7 +14,7 @@ export default function RevistaContent({ pdfPath }: Props) {
 
   if (pdfPath) {
     return (
-      <main className="relative z-20  pb-24">
+      <main className="relative z-20  pb-10">
         <div className="container mx-auto px-4 max-w-5xl">
           <header className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-serif text-brand-black">
@@ -45,7 +45,7 @@ export default function RevistaContent({ pdfPath }: Props) {
   }
 
   return (
-    <main className="relative z-20  pb-24">
+    <main className="relative z-20  pb-10">
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 md:py-20 text-center max-w-4xl">
         <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
@@ -87,7 +87,7 @@ export default function RevistaContent({ pdfPath }: Props) {
       </section>
 
       {/* Latest articles + sidebar */}
-      <section className="container mx-auto px-4 mb-24 flex flex-col lg:flex-row gap-10">
+      <section className="container mx-auto px-4 mb-10 flex flex-col lg:flex-row gap-10">
         <div className="lg:w-2/3">
           <h3 className="text-2xl font-serif text-gray-900 mb-8 pb-4 border-b border-gray-200">
             {t("revLatestTitle")}
