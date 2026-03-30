@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
-import lobbyAboutImage from "../../../ejemplos/lobby/Lobby.png";
+import lobbyAboutImage from "../pictures/lobby.png";
 import aiBgImage from "../pictures/ai_espacio.png";
 import PrivacyModal from "./PrivacyModal";
 
@@ -409,15 +409,14 @@ export default function LobbyContent() {
               {t("lobAboutDocMainTitle")}
             </h2>
             <div className="overflow-hidden text-[15px] md:text-base text-gray-600 font-light leading-relaxed">
-              <figure className="mb-5 sm:mb-3 sm:mt-1 sm:float-right sm:ml-6 w-full max-w-md mx-auto sm:mx-0 sm:w-[min(100%,280px)] sm:max-w-[40%] lg:w-[200px] lg:max-w-[200px] xl:w-[180px] xl:max-w-[180px] shrink-0 rounded-xl overflow-hidden border border-gray-100/90 shadow-md bg-white">
+              <figure className="mb-5 sm:mb-3 sm:mt-1 sm:float-right sm:ml-6 w-full max-w-[200px] mx-auto sm:mx-0 sm:w-[160px] sm:max-w-[30%] lg:w-[140px] lg:max-w-[140px] xl:w-[130px] xl:max-w-[130px] shrink-0 rounded-xl overflow-hidden border border-gray-100/90 shadow-md bg-white">
                 <Image
                   src={lobbyAboutImage}
                   alt={t("lobAboutDocMainTitle")}
                   className="w-full h-auto object-cover object-center"
-                  sizes="(max-width: 640px) min(100vw - 8rem, 28rem), (max-width: 1024px) 280px, (max-width: 1280px) 200px, 180px"
-                  quality={100}
+                  sizes="(max-width: 640px) 200px, (max-width: 1024px) 160px, (max-width: 1280px) 140px, 130px"
                   priority
-                  placeholder="blur"
+                  unoptimized
                 />
               </figure>
               {ABOUT_DOC_PARAGRAPHS.map((key) => (
