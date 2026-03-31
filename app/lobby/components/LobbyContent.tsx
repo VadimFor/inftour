@@ -409,12 +409,12 @@ export default function LobbyContent() {
               {t("lobAboutDocMainTitle")}
             </h2>
             <div className="overflow-hidden text-[15px] md:text-base text-gray-600 font-light leading-relaxed">
-              <figure className="mb-5 sm:mb-3 sm:mt-1 sm:float-right sm:ml-6 w-full max-w-[200px] mx-auto sm:mx-0 sm:w-[160px] sm:max-w-[30%] lg:w-[140px] lg:max-w-[140px] xl:w-[130px] xl:max-w-[130px] shrink-0 rounded-xl overflow-hidden border border-gray-100/90 shadow-md bg-white">
+              <figure className="mb-5 sm:mb-3 sm:mt-1 sm:float-right sm:ml-6 w-full max-w-[280px] mx-auto sm:mx-0 sm:w-[240px] sm:max-w-[40%] lg:w-[220px] lg:max-w-[220px] xl:w-[200px] xl:max-w-[200px] shrink-0 rounded-xl overflow-hidden border border-gray-100/90 shadow-md bg-white">
                 <Image
                   src={lobbyAboutImage}
                   alt={t("lobAboutDocMainTitle")}
                   className="w-full h-auto object-cover object-center"
-                  sizes="(max-width: 640px) 200px, (max-width: 1024px) 160px, (max-width: 1280px) 140px, 130px"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 240px, (max-width: 1280px) 220px, 200px"
                   priority
                   unoptimized
                 />
