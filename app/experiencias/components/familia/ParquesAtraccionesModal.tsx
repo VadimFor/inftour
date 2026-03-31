@@ -81,6 +81,10 @@ function scrollToParkSection(id: string) {
   el?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+function shouldRenderImageBelowParagraph(parkId?: string) {
+  return parkId === "park-terra-natura" || parkId === "park-terra-mitica";
+}
+
 type ParquesAtraccionesModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -243,10 +247,19 @@ export default function ParquesAtraccionesModal({
                             id={bid}
                             className="text-sm text-gray-700 leading-relaxed list-disc list-inside scroll-mt-6"
                           >
-                            {bid && TERRA_IMAGES_BY_PARK[bid] && (
-                              <TerraImagesForPark parkId={bid} />
-                            )}
                             {renderLabeledLine(bullet)}
+                            {bid &&
+                              TERRA_IMAGES_BY_PARK[bid] &&
+                              shouldRenderImageBelowParagraph(bid) && (
+                                <div className="mt-2">
+                                  <TerraImagesForPark parkId={bid} />
+                                </div>
+                              )}
+                            {bid &&
+                              TERRA_IMAGES_BY_PARK[bid] &&
+                              !shouldRenderImageBelowParagraph(bid) && (
+                                <TerraImagesForPark parkId={bid} />
+                              )}
                           </li>
                         );
                       })}
