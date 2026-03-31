@@ -151,7 +151,7 @@ export default function HorizontesMarinosModal({ isOpen, onClose }: HorizontesMa
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("close")}
           className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
         >
           <svg

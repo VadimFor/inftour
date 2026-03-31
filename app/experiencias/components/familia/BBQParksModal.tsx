@@ -77,7 +77,7 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("close")}
           className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
         >
           <svg
@@ -204,7 +204,7 @@ export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
             onClick={onClose}
             className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
           >
-            Close
+            {t("close")}
           </button>
         </div>
       </div>
