@@ -7,6 +7,8 @@ import { servicesTranslations } from "../services/translations/services_translat
 import { lobbyTranslations } from "../lobby/translations/lobby_translations";
 import { stayTranslations } from "../lobby/translations/stay_translations";
 import { privacyModalTranslations } from "../lobby/translations/privacymodal_translate";
+import { reportingChannelModalTranslations } from "../lobby/translations/reporting_channel_modal_translations";
+import { faqModalTranslations } from "../lobby/translations/faq_modal_translations";
 import { instrWhatIfTranslations } from "../lobby/translations/instr_whatif_merged";
 import { menuTranslations } from "./menu_translations";
 import { footerTranslations } from "./footer_translations";
@@ -116,6 +118,12 @@ const translations: TranslationMap = {
 
   // Lobby – Privacy Policy modal (full text from Lobby Políticas de privacidad.docx)
   ...privacyModalTranslations,
+
+  // Lobby – Reporting channel modal
+  ...reportingChannelModalTranslations,
+
+  // Lobby – FAQ modal
+  ...faqModalTranslations,
 };
 
 type LangStore = {
