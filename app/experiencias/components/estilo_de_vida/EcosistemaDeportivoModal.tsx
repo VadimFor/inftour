@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useCallback, type ReactNode } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import ecosistemaCalpe1 from "./pictures/Ecosistema deportivo de Calpe 1.png";
 import ecosistemaCalpe2 from "./pictures/Ecosistema deportivo de Calpe 2.jpg";
 import ecosistemaCalpe3 from "./pictures/Ecosistema deportivo de Calpe 3.png";
@@ -232,8 +233,11 @@ export default function EcosistemaDeportivoModal({
   onClose,
 }: EcosistemaDeportivoModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
-    const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
       open?: () => void;
       toggle?: () => void;
       shadowRoot?: ShadowRoot | null;
@@ -246,7 +250,11 @@ export default function EcosistemaDeportivoModal({
       const buttons = Array.from(root.querySelectorAll("button"));
       for (const btn of buttons) {
         const text = (btn.textContent || "").trim().toLowerCase();
-        if (text === "accept" || text === "aceptar" || text.includes("accept")) {
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
           (btn as HTMLButtonElement).click();
           return true;
         }
@@ -267,7 +275,9 @@ export default function EcosistemaDeportivoModal({
       if (avatar) {
         avatar.click();
       } else {
-        const clickable = root.querySelector("button, [role='button']") as HTMLElement | null;
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
         clickable?.click();
       }
     }

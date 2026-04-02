@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 const RESTAURANT_IMAGES = [
   "/sabores/pictures/Restaurantes 1.jpeg",
@@ -54,6 +55,7 @@ export default function RestaurantsModal({
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

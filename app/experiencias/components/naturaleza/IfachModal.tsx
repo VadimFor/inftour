@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import ascenso1 from "./pictures/Ascenso al Peñón 1.jpeg";
 import ascenso2 from "./pictures/Ascenso al Peñón 2.jpeg";
 import ascenso3 from "./pictures/Ascenso al Peñón 3.jpeg";
@@ -43,6 +44,7 @@ function isHeaderLike(line: string) {
 
 export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

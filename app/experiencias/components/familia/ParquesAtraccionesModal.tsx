@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useCallback, useMemo } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import terra1 from "./pictures/Terra 1.png";
 import terra2 from "./pictures/Terra 2.png";
 import terra3 from "./pictures/Terra 3.png";
@@ -144,6 +145,7 @@ export default function ParquesAtraccionesModal({
   onClose,
 }: ParquesAtraccionesModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

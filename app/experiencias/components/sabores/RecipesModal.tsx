@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { recipesModalSectionsByLang } from "./recipes_modal_sections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 const RECIPE_IMAGES = [
   "/sabores/pictures/Recetas 1.png",
@@ -42,6 +43,7 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
   const lang = useLangStore((s) => s.lang);
   const sections = recipesModalSectionsByLang[lang];
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

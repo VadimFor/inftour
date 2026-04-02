@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
 import lobbyAboutImage from "../pictures/lobby.png";
-import aiBgImage from "../pictures/ai_espacio.png";
 import PrivacyModal from "./PrivacyModal";
 
 const INSTRUCTION_ITEMS = [
@@ -30,6 +29,14 @@ const INSTRUCTION_ITEMS = [
   { q: "lobInstr18Q" as const, a: "lobInstr18A" as const },
   { q: "lobInstr19Q" as const, a: "lobInstr19A" as const },
   { q: "lobInstr20Q" as const, a: "lobInstr20A" as const },
+] as const;
+
+const INSTRUCTION_QUICK_ITEMS = [
+  "lobInstructionsQuickQ1",
+  "lobInstructionsQuickQ2",
+  "lobInstructionsQuickQ3",
+  "lobInstructionsQuickQ4",
+  "lobInstructionsQuickQ5",
 ] as const;
 
 const ABOUT_DOC_PARAGRAPHS = [
@@ -370,7 +377,7 @@ const POLICIES = [
   {
     titleKey: "cancellationPolicy" as const,
     descKey: "cancellationPolicyDesc" as const,
-    href: "#",
+    href: "#llegada-estancia",
   },
   {
     titleKey: "paymentPolicy" as const,
@@ -408,6 +415,26 @@ function IconAI({ className }: { className?: string }) {
   );
 }
 
+function InstructionsSubtitle({ t }: { t: (key: string) => string }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-center text-base md:text-lg font-semibold italic leading-tight text-brand-black">
+        {t("lobInstructionsQuickTitle")}
+      </p>
+      <div className="flex flex-wrap justify-center gap-2.5">
+        {INSTRUCTION_QUICK_ITEMS.map((key) => (
+          <p
+            key={key}
+            className="m-0 inline-flex rounded-md bg-[#eef1ff] px-3 py-2 text-sm md:text-base leading-snug text-[#2f45d3]"
+          >
+            {t(key)}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LobbyContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   const [name, setName] = useState("");
@@ -418,13 +445,75 @@ export default function LobbyContent() {
   >("idle");
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [instructionsModalOpen, setInstructionsModalOpen] = useState(false);
   const [openInstr, setOpenInstr] = useState<string | null>(null);
 
-  function openAIChat() {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("openAIChat"));
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const shouldLockScroll =
+      privacyModalOpen || aboutModalOpen || instructionsModalOpen;
+    if (!shouldLockScroll) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [privacyModalOpen, aboutModalOpen, instructionsModalOpen]);
+
+  const openAIChat = useCallback(() => {
+    const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
+      open?: () => void;
+      toggle?: () => void;
+      shadowRoot?: ShadowRoot | null;
+    };
+    if (!widget) return;
+
+    const clickAcceptIfPresent = () => {
+      const root = widget.shadowRoot;
+      if (!root) return false;
+      const buttons = Array.from(root.querySelectorAll("button"));
+      for (const btn of buttons) {
+        const text = (btn.textContent || "").trim().toLowerCase();
+        if (text === "accept" || text === "aceptar" || text.includes("accept")) {
+          (btn as HTMLButtonElement).click();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (typeof widget.open === "function") {
+      widget.open();
+    } else if (typeof widget.toggle === "function") {
+      widget.toggle();
+    } else {
+      const root = widget.shadowRoot;
+      if (!root) return;
+      const avatar = root.querySelector(
+        "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
+      ) as HTMLElement | null;
+      if (avatar) {
+        avatar.click();
+      } else {
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
+        clickable?.click();
+      }
     }
-  }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      const accepted = clickAcceptIfPresent();
+      if (accepted || attempts >= maxAttempts) {
+        window.clearInterval(timer);
+      }
+    }, 150);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -450,697 +539,675 @@ export default function LobbyContent() {
 
   return (
     <>
-    <main className="relative z-20  pb-24 container mx-auto px-4 md:px-6 max-w-6xl">
-      {/* Hero */}
-      <section className="text-center max-w-3xl mx-auto py-12 md:py-16">
-        <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
-          {t("lobHeroLabel")}
-        </span>
-        <h1 className="text-4xl md:text-5xl font-serif text-brand-black mb-6 leading-tight">
-          {t("lobHeroTitle")}
-        </h1>
-        <p className="text-lg text-gray-600 font-light leading-relaxed">
-          {t("lobHeroDesc")}
-        </p>
-      </section>
+      <main className="relative z-20  pb-24 container mx-auto px-4 md:px-6 max-w-6xl">
+        {/* Hero */}
+        <section className="text-center max-w-3xl mx-auto py-12 md:py-16">
+          <span className="text-brand-gold font-bold uppercase tracking-[0.2em] text-xs mb-4 block">
+            {t("lobHeroLabel")}
+          </span>
+          <h1 className="text-4xl md:text-5xl font-serif text-brand-black mb-6 leading-tight">
+            {t("lobHeroTitle")}
+          </h1>
+          <p className="text-lg text-gray-600 font-light leading-relaxed">
+            {t("lobHeroDesc")}
+          </p>
+        </section>
 
-      {/* About us: compact card + full story modal */}
-      <section className="mb-24">
-        <div className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row md:min-h-[560px] lg:min-h-[620px]">
-          <div className="md:w-1/2 overflow-hidden">
-            <Image
-              src={lobbyAboutImage}
-              alt={t("lobAboutDocMainTitle")}
-              className="w-full h-full object-contain"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-              unoptimized
-            />
-          </div>
-          <div className="md:w-1/2 p-8 md:p-14 lg:p-16 flex flex-col justify-center md:min-h-[560px] lg:min-h-[620px]">
-            <h2 className="text-3xl font-serif text-gray-900 mb-4">
-              {t("lobAboutTitle")}
-            </h2>
-            <p className="text-gray-600 font-light leading-relaxed mb-6">
-              <strong className="font-bold text-gray-800">INFTOUR</strong>{" "}
-              {t("lobAboutCardP1").replace(/^INFTOUR\s*/i, "")}{" "}
-              {t("lobAboutCardP2")}
-            </p>
-            <button
-              type="button"
-              onClick={() => setAboutModalOpen(true)}
-              className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-brand-gold border-t border-gray-100 pt-3 transition hover:text-amber-600"
-            >
-              {t("lobAboutReadFull")}
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                aria-hidden
+        {/* About us: compact card + full story modal */}
+        <section className="mb-24">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row md:min-h-[560px] lg:min-h-[620px]">
+            <div className="md:w-1/2 overflow-hidden">
+              <Image
+                src={lobbyAboutImage}
+                alt={t("lobAboutDocMainTitle")}
+                className="w-full h-full object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                unoptimized
+              />
+            </div>
+            <div className="md:w-1/2 p-8 md:p-14 lg:p-16 flex flex-col justify-center md:min-h-[560px] lg:min-h-[620px]">
+              <h2 className="text-3xl font-serif text-gray-900 mb-4">
+                {t("lobAboutTitle")}
+              </h2>
+              <p className="text-gray-600 font-light leading-relaxed mb-6">
+                <strong className="font-bold text-gray-800">INFTOUR</strong>{" "}
+                {t("lobAboutCardP1").replace(/^INFTOUR\s*/i, "")}{" "}
+                {t("lobAboutCardP2")}
+              </p>
+              <button
+                type="button"
+                onClick={() => setAboutModalOpen(true)}
+                className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-brand-gold border-t border-gray-100 pt-3 transition hover:text-amber-600"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Llegada y estancia — Lobby Llegada y estancia.docx */}
-      <section
-        id="llegada-estancia"
-        className="mb-20 scroll-mt-24 md:mb-24"
-        aria-labelledby="lob-stay-heading"
-      >
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] overflow-hidden">
-          {/* Section header */}
-          <div className="bg-linear-to-br from-brand-bg via-white to-amber-50/30 border-b border-brand-gold/15 px-8 py-10 md:px-12 md:py-12">
-            <h2
-              id="lob-stay-heading"
-              className="mb-4 font-serif text-3xl leading-tight text-brand-black md:text-4xl"
-            >
-              {t("lobStayTitle")}
-            </h2>
-            <div className="max-w-2xl space-y-3 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-              <p>{t("lobStayIntro1")}</p>
-              <p>{t("lobStayIntro2")}</p>
+                {t("lobAboutReadFull")}
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
+        </section>
 
-          {/* Body */}
-          <div className="space-y-10 p-8 md:p-12 lg:p-14">
-            {/* 3 steps */}
-            <div>
-              <h3 className="mb-6 flex items-center gap-3 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="h-6 w-1 shrink-0 rounded-full bg-brand-gold"
-                  aria-hidden
-                />
-                {t("lobStayStepsHeading")}
-              </h3>
-              <ol className="grid gap-4 md:grid-cols-3">
-                {STAY_THREE_STEPS.map(({ title, body }, i) => (
-                  <li
-                    key={title}
-                    className="flex flex-col rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-5"
-                  >
-                    <span className="mb-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-gold text-sm font-bold text-white shadow-sm ring-4 ring-white">
-                      {i + 1}
-                    </span>
-                    <p className="mb-2 text-sm font-semibold text-brand-black md:text-base">
-                      {t(title)}
-                    </p>
-                    <p className="text-sm font-light leading-relaxed text-gray-600 md:text-[15px]">
-                      {t(body)}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            {/* Before arrival */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayBeforeArrivalTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayBeforeArrivalP1")}</p>
-                <p>{t("lobStayBeforeArrivalP2")}</p>
-                <ul className="list-disc space-y-2 pl-5 marker:text-brand-gold">
-                  {STAY_BEFORE_ARRIVAL_BULLETS.map((key) => (
-                    <li key={key}>{t(key)}</li>
-                  ))}
-                </ul>
-                <p>{t("lobStayBeforeArrivalP3")}</p>
-                <p>{t("lobStayBeforeArrivalP4")}</p>
+        {/* Llegada y estancia — Lobby Llegada y estancia.docx */}
+        <section
+          id="llegada-estancia"
+          className="mb-20 scroll-mt-24 md:mb-24"
+          aria-labelledby="lob-stay-heading"
+        >
+          <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] overflow-hidden">
+            {/* Section header */}
+            <div className="bg-linear-to-br from-brand-bg via-white to-amber-50/30 border-b border-brand-gold/15 px-8 py-10 md:px-12 md:py-12">
+              <h2
+                id="lob-stay-heading"
+                className="mb-4 font-serif text-3xl leading-tight text-brand-black md:text-4xl"
+              >
+                {t("lobStayTitle")}
+              </h2>
+              <div className="max-w-2xl space-y-3 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                <p>{t("lobStayIntro1")}</p>
+                <p>{t("lobStayIntro2")}</p>
               </div>
             </div>
 
-            {/* Office hours */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayOfficeHoursTitle")}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-4">
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-gold">
-                    {t("lobStayOfficeSummer")}
-                  </p>
-                  <p className="mb-2 text-sm font-medium text-brand-black">
-                    {t("lobStayOfficeWeekdays")}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {t("lobStayOfficeSummerAm")}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {t("lobStayOfficeSummerPm")}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-4">
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-gold">
-                    {t("lobStayOfficeWinter")}
-                  </p>
-                  <p className="mb-2 text-sm font-medium text-brand-black">
-                    {t("lobStayOfficeWeekdays")}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {t("lobStayOfficeWinterAm")}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {t("lobStayOfficeWinterPm")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Check-in / Check-out */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayCheckTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayCheckIn")}</p>
-                <p>{t("lobStayCheckOut")}</p>
-                <p>{t("lobStayCheckExtraIntro")}</p>
-                <ul className="list-disc space-y-2 pl-5 marker:text-brand-gold">
-                  {STAY_CHECK_BULLETS.map((key) => (
-                    <li key={key}>{t(key)}</li>
-                  ))}
-                </ul>
-                <p>{t("lobStayCheckNote")}</p>
-              </div>
-            </div>
-
-            {/* Property access */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayAccessTitle")}
-              </h3>
-              <div className="space-y-5 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayAccessIntro")}</p>
-                <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
-                  <p className="mb-2 text-sm font-semibold text-brand-black">
-                    {t("lobStayAccessOfficeTitle")}
-                  </p>
-                  <p>{t("lobStayAccessOfficeBody")}</p>
-                </div>
-                <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
-                  <p className="mb-3 text-sm font-semibold text-brand-black">
-                    {t("lobStayAccessSelfTitle")}
-                  </p>
-                  <p className="mb-3">{t("lobStayAccessSelfP1")}</p>
-                  <p className="mb-3">{t("lobStayAccessSelfP2")}</p>
-                  <p>{t("lobStayAccessSelfP3")}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Security deposit */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayDepositTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayDepositP1")}</p>
-                <p>{t("lobStayDepositP2")}</p>
-                <p>{t("lobStayDepositP3")}</p>
-              </div>
-            </div>
-
-            {/* Guest registration */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayGuestRegTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayGuestRegP1")}</p>
-                <p>{t("lobStayGuestRegP2")}</p>
-              </div>
-            </div>
-
-            {/* During your stay */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayDuringTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayDuringP1")}</p>
-                <p>{t("lobStayDuringP2")}</p>
-                <p>{t("lobStayDuringP3")}</p>
-                <p>
-                  {t("lobStayDuringP4")}{" "}
-                  <a
-                    href="#ai-guide"
-                    className="font-medium text-brand-gold underline decoration-brand-gold/40 underline-offset-2 transition hover:text-amber-600 hover:decoration-amber-600"
-                  >
-                    {t("lobStayDuringAILink")}
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            {/* Before departure */}
-            <div className="border-t border-gray-100 pt-2">
-              <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
-                <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
-                  aria-hidden
-                >
-                  <svg
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
-                    />
-                  </svg>
-                </span>
-                {t("lobStayBeforeDepartureTitle")}
-              </h3>
-              <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-                <p>{t("lobStayBeforeDepartureIntro")}</p>
-                <ul className="space-y-2">
-                  {STAY_DEPARTURE_BULLETS.map((key) => (
+            {/* Body */}
+            <div className="space-y-10 p-8 md:p-12 lg:p-14">
+              {/* 3 steps */}
+              <div>
+                <h3 className="mb-6 flex items-center gap-3 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="h-6 w-1 shrink-0 rounded-full bg-brand-gold"
+                    aria-hidden
+                  />
+                  {t("lobStayStepsHeading")}
+                </h3>
+                <ol className="grid gap-4 md:grid-cols-3">
+                  {STAY_THREE_STEPS.map(({ title, body }, i) => (
                     <li
-                      key={key}
-                      className="flex items-start gap-3 rounded-lg border border-brand-gold/15 bg-amber-50/60 px-4 py-2.5 text-sm"
+                      key={title}
+                      className="flex flex-col rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-5"
                     >
-                      <svg
-                        className="mt-0.5 size-4 shrink-0 text-brand-gold"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        aria-hidden
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      {t(key)}
+                      <span className="mb-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-gold text-sm font-bold text-white shadow-sm ring-4 ring-white">
+                        {i + 1}
+                      </span>
+                      <p className="mb-2 text-sm font-semibold text-brand-black md:text-base">
+                        {t(title)}
+                      </p>
+                      <p className="text-sm font-light leading-relaxed text-gray-600 md:text-[15px]">
+                        {t(body)}
+                      </p>
                     </li>
                   ))}
-                </ul>
-                <p>{t("lobStayBeforeDepartureClosing")}</p>
+                </ol>
+              </div>
+
+              {/* Before arrival */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayBeforeArrivalTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayBeforeArrivalP1")}</p>
+                  <p>{t("lobStayBeforeArrivalP2")}</p>
+                  <ul className="list-disc space-y-2 pl-5 marker:text-brand-gold">
+                    {STAY_BEFORE_ARRIVAL_BULLETS.map((key) => (
+                      <li key={key}>{t(key)}</li>
+                    ))}
+                  </ul>
+                  <p>{t("lobStayBeforeArrivalP3")}</p>
+                  <p>{t("lobStayBeforeArrivalP4")}</p>
+                </div>
+              </div>
+
+              {/* Office hours */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayOfficeHoursTitle")}
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-4">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-gold">
+                      {t("lobStayOfficeSummer")}
+                    </p>
+                    <p className="mb-2 text-sm font-medium text-brand-black">
+                      {t("lobStayOfficeWeekdays")}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("lobStayOfficeSummerAm")}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("lobStayOfficeSummerPm")}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-(--color-brand-bg) px-5 py-4">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-gold">
+                      {t("lobStayOfficeWinter")}
+                    </p>
+                    <p className="mb-2 text-sm font-medium text-brand-black">
+                      {t("lobStayOfficeWeekdays")}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("lobStayOfficeWinterAm")}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("lobStayOfficeWinterPm")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Check-in / Check-out */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayCheckTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayCheckIn")}</p>
+                  <p>{t("lobStayCheckOut")}</p>
+                  <p>{t("lobStayCheckExtraIntro")}</p>
+                  <ul className="list-disc space-y-2 pl-5 marker:text-brand-gold">
+                    {STAY_CHECK_BULLETS.map((key) => (
+                      <li key={key}>{t(key)}</li>
+                    ))}
+                  </ul>
+                  <p>{t("lobStayCheckNote")}</p>
+                </div>
+              </div>
+
+              {/* Property access */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayAccessTitle")}
+                </h3>
+                <div className="space-y-5 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayAccessIntro")}</p>
+                  <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+                    <p className="mb-2 text-sm font-semibold text-brand-black">
+                      {t("lobStayAccessOfficeTitle")}
+                    </p>
+                    <p>{t("lobStayAccessOfficeBody")}</p>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-brand-black">
+                      {t("lobStayAccessSelfTitle")}
+                    </p>
+                    <p className="mb-3">{t("lobStayAccessSelfP1")}</p>
+                    <p className="mb-3">{t("lobStayAccessSelfP2")}</p>
+                    <p>{t("lobStayAccessSelfP3")}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security deposit */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayDepositTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayDepositP1")}</p>
+                  <p>{t("lobStayDepositP2")}</p>
+                  <p>{t("lobStayDepositP3")}</p>
+                </div>
+              </div>
+
+              {/* Guest registration */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayGuestRegTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayGuestRegP1")}</p>
+                  <p>{t("lobStayGuestRegP2")}</p>
+                </div>
+              </div>
+
+              {/* During your stay */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayDuringTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayDuringP1")}</p>
+                  <p>{t("lobStayDuringP2")}</p>
+                  <p>{t("lobStayDuringP3")}</p>
+                  <p>
+                    {t("lobStayDuringP4")}{" "}
+                    <a
+                      href="#ai-guide"
+                      className="font-medium text-brand-gold underline decoration-brand-gold/40 underline-offset-2 transition hover:text-amber-600 hover:decoration-amber-600"
+                    >
+                      {t("lobStayDuringAILink")}
+                    </a>
+                  </p>
+                </div>
+              </div>
+
+              {/* Before departure */}
+              <div className="border-t border-gray-100 pt-2">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4 font-serif text-xl text-brand-black md:text-2xl">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold"
+                    aria-hidden
+                  >
+                    <svg
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                      />
+                    </svg>
+                  </span>
+                  {t("lobStayBeforeDepartureTitle")}
+                </h3>
+                <div className="space-y-4 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                  <p>{t("lobStayBeforeDepartureIntro")}</p>
+                  <ul className="space-y-2">
+                    {STAY_DEPARTURE_BULLETS.map((key) => (
+                      <li
+                        key={key}
+                        className="flex items-start gap-3 rounded-lg border border-brand-gold/15 bg-amber-50/60 px-4 py-2.5 text-sm"
+                      >
+                        <svg
+                          className="mt-0.5 size-4 shrink-0 text-brand-gold"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {t(key)}
+                      </li>
+                    ))}
+                  </ul>
+                  <p>{t("lobStayBeforeDepartureClosing")}</p>
+                </div>
+              </div>
+
+              {/* Closing */}
+              <div className="space-y-3 border-t border-gray-100 pt-6 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+                <p>{t("lobStayClosing1")}</p>
+                <p>{t("lobStayClosing2")}</p>
               </div>
             </div>
-
-            {/* Closing */}
-            <div className="space-y-3 border-t border-gray-100 pt-6 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-              <p>{t("lobStayClosing1")}</p>
-              <p>{t("lobStayClosing2")}</p>
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Two columns: AI card + Contact card */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 md:mb-24">
-        {/* AI Assistant card */}
-        <div
-          id="ai-guide"
-          className="bg-gray-900 text-white p-8 md:p-12 rounded-lg shadow-xl relative overflow-hidden flex flex-col justify-center min-h-[320px]"
-        >
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <Image
-              src={aiBgImage}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="600px"
+        {/* Two columns: AI card + Contact card */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 md:mb-24">
+          {/* AI Assistant card */}
+          <div
+            id="ai-guide"
+            className="bg-white text-brand-black p-8 md:p-10 rounded-2xl border border-gray-200 shadow-[0_14px_38px_-20px_rgba(0,0,0,0.2)] relative overflow-hidden flex flex-col justify-center min-h-[320px]"
+          >
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-linear-to-b from-amber-50/70 to-transparent"
+              aria-hidden
             />
-          </div>
-          <div className="relative z-10">
-            <div className="w-12 h-12 flex items-center justify-center bg-white/10 text-brand-gold rounded-full mb-6">
-              <IconAI className="w-6 h-6" />
+            <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center text-center">
+              <div className="w-12 h-12 flex items-center justify-center bg-[#f7f2e6] text-brand-gold rounded-full mb-5 border border-[#efe3c8]">
+                <IconAI className="w-6 h-6" />
+              </div>
+              <h3 className="text-3xl font-serif mb-5">{t("lobAITitle")}</h3>
+              <ul className="w-full max-w-sm text-center text-[15px] text-gray-700 font-light space-y-3.5 mb-8">
+                {(["lobAI1", "lobAI2", "lobAI3", "lobAI4"] as const).map(
+                  (key) => (
+                    <li key={key} className="flex items-start justify-center gap-3">
+                      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f7f2e6] text-brand-gold text-xs">
+                        •
+                      </span>
+                      <span>{t(key)}</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={openAIChat}
+                  className="inline-flex w-[360px] max-w-full items-center justify-center rounded-lg bg-brand-gold px-8 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-amber-500"
+                >
+                  {t("lobAIStartChat")}
+                </button>
+              </div>
             </div>
-            <h3 className="text-3xl font-serif mb-6">{t("lobAITitle")}</h3>
-            <ul className="text-sm text-gray-300 font-light space-y-4 mb-8">
-              {(["lobAI1", "lobAI2", "lobAI3", "lobAI4"] as const).map(
-                (key) => (
-                  <li key={key} className="flex items-start gap-3">
-                    <span className="text-brand-gold mt-0.5">▪</span>
-                    {t(key)}
-                  </li>
+          </div>
+
+          {/* Contact card */}
+          <div className="bg-white border border-gray-100 p-8 md:p-12 shadow-sm rounded-lg">
+            <h3 className="text-3xl font-serif text-brand-black mb-2">
+              {t("sectionContact")}
+            </h3>
+            <p className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-8">
+              {t("lobContactWeAreHere")}
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder={t("formNamePlaceholder")}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition"
+                />
+                <input
+                  type="email"
+                  placeholder={t("formEmailLabel")}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition"
+                />
+              </div>
+              <textarea
+                placeholder={t("lobFormHelpPlaceholder")}
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                required
+                className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition resize-none"
+              />
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                className="w-full bg-(--color-brand-darkgray) text-white px-6 py-3 text-xs font-bold uppercase tracking-wider hover:bg-gray-600 transition rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {status === "sending" ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {t("formSubmit")}
+                  </span>
+                ) : (
+                  t("formSubmit")
+                )}
+              </button>
+              {status === "success" && (
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">
+                  {t("formSuccess")}
+                </div>
+              )}
+              {status === "error" && (
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+                  {t("formError")}
+                </div>
+              )}
+            </form>
+
+            <div className="border-t border-gray-100 pt-6 space-y-3 text-sm text-gray-600 font-medium">
+              <p className="flex items-center gap-3">
+                <span className="text-brand-gold" aria-hidden>
+                  📍
+                </span>
+                {t("lobAddressLine")}
+              </p>
+              <p className="flex items-center gap-3">
+                <span className="text-brand-gold" aria-hidden>
+                  📞
+                </span>
+                {t("lobPhoneLine")}
+              </p>
+              <p className="flex items-center gap-3">
+                <span className="text-brand-gold" aria-hidden>
+                  ✉️
+                </span>
+                <a
+                  href={`mailto:${t("lobEmailLine")}`}
+                  className="hover:text-brand-gold transition"
+                >
+                  {t("lobEmailLine")}
+                </a>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Canal de denuncias / reporting channel (text from Lobby Canal de denuncias.docx) */}
+        <section className="mb-20 md:mb-24">
+          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] md:p-12 lg:p-14">
+            <h2 className="mb-6 font-serif text-2xl leading-tight text-brand-black md:text-3xl">
+              {t("lobComplaintsTitle")}
+            </h2>
+            <div className="space-y-5 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
+              <p>{t("lobComplaintsP1")}</p>
+              <p>{t("lobComplaintsP2")}</p>
+              <h3 className="pt-2 text-base font-semibold text-brand-black">
+                {t("lobComplaintsHowTitle")}
+              </h3>
+              <p>{renderComplaintEmailLine(t("lobComplaintsLineEmail"))}</p>
+              <p>
+                {renderComplaintWhatsappLine(t("lobComplaintsLineWhatsapp"))}
+              </p>
+              <p>{t("lobComplaintsP3")}</p>
+              <p>{t("lobComplaintsP4")}</p>
+              <p>{t("lobComplaintsP5")}</p>
+            </div>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+              <a
+                href={`mailto:${LOBBY_COMPLAINT_EMAIL}`}
+                className="inline-flex items-center justify-center rounded-lg bg-brand-gold px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-amber-500"
+              >
+                {t("lobComplaintsBtnEmail")}
+              </a>
+              <a
+                href={LOBBY_COMPLAINT_WA_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-3 text-xs font-bold uppercase tracking-wider text-brand-black transition hover:border-brand-gold hover:text-brand-gold"
+              >
+                {t("lobComplaintsBtnWhatsapp")}
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Instructions + Policies */}
+        <section className="space-y-10">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)]">
+            <h3 className="text-2xl font-serif text-brand-black mb-3">
+              {t("lobInstructionsTitle")}
+            </h3>
+            <div className="mb-6">
+              <InstructionsSubtitle t={t} />
+            </div>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setInstructionsModalOpen(true)}
+                className="inline-flex items-center justify-center rounded-lg bg-brand-darkgray px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-gray-600"
+              >
+                {t("lobInstructionsOpenModal")}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-serif text-brand-black mb-6">
+              {t("lobPoliciesTitle")}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {POLICIES.map(({ titleKey, descKey, href }) =>
+                titleKey === "privacyPolicy" ? (
+                  <button
+                    key={titleKey}
+                    type="button"
+                    onClick={() => setPrivacyModalOpen(true)}
+                    className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
+                  >
+                    <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
+                      {t(titleKey)}
+                    </h4>
+                    <p className="text-xs font-light text-gray-500">
+                      {t(descKey)}
+                    </p>
+                  </button>
+                ) : (
+                  <Link
+                    key={titleKey}
+                    href={href}
+                    className="group block p-6 bg-(--color-brand-bg) border border-gray-100 rounded-lg hover:border-brand-gold hover:bg-white transition"
+                  >
+                    <h4 className="font-bold text-sm text-brand-black mb-2 group-hover:text-brand-gold transition">
+                      {t(titleKey)}
+                    </h4>
+                    <p className="text-xs text-gray-500 font-light">
+                      {t(descKey)}
+                    </p>
+                  </Link>
                 ),
               )}
-            </ul>
-            <button
-              type="button"
-              onClick={openAIChat}
-              className="bg-brand-gold text-white px-8 py-3 text-xs font-bold uppercase tracking-wider hover:bg-amber-500 transition rounded-lg"
-            >
-              {t("lobAIStartChat")}
-            </button>
-          </div>
-        </div>
-
-        {/* Contact card */}
-        <div className="bg-white border border-gray-100 p-8 md:p-12 shadow-sm rounded-lg">
-          <h3 className="text-3xl font-serif text-brand-black mb-2">
-            {t("sectionContact")}
-          </h3>
-          <p className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-8">
-            {t("lobContactWeAreHere")}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder={t("formNamePlaceholder")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition"
-              />
-              <input
-                type="email"
-                placeholder={t("formEmailLabel")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition"
-              />
             </div>
-            <textarea
-              placeholder={t("lobFormHelpPlaceholder")}
-              rows={3}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              className="w-full bg-gray-50 border border-gray-200 text-sm px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition resize-none"
-            />
-            <button
-              type="submit"
-              disabled={status === "sending"}
-              className="w-full bg-(--color-brand-darkgray) text-white px-6 py-3 text-xs font-bold uppercase tracking-wider hover:bg-gray-600 transition rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {status === "sending" ? (
-                <span className="inline-flex items-center justify-center gap-2">
-                  <span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t("formSubmit")}
-                </span>
-              ) : (
-                t("formSubmit")
-              )}
-            </button>
-            {status === "success" && (
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">
-                {t("formSuccess")}
-              </div>
-            )}
-            {status === "error" && (
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
-                {t("formError")}
-              </div>
-            )}
-          </form>
-
-          <div className="border-t border-gray-100 pt-6 space-y-3 text-sm text-gray-600 font-medium">
-            <p className="flex items-center gap-3">
-              <span className="text-brand-gold" aria-hidden>
-                📍
-              </span>
-              {t("lobAddressLine")}
-            </p>
-            <p className="flex items-center gap-3">
-              <span className="text-brand-gold" aria-hidden>
-                📞
-              </span>
-              {t("lobPhoneLine")}
-            </p>
-            <p className="flex items-center gap-3">
-              <span className="text-brand-gold" aria-hidden>
-                ✉️
-              </span>
-              <a
-                href={`mailto:${t("lobEmailLine")}`}
-                className="hover:text-brand-gold transition"
-              >
-                {t("lobEmailLine")}
-              </a>
-            </p>
           </div>
-        </div>
-      </section>
-
-      {/* Canal de denuncias / reporting channel (text from Lobby Canal de denuncias.docx) */}
-      <section className="mb-20 md:mb-24">
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] md:p-12 lg:p-14">
-          <h2 className="mb-6 font-serif text-2xl leading-tight text-brand-black md:text-3xl">
-            {t("lobComplaintsTitle")}
-          </h2>
-          <div className="space-y-5 text-[15px] font-light leading-relaxed text-gray-600 md:text-base">
-            <p>{t("lobComplaintsP1")}</p>
-            <p>{t("lobComplaintsP2")}</p>
-            <h3 className="pt-2 text-base font-semibold text-brand-black">
-              {t("lobComplaintsHowTitle")}
-            </h3>
-            <p>{renderComplaintEmailLine(t("lobComplaintsLineEmail"))}</p>
-            <p>{renderComplaintWhatsappLine(t("lobComplaintsLineWhatsapp"))}</p>
-            <p>{t("lobComplaintsP3")}</p>
-            <p>{t("lobComplaintsP4")}</p>
-            <p>{t("lobComplaintsP5")}</p>
-          </div>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-            <a
-              href={`mailto:${LOBBY_COMPLAINT_EMAIL}`}
-              className="inline-flex items-center justify-center rounded-lg bg-brand-gold px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-amber-500"
-            >
-              {t("lobComplaintsBtnEmail")}
-            </a>
-            <a
-              href={LOBBY_COMPLAINT_WA_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-3 text-xs font-bold uppercase tracking-wider text-brand-black transition hover:border-brand-gold hover:text-brand-gold"
-            >
-              {t("lobComplaintsBtnWhatsapp")}
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Instructions + Policies */}
-      <section className="space-y-10">
-        <div>
-          <h3 className="text-2xl font-serif text-brand-black mb-6">
-            {t("lobInstructionsTitle")}
-          </h3>
-          <p className="text-sm text-gray-600 font-light">
-            {t("lobInstructionsIntro")}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-3 items-start">
-          {INSTRUCTION_ITEMS.map(({ q, a }) => {
-            const isOpen = openInstr === q;
-            return (
-              <div
-                key={q}
-                className="bg-white border border-gray-100 rounded-lg overflow-hidden"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenInstr(isOpen ? null : q)}
-                  className="flex w-full items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition text-left"
-                  aria-expanded={isOpen}
-                >
-                  {t(q)}
-                  <span
-                    className={`text-gray-400 transition-transform duration-300 text-xl leading-none shrink-0 ml-2 ${isOpen ? "rotate-45" : ""}`}
-                  >
-                    +
-                  </span>
-                </button>
-                {isOpen && (
-                  <div className="scrollbar-modal max-h-[min(70vh,26rem)] overflow-y-auto border-t border-gray-50 px-4 pb-4 pt-3">
-                    {renderInstructionAnswer(t(a))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div>
-          <h3 className="text-2xl font-serif text-brand-black mb-6">
-            {t("lobPoliciesTitle")}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {POLICIES.map(({ titleKey, descKey, href }) =>
-              titleKey === "privacyPolicy" ? (
-                <button
-                  key={titleKey}
-                  type="button"
-                  onClick={() => setPrivacyModalOpen(true)}
-                  className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
-                >
-                  <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
-                    {t(titleKey)}
-                  </h4>
-                  <p className="text-xs font-light text-gray-500">
-                    {t(descKey)}
-                  </p>
-                </button>
-              ) : (
-                <Link
-                  key={titleKey}
-                  href={href}
-                  className="group block p-6 bg-(--color-brand-bg) border border-gray-100 rounded-lg hover:border-brand-gold hover:bg-white transition"
-                >
-                  <h4 className="font-bold text-sm text-brand-black mb-2 group-hover:text-brand-gold transition">
-                    {t(titleKey)}
-                  </h4>
-                  <p className="text-xs text-gray-500 font-light">
-                    {t(descKey)}
-                  </p>
-                </Link>
-              ),
-            )}
-          </div>
-        </div>
-      </section>
-
-    </main>
+        </section>
+      </main>
       <PrivacyModal
         isOpen={privacyModalOpen}
         onClose={() => setPrivacyModalOpen(false)}
@@ -1312,6 +1379,89 @@ export default function LobbyContent() {
               <button
                 type="button"
                 onClick={() => setAboutModalOpen(false)}
+                className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+              >
+                {t("close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {instructionsModalOpen && (
+        <div
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/55 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("lobInstructionsTitle")}
+          onClick={() => setInstructionsModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setInstructionsModalOpen(false)}
+              className="absolute top-6 right-6 left-auto z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+              aria-label={t("lobCloseModal")}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className="w-4 h-4"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="overflow-y-auto flex-1 px-6 py-6 md:px-8">
+              <div className="bg-brand-bg border-b border-gray-200 -mx-6 px-6 pt-6 pb-6 mb-6 md:-mx-8 md:px-8 md:pr-14">
+                <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+                <h3 className="text-2xl md:text-3xl font-serif text-brand-black">
+                  {t("lobInstructionsTitle")}
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-3 items-start">
+                {INSTRUCTION_ITEMS.map(({ q, a }) => {
+                  const isOpen = openInstr === q;
+                  return (
+                    <div
+                      key={q}
+                      className="bg-white border border-gray-100 rounded-lg overflow-hidden"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setOpenInstr(isOpen ? null : q)}
+                        className="flex w-full items-center justify-between p-4 cursor-pointer text-sm font-bold text-brand-black hover:text-brand-gold transition text-left"
+                        aria-expanded={isOpen}
+                      >
+                        {t(q)}
+                        <span
+                          className={`text-gray-400 transition-transform duration-300 text-xl leading-none shrink-0 ml-2 ${isOpen ? "rotate-45" : ""}`}
+                        >
+                          +
+                        </span>
+                      </button>
+                      {isOpen && (
+                        <div className="scrollbar-modal max-h-[min(70vh,26rem)] overflow-y-auto border-t border-gray-50 px-4 pb-4 pt-3">
+                          {renderInstructionAnswer(t(a))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInstructionsModalOpen(false)}
                 className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
               >
                 {t("close")}

@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useCallback } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 type SportRentingModalProps = {
   isOpen: boolean;
@@ -104,8 +105,11 @@ export default function SportRentingModal({
   onClose,
 }: SportRentingModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
-    const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
       open?: () => void;
       toggle?: () => void;
       shadowRoot?: ShadowRoot | null;
@@ -118,7 +122,11 @@ export default function SportRentingModal({
       const buttons = Array.from(root.querySelectorAll("button"));
       for (const btn of buttons) {
         const text = (btn.textContent || "").trim().toLowerCase();
-        if (text === "accept" || text === "aceptar" || text.includes("accept")) {
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
           (btn as HTMLButtonElement).click();
           return true;
         }
@@ -139,7 +147,9 @@ export default function SportRentingModal({
       if (avatar) {
         avatar.click();
       } else {
-        const clickable = root.querySelector("button, [role='button']") as HTMLElement | null;
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
         clickable?.click();
       }
     }

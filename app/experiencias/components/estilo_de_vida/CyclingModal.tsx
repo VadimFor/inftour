@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 const CYCLING_IMAGES = [
   "/estilo_de_vida/pictures/El Vaticano del ciclismo 1.png",
@@ -47,6 +48,7 @@ function renderTextWithBoldRoutes(text: string, routeNames: string[]) {
 export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
   const t = useLangStore((s) => s.t);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

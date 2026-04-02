@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import areas1 from "./pictures/Áreas 1.png";
 
 type BBQParksModalProps = {
@@ -31,6 +32,7 @@ function renderLabeledLine(line: string) {
 
 export default function BBQParksModal({ isOpen, onClose }: BBQParksModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

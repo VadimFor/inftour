@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import playas1 from "./pictures/Playas 1.jpeg";
 import playas2 from "./pictures/Playas 2.jpeg";
 import playas3 from "./pictures/Playas 3.jpeg";
@@ -76,6 +77,7 @@ export default function HorizontesMarinosModal({
   onClose,
 }: HorizontesMarinosModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

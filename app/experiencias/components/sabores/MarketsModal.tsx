@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 const MARKET_IMAGES = [
   "/sabores/pictures/Mercado Lonja 1.png",
@@ -29,6 +30,7 @@ const sectionsMeta = [
 export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
   const t = useLangStore((s) => s.t);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

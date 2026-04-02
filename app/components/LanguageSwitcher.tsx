@@ -136,7 +136,7 @@ const LANGUAGES: Array<{
   { code: "fr", label: "FR", Icon: FlagFrance, title: "Français" },
   { code: "it", label: "IT", Icon: FlagItaly, title: "Italiano" },
   { code: "de", label: "DE", Icon: FlagGermany, title: "Deutsch" },
-  { code: "uk", label: "UK", Icon: FlagUkraine, title: "Українська" },
+  { code: "uk", label: "UA", Icon: FlagUkraine, title: "Українська" },
   { code: "pl", label: "PL", Icon: FlagPoland, title: "Polski" },
 ];
 

@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import salinas1 from "./pictures/Las Salinas 1.jpg";
 import salinas2 from "./pictures/Las Salinas 2.jpg";
 import salinas3 from "./pictures/Las Salinas 3.png";
@@ -47,6 +48,7 @@ function renderLabeledLine(line: string) {
 
 export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

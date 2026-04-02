@@ -3,6 +3,7 @@
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 type RelaxModalProps = {
   isOpen: boolean;
@@ -76,6 +77,7 @@ function isTimeOrSeasonBullet(line: string) {
 
 export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
   const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
 
   if (!isOpen || typeof document === "undefined") return null;
 
