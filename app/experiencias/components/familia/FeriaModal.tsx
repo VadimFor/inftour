@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -30,6 +31,68 @@ function renderLabeledLine(line: string) {
 
 export default function FeriaModal({ isOpen, onClose }: FeriaModalProps) {
   const t = useLangStore((s) => s.t);
+  const openAIWidget = useCallback(() => {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
+      open?: () => void;
+      toggle?: () => void;
+      shadowRoot?: ShadowRoot | null;
+    };
+    if (!widget) return;
+
+    const clickAcceptIfPresent = () => {
+      const root = widget.shadowRoot;
+      if (!root) return false;
+      const buttons = Array.from(root.querySelectorAll("button"));
+      for (const btn of buttons) {
+        const text = (btn.textContent || "").trim().toLowerCase();
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
+          (btn as HTMLButtonElement).click();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (typeof widget.open === "function") {
+      widget.open();
+    } else if (typeof widget.toggle === "function") {
+      widget.toggle();
+    } else {
+      const root = widget.shadowRoot;
+      if (!root) return;
+      const avatar = root.querySelector(
+        "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
+      ) as HTMLElement | null;
+      if (avatar) {
+        avatar.click();
+      } else {
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
+        clickable?.click();
+      }
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      const accepted = clickAcceptIfPresent();
+      if (accepted || attempts >= maxAttempts) {
+        window.clearInterval(timer);
+      }
+    }, 150);
+  }, []);
+  const handleAdviceBoxClick = useCallback(() => {
+    onClose();
+    openAIWidget();
+  }, [onClose, openAIWidget]);
 
   const parseSection = (key: string) => {
     const lines = t(key)
@@ -134,7 +197,18 @@ export default function FeriaModal({ isOpen, onClose }: FeriaModalProps) {
             })}
           </div>
 
-          <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
+          <div
+            className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onClick={handleAdviceBoxClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleAdviceBoxClick();
+              }
+            }}
+          >
             <svg
               viewBox="0 0 24 24"
               fill="none"

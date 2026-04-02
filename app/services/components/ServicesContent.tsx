@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
 import heroImage from "../pictures/chica_con_portatil.png";
@@ -111,6 +112,84 @@ const CARDS = [
 
 export default function ServicesContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
+  const openAIWidget = useCallback(() => {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
+      open?: () => void;
+      toggle?: () => void;
+      shadowRoot?: ShadowRoot | null;
+    };
+    if (!widget) return;
+
+    const clickAcceptIfPresent = () => {
+      const root = widget.shadowRoot;
+      if (!root) return false;
+
+      const buttons = Array.from(root.querySelectorAll("button"));
+      for (const btn of buttons) {
+        const text = (btn.textContent || "").trim().toLowerCase();
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
+          (btn as HTMLButtonElement).click();
+          return true;
+        }
+      }
+
+      const spans = Array.from(root.querySelectorAll("span"));
+      for (const span of spans) {
+        const text = (span.textContent || "").trim().toLowerCase();
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
+          const btn = span.closest("button");
+          if (btn) {
+            (btn as HTMLButtonElement).click();
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+
+    if (typeof widget.open === "function") {
+      widget.open();
+    } else if (typeof widget.toggle === "function") {
+      widget.toggle();
+    } else {
+      const root = widget.shadowRoot;
+      if (!root) return;
+
+      const avatar = root.querySelector(
+        "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
+      ) as HTMLElement | null;
+      if (avatar) {
+        avatar.click();
+      } else {
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
+        clickable?.click();
+      }
+    }
+
+    // Consent popup can appear after a short delay; retry briefly and auto-accept.
+    let attempts = 0;
+    const maxAttempts = 20;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      const accepted = clickAcceptIfPresent();
+      if (accepted || attempts >= maxAttempts) {
+        window.clearInterval(timer);
+      }
+    }, 150);
+  }, []);
 
   return (
     <main className="relative z-20">
@@ -159,7 +238,24 @@ export default function ServicesContent() {
             {CARDS.map((card) => (
               <article
                 key={card.titleKey}
-                className="group p-8 border border-gray-100 hover:border-brand-gold transition duration-300 shadow-sm rounded-sm bg-brand-bg hover:bg-white flex flex-col items-start"
+                className={`group p-8 border border-gray-100 hover:border-brand-gold transition duration-300 shadow-sm rounded-sm bg-brand-bg hover:bg-white flex flex-col items-start ${
+                  card.titleKey === "svcCardAITitle" ? "cursor-pointer" : ""
+                }`}
+                onClick={
+                  card.titleKey === "svcCardAITitle" ? openAIWidget : undefined
+                }
+                role={card.titleKey === "svcCardAITitle" ? "button" : undefined}
+                tabIndex={card.titleKey === "svcCardAITitle" ? 0 : undefined}
+                onKeyDown={
+                  card.titleKey === "svcCardAITitle"
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openAIWidget();
+                        }
+                      }
+                    : undefined
+                }
               >
                 <div className="w-12 h-12 flex items-center justify-center bg-white text-brand-gold rounded-full shadow-sm mb-6 group-hover:scale-110 transition">
                   <card.Icon className="w-6 h-6" />
@@ -179,7 +275,7 @@ export default function ServicesContent() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-600 font-light leading-relaxed">
+                  <p className="text-sm text-gray-600 font-light leading-relaxed whitespace-pre-line">
                     {t(card.descKey!)}
                   </p>
                 )}
