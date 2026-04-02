@@ -1,8 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
+import playas1 from "./pictures/Playas 1.jpeg";
+import playas2 from "./pictures/Playas 2.jpeg";
+import playas3 from "./pictures/Playas 3.jpeg";
+import playas4 from "./pictures/Playas 4.jpeg";
 
 type CalpeGrandezaModalProps = {
   isOpen: boolean;
@@ -24,6 +29,13 @@ const sectionsMeta = [
   { key: "expCalpeGrandeurModalSection12" },
   { key: "expCalpeGrandeurModalSection13" },
 ] as const;
+
+const SECTION_IMAGE_BY_KEY: Partial<Record<(typeof sectionsMeta)[number]["key"], typeof playas2>> = {
+  expCalpeGrandeurModalSection1: playas2,
+  expCalpeGrandeurModalSection8: playas4,
+};
+
+const PLAYAS_GALLERY_IMAGES = [playas1, playas3];
 
 function parseSection(raw: string) {
   const lines = raw.split("\n");
@@ -127,9 +139,28 @@ export default function CalpeGrandezaModal({
             ))}
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+            {PLAYAS_GALLERY_IMAGES.map((img, i) => (
+              <div
+                key={`playas-gallery-${i}`}
+                className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100"
+              >
+                <Image
+                  src={img}
+                  alt={`Playas de Calpe ${i === 0 ? 1 : 3}`}
+                  width={img.width}
+                  height={img.height}
+                  className="w-full h-48 object-cover"
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                />
+              </div>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 gap-4">
             {sectionsMeta.map(({ key }) => {
               const { title, body } = parseSection(t(key));
+              const sectionImage = SECTION_IMAGE_BY_KEY[key];
               return (
                 <div
                   key={key}
@@ -142,6 +173,18 @@ export default function CalpeGrandezaModal({
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                       {body}
                     </p>
+                  ) : null}
+                  {sectionImage ? (
+                    <div className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100 mt-1">
+                      <Image
+                        src={sectionImage}
+                        alt={title || "Playas de Calpe"}
+                        width={sectionImage.width}
+                        height={sectionImage.height}
+                        className="w-full h-56 object-cover"
+                        sizes="(max-width: 1024px) 100vw, 896px"
+                      />
+                    </div>
                   ) : null}
                 </div>
               );

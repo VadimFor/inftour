@@ -21,6 +21,7 @@ export const menuTranslations: Record<string, LangStrings> = {
     pl: "Kolekcja Calpe",
   },
   reservaDirecta: { eng: "Direct booking", esp: "Reserva directa", ru: "Прямое бронирование", fr: "Réservation directe", it: "Prenotazione diretta", de: "Direktbuchung", uk: "Пряме бронювання", pl: "Rezerwacja bezpośrednia" },
+  reservaDirectaV2: { eng: "Direct booking V2", esp: "Reserva Directa V2", ru: "Прямое бронирование V2", fr: "Réservation directe V2", it: "Prenotazione diretta V2", de: "Direktbuchung V2", uk: "Пряме бронювання V2", pl: "Rezerwacja bezpośrednia V2" },
   experiencias: { eng: "Experiences", esp: "Experiencias", ru: "Впечатления", fr: "Expériences", it: "Esperienze", de: "Erlebnisse", uk: "Враження", pl: "Doświadczenia" },
   services: { eng: "Services", esp: "Servicios", ru: "Услуги", fr: "Services", it: "Servizi", de: "Dienstleistungen", uk: "Послуги", pl: "Usługi" },
   revista: { eng: "Magazine", esp: "Revista", ru: "Журнал", fr: "Magazine", it: "Rivista", de: "Magazin", uk: "Журнал", pl: "Magazyn" },

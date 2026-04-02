@@ -6,7 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
 import gastronomyImage from "../pictures/restaurante.png";
 import natureImage from "./naturaleza/pictures/Experiencias Naturaleza.jpeg";
-import relaxImage from "../pictures/jabon.png";
+import relaxImage from "./relax/Playas.jpeg";
 import sportEstiloImage1 from "./estilo_de_vida/pictures/1.jpeg";
 import sportEstiloImage2 from "./estilo_de_vida/pictures/2.png";
 import RestaurantsModal from "./sabores/RestaurantsModal";
@@ -342,12 +342,15 @@ export default function ExperienciasContent() {
                 </svg>
               </button>
             </div>
-            <div className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden">
-              <div className="w-full transition duration-700">
+            <div className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden p-4">
+              <div
+                className="w-full transition duration-700 flex items-center justify-center"
+                style={{ maxWidth: "760px", maxHeight: "440px" }}
+              >
                 <Image
                   src={relaxImage}
                   alt={t("expRelax")}
-                  className="w-full h-auto object-contain group-hover:scale-105 duration-700"
+                  className="w-full h-full object-contain group-hover:scale-105 duration-700"
                 />
               </div>
             </div>
