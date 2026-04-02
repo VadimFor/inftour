@@ -654,13 +654,25 @@ export default function LobbyContent() {
                 <span className="text-brand-gold" aria-hidden>
                   📍
                 </span>
-                {t("lobAddressLine")}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t("lobAddressLine"))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-brand-gold transition"
+                >
+                  {t("lobAddressLine")}
+                </a>
               </p>
               <p className="flex items-center gap-3">
                 <span className="text-brand-gold" aria-hidden>
                   📞
                 </span>
-                {t("lobPhoneLine")}
+                <a
+                  href={`tel:${t("lobPhoneLine").replace(/\s+/g, "")}`}
+                  className="hover:text-brand-gold transition"
+                >
+                  {t("lobPhoneLine")}
+                </a>
               </p>
               <p className="flex items-center gap-3">
                 <span className="text-brand-gold" aria-hidden>
@@ -680,7 +692,7 @@ export default function LobbyContent() {
         {/* Instructions + Policies */}
         <section className="space-y-10">
           <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)]">
-            <h3 className="text-2xl font-serif text-brand-black mb-3">
+            <h3 className="text-2xl font-serif text-brand-black mb-3 text-center">
               {t("lobInstructionsTitle")}
             </h3>
             <div className="mb-6">
@@ -1005,7 +1017,7 @@ export default function LobbyContent() {
             <div className="overflow-y-auto flex-1 px-6 py-6 md:px-8">
               <div className="bg-brand-bg border-b border-gray-200 -mx-6 px-6 pt-6 pb-6 mb-6 md:-mx-8 md:px-8 md:pr-14">
                 <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-                <h3 className="text-2xl md:text-3xl font-serif text-brand-black">
+                <h3 className="text-2xl md:text-3xl font-serif text-brand-black text-center">
                   {t("lobInstructionsTitle")}
                 </h3>
               </div>
