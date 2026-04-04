@@ -4,6 +4,9 @@ import { create } from "zustand";
 import { experienciasTranslations } from "../experiencias/experiencias_translations";
 import { revistaTranslations } from "../revista/translations/revista_translations";
 import { servicesTranslations } from "../services/translations/services_translations";
+import { referenceNumbersModalTranslations } from "../services/translations/reference_numbers_modal_translations";
+import { ourServicesModalTranslations } from "../services/translations/our_services_modal_translations";
+import { requestsCommentsModalTranslations } from "../services/translations/requests_comments_modal_translations";
 import { lobbyTranslations } from "../lobby/translations/lobby_translations";
 import { stayTranslations } from "../lobby/translations/stay_translations";
 import { privacyModalTranslations } from "../lobby/translations/privacymodal_translate";
@@ -106,6 +109,11 @@ const translations: TranslationMap = {
 
   // Services
   ...servicesTranslations,
+
+  // Services – modals (RecipesModal-style shells)
+  ...referenceNumbersModalTranslations,
+  ...ourServicesModalTranslations,
+  ...requestsCommentsModalTranslations,
 
   // Lobby
   ...lobbyTranslations,

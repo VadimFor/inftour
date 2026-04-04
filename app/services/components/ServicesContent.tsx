@@ -1,10 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
 import heroImage from "../pictures/chica_con_portatil.png";
+import OurServicesModal from "./OurServicesModal";
+import ReferenceNumbersModal from "./ReferenceNumbersModal";
+import RequestsCommentsModal from "./RequestsCommentsModal";
 
 function IconAI({ className }: { className?: string }) {
   return (
@@ -112,6 +115,9 @@ const CARDS = [
 
 export default function ServicesContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
+  const [referenceModalOpen, setReferenceModalOpen] = useState(false);
+  const [ourServicesModalOpen, setOurServicesModalOpen] = useState(false);
+  const [requestsModalOpen, setRequestsModalOpen] = useState(false);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector(
       "elevenlabs-convai",
@@ -191,6 +197,12 @@ export default function ServicesContent() {
     }, 150);
   }, []);
 
+  const openModalForCard = (titleKey: (typeof CARDS)[number]["titleKey"]) => {
+    if (titleKey === "svcCardRefTitle") setReferenceModalOpen(true);
+    else if (titleKey === "svcCardCleaningTitle") setOurServicesModalOpen(true);
+    else if (titleKey === "svcCardOfficeTitle") setRequestsModalOpen(true);
+  };
+
   return (
     <main className="relative z-20">
       {/* Hero */}
@@ -239,13 +251,38 @@ export default function ServicesContent() {
               <article
                 key={card.titleKey}
                 className={`group p-8 border border-gray-100 hover:border-brand-gold transition duration-300 shadow-sm rounded-sm bg-brand-bg hover:bg-white flex flex-col items-start ${
-                  card.titleKey === "svcCardAITitle" ? "cursor-pointer" : ""
+                  card.titleKey === "svcCardAITitle" ||
+                  card.titleKey === "svcCardRefTitle" ||
+                  card.titleKey === "svcCardCleaningTitle" ||
+                  card.titleKey === "svcCardOfficeTitle"
+                    ? "cursor-pointer"
+                    : ""
                 }`}
                 onClick={
-                  card.titleKey === "svcCardAITitle" ? openAIWidget : undefined
+                  card.titleKey === "svcCardAITitle"
+                    ? openAIWidget
+                    : card.titleKey === "svcCardRefTitle" ||
+                        card.titleKey === "svcCardCleaningTitle" ||
+                        card.titleKey === "svcCardOfficeTitle"
+                      ? () => openModalForCard(card.titleKey)
+                      : undefined
                 }
-                role={card.titleKey === "svcCardAITitle" ? "button" : undefined}
-                tabIndex={card.titleKey === "svcCardAITitle" ? 0 : undefined}
+                role={
+                  card.titleKey === "svcCardAITitle" ||
+                  card.titleKey === "svcCardRefTitle" ||
+                  card.titleKey === "svcCardCleaningTitle" ||
+                  card.titleKey === "svcCardOfficeTitle"
+                    ? "button"
+                    : undefined
+                }
+                tabIndex={
+                  card.titleKey === "svcCardAITitle" ||
+                  card.titleKey === "svcCardRefTitle" ||
+                  card.titleKey === "svcCardCleaningTitle" ||
+                  card.titleKey === "svcCardOfficeTitle"
+                    ? 0
+                    : undefined
+                }
                 onKeyDown={
                   card.titleKey === "svcCardAITitle"
                     ? (e) => {
@@ -254,7 +291,16 @@ export default function ServicesContent() {
                           openAIWidget();
                         }
                       }
-                    : undefined
+                    : card.titleKey === "svcCardRefTitle" ||
+                        card.titleKey === "svcCardCleaningTitle" ||
+                        card.titleKey === "svcCardOfficeTitle"
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openModalForCard(card.titleKey);
+                          }
+                        }
+                      : undefined
                 }
               >
                 <div className="w-12 h-12 flex items-center justify-center bg-white text-brand-gold rounded-full shadow-sm mb-6 group-hover:scale-110 transition">
@@ -284,6 +330,19 @@ export default function ServicesContent() {
           </div>
         </div>
       </section>
+
+      <ReferenceNumbersModal
+        isOpen={referenceModalOpen}
+        onClose={() => setReferenceModalOpen(false)}
+      />
+      <OurServicesModal
+        isOpen={ourServicesModalOpen}
+        onClose={() => setOurServicesModalOpen(false)}
+      />
+      <RequestsCommentsModal
+        isOpen={requestsModalOpen}
+        onClose={() => setRequestsModalOpen(false)}
+      />
     </main>
   );
 }
