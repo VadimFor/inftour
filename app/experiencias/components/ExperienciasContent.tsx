@@ -295,16 +295,6 @@ export default function ExperienciasContent() {
                   {t("expEquipmentRental")}
                 </button>
               </li>
-              <li className="font-bold text-gray-800">
-                <a
-                  href="https://cultura.calp.es/en/agendaweb/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-brand-link transition block font-bold text-brand-gold"
-                >
-                  <span className="font-bold">{t("expSportsEvents")}</span>
-                </a>
-              </li>
             </ul>
           </article>
 
