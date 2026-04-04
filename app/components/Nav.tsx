@@ -17,6 +17,7 @@ export default function Nav() {
     <nav
       className="sticky top-0 z-50 bg-white border-b border-gray-200 min-w-0"
       data-lang={lang}
+      data-site-nav
     >
       <div className="container mx-auto px-6 h-20 flex justify-between items-center min-w-0">
         <Link href="/" className="flex flex-col items-start mt-1 shrink-0">

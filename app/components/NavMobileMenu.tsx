@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useShallow } from "zustand/react/shallow";
 import { navItems } from "../lib/nav-config";
@@ -14,6 +14,7 @@ const LG_BREAKPOINT = 1024;
 export default function NavMobileMenu() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [panelTopPx, setPanelTopPx] = useState(0);
   const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
 
   useEffect(() => {
@@ -30,6 +31,23 @@ export default function NavMobileMenu() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const nav = document.querySelector<HTMLElement>("[data-site-nav]");
+    const syncTop = () => {
+      const bottom = nav?.getBoundingClientRect().bottom;
+      if (typeof bottom === "number" && bottom > 0) setPanelTopPx(bottom);
+    };
+    syncTop();
+    const ro = nav ? new ResizeObserver(syncTop) : null;
+    if (nav) ro?.observe(nav);
+    window.addEventListener("resize", syncTop);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", syncTop);
+    };
+  }, [open]);
 
   return (
     <div className="lg:hidden shrink-0">
@@ -59,7 +77,7 @@ export default function NavMobileMenu() {
           />
           <div
             className="fixed left-0 right-0 z-50 py-4 px-6 bg-gradient-to-b from-gray-50 to-brand-stone border-b border-gray-200 shadow-lg"
-            style={{ top: "7.5rem" }}
+            style={{ top: panelTopPx > 0 ? `${panelTopPx}px` : "5rem" }}
           >
             <ul className="flex flex-col items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">
               {navItems.map(({ href, labelKey }) => {

@@ -300,50 +300,35 @@ export default function ExperienciasContent() {
 
           {/* Relax – full width */}
           <article className="md:col-span-12 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group">
-            <div className="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center shrink-0">
-              <h2 className="text-3xl font-serif text-gray-900 mb-2">
+            <button
+              type="button"
+              onClick={() => setRelaxOpen(true)}
+              className="md:w-1/3 bg-brand-bg p-8 flex flex-col justify-center shrink-0 text-left cursor-pointer border-0 transition hover:brightness-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link"
+            >
+              <span className="text-3xl font-serif text-gray-900 mb-2">
                 {t("expRelax")}
-              </h2>
-              <p className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">
+              </span>
+              <span className="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6 block">
                 {t("expRelaxDesc")}
-              </p>
-              <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                {t("expRelaxDescLong")}
-              </p>
-              <button
-                type="button"
-                onClick={() => setRelaxOpen(true)}
-                className="text-brand-link text-sm font-bold inline-flex items-center gap-2 hover:underline"
-              >
-                {t("expExploreCatalog")}
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden p-4">
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRelaxOpen(true)}
+              aria-label={t("expRelax")}
+              className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden p-4 cursor-pointer border-0 transition hover:brightness-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link"
+            >
               <div
                 className="w-full transition duration-700 flex items-center justify-center"
                 style={{ maxWidth: "760px", maxHeight: "440px" }}
               >
                 <Image
                   src={relaxImage}
-                  alt={t("expRelax")}
-                  className="w-full h-full object-contain group-hover:scale-105 duration-700"
+                  alt=""
+                  className="w-full h-full object-contain group-hover:scale-105 duration-700 pointer-events-none"
                 />
               </div>
-            </div>
+            </button>
           </article>
         </div>
       </div>
