@@ -2,7 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { useCallback, useState } from "react";
-import Image from "next/image";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -193,14 +193,20 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
           <div className="grid grid-cols-2 gap-2 mb-6">
             {CYCLING_IMAGES.map((src, idx) =>
               !failedImages.has(idx) ? (
-                <div key={idx} className="relative w-full h-48 overflow-hidden rounded-sm">
-                  <Image
+                <div
+                  key={idx}
+                  className="relative h-48 w-full overflow-hidden rounded-sm"
+                >
+                  <ProgressiveNextImage
                     src={src}
                     alt=""
-                    fill
-                    onError={() => setFailedImages((prev) => new Set(prev).add(idx))}
-                    className="object-cover hover:scale-105 transition-transform duration-500 ease-in-out"
+                    priority={idx === 0}
+                    loading={idx < 2 ? "eager" : "lazy"}
+                    onError={() =>
+                      setFailedImages((prev) => new Set(prev).add(idx))
+                    }
                     sizes="(max-width: 896px) 50vw, 448px"
+                    imageClassName="object-cover transition-transform duration-500 ease-in-out hover:scale-105"
                   />
                 </div>
               ) : null

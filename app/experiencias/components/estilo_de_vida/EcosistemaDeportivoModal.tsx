@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useCallback, type ReactNode } from "react";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -466,69 +466,81 @@ export default function EcosistemaDeportivoModal({
 
               const imagesAfterTitle =
                 sectionNum === 1 ? (
-                  <div className="w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100 mb-4">
-                    <Image
-                      src={ecosistemaCalpe1}
-                      alt={`${title} — Golf`}
-                      width={ecosistemaCalpe1.width}
-                      height={ecosistemaCalpe1.height}
-                      className="w-full h-auto"
-                      sizes="(max-width: 640px) 100vw, 400px"
-                    />
-                  </div>
-                ) : sectionNum === 2 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mb-4 border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
-                    <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
-                        src={ecosistemaCalpe2}
-                        alt={`${title} — Tennis & padel (1)`}
-                        width={ecosistemaCalpe2.width}
-                        height={ecosistemaCalpe2.height}
-                        className="w-full h-auto"
-                        sizes="(max-width: 640px) 100vw, 200px"
+                  <div className="mb-4 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100">
+                    <div
+                      className="relative w-full"
+                      style={{
+                        aspectRatio: `${ecosistemaCalpe1.width} / ${ecosistemaCalpe1.height}`,
+                      }}
+                    >
+                      <ProgressiveNextImage
+                        src={ecosistemaCalpe1}
+                        alt={`${title} — Golf`}
+                        sizes="(max-width: 640px) 100vw, 400px"
+                        priority
+                        imageClassName="object-contain"
                       />
                     </div>
+                  </div>
+                ) : sectionNum === 2 ? (
+                  <div className="mb-4 grid w-full grid-cols-1 gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2 sm:grid-cols-2">
                     <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
-                        src={ecosistemaCalpe3}
-                        alt={`${title} — Tennis & padel (2)`}
-                        width={ecosistemaCalpe3.width}
-                        height={ecosistemaCalpe3.height}
-                        className="w-full h-auto"
-                        sizes="(max-width: 640px) 100vw, 200px"
-                      />
+                      <div
+                        className="relative w-full"
+                        style={{
+                          aspectRatio: `${ecosistemaCalpe2.width} / ${ecosistemaCalpe2.height}`,
+                        }}
+                      >
+                        <ProgressiveNextImage
+                          src={ecosistemaCalpe2}
+                          alt={`${title} — Tennis & padel (1)`}
+                          sizes="(max-width: 640px) 100vw, 200px"
+                          loading="eager"
+                          imageClassName="object-contain"
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <div
+                        className="relative w-full"
+                        style={{
+                          aspectRatio: `${ecosistemaCalpe3.width} / ${ecosistemaCalpe3.height}`,
+                        }}
+                      >
+                        <ProgressiveNextImage
+                          src={ecosistemaCalpe3}
+                          alt={`${title} — Tennis & padel (2)`}
+                          sizes="(max-width: 640px) 100vw, 200px"
+                          loading="eager"
+                          imageClassName="object-contain"
+                        />
+                      </div>
                     </div>
                   </div>
                 ) : sectionNum === 3 ? (
-                  <div className="flex flex-row gap-2 w-full mb-4 border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
-                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
+                  <div className="mb-4 flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
+                    <div className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <ProgressiveNextImage
                         src={ecosistemaCalpe4}
                         alt={`${title} — Nautical & water (1)`}
-                        width={ecosistemaCalpe4.width}
-                        height={ecosistemaCalpe4.height}
-                        className="w-full h-full object-cover"
                         sizes="33vw"
+                        imageClassName="object-cover"
                       />
                     </div>
-                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
+                    <div className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <ProgressiveNextImage
                         src={ecosistemaCalpe5}
                         alt={`${title} — Nautical & water (2)`}
-                        width={ecosistemaCalpe5.width}
-                        height={ecosistemaCalpe5.height}
-                        className="w-full h-full object-cover"
                         sizes="33vw"
+                        imageClassName="object-cover"
                       />
                     </div>
-                    <div className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
+                    <div className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <ProgressiveNextImage
                         src={ecosistemaCalpe6}
                         alt={`${title} — Nautical & water (3)`}
-                        width={ecosistemaCalpe6.width}
-                        height={ecosistemaCalpe6.height}
-                        className="w-full h-full object-cover"
                         sizes="33vw"
+                        imageClassName="object-cover"
                       />
                     </div>
                   </div>

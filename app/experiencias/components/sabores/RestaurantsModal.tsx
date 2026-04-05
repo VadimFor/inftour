@@ -2,8 +2,8 @@
 
 import { createPortal } from "react-dom";
 import { useCallback, useState } from "react";
-import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
+import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -12,7 +12,7 @@ const RESTAURANT_IMAGES = [
   "/sabores/pictures/Restaurantes 1.jpeg",
   "/sabores/pictures/Restaurantes 2.jpg",
   "/sabores/pictures/Restaurantes 3.png",
-];
+] as const;
 
 type RestaurantsModalProps = {
   isOpen: boolean;
@@ -187,15 +187,20 @@ export default function RestaurantsModal({
                     />
                   </div>
                   {RESTAURANT_IMAGES[index] && !failedImages.has(index) && (
-                    <div className="relative w-full h-72 mt-4 overflow-hidden">
-                      <Image
-                        src={RESTAURANT_IMAGES[index]}
-                        alt=""
-                        fill
-                        onError={() => setFailedImages((prev) => new Set(prev).add(index))}
-                        className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
-                        sizes="(max-width: 896px) 100vw, 896px"
-                      />
+                    <div className="relative mt-4 h-72 w-full overflow-hidden">
+                      <div className="absolute inset-0 scale-110 transition-transform duration-500 ease-in-out group-hover:scale-100">
+                        <SaboresProgressiveImage
+                          src={RESTAURANT_IMAGES[index]}
+                          alt=""
+                          priority={index === 0}
+                          loading={index === 0 ? undefined : "eager"}
+                          quality={65}
+                          onError={() =>
+                            setFailedImages((prev) => new Set(prev).add(index))
+                          }
+                          sizes="(max-width: 640px) 100vw, (max-width: 896px) calc(100vw - 4rem), 800px"
+                        />
+                      </div>
                     </div>
                   )}
                   <div

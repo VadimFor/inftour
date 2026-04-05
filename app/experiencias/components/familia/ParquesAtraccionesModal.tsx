@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
+import type { StaticImageData } from "next/image";
 import { createPortal } from "react-dom";
 import { useCallback, useMemo } from "react";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -12,8 +13,6 @@ import terra3 from "./pictures/Terra 3.png";
 import terra4 from "./pictures/Terra 4.png";
 import terra5 from "./pictures/Terra 5.png";
 import terra6 from "./pictures/Terra 6.png";
-
-import type { StaticImageData } from "next/image";
 
 /** Imágenes por parque (orden de contenido: Aqualandia → Terra Natura → Terra Mítica → Safari Aitana) */
 const TERRA_IMAGES_BY_PARK: Record<string, StaticImageData[]> = {
@@ -37,14 +36,24 @@ function TerraImagesForPark({ parkId, imgClassName }: { parkId: string; imgClass
           className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100 text-left cursor-pointer hover:border-brand-gold/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 transition-colors"
           aria-label={parkId.replace(/^park-/, "").replace(/-/g, " ")}
         >
-          <Image
-            src={img}
-            alt=""
-            width={img.width}
-            height={img.height}
-            className={`w-full object-cover pointer-events-none${imgClassName ? ` ${imgClassName}` : " h-auto"}`}
-            sizes="(max-width: 640px) 50vw, 33vw"
-          />
+          <div
+            className={`relative w-full overflow-hidden${
+              imgClassName?.includes("max-h-24") ? " h-24" : ""
+            }`}
+            style={
+              imgClassName?.includes("max-h-24")
+                ? undefined
+                : { aspectRatio: `${img.width} / ${img.height}` }
+            }
+          >
+            <ProgressiveNextImage
+              src={img}
+              alt=""
+              sizes="(max-width: 640px) 50vw, 33vw"
+              loading="lazy"
+              imageClassName="pointer-events-none object-cover"
+            />
+          </div>
         </button>
       ))}
     </div>

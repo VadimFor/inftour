@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -259,30 +259,31 @@ export default function IfachModal({ isOpen, onClose }: IfachModalProps) {
 
                 {sIdx === 0 ? (
                   <div className="w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
-                    <div className="h-72 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                      <Image
+                    <div className="relative h-72 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
+                      <ProgressiveNextImage
                         src={ascenso1}
                         alt={`${title} — Ascenso al Peñón 1`}
-                        width={ascenso1.width}
-                        height={ascenso1.height}
-                        className="w-full h-full object-cover"
-                        sizes="100vw"
+                        sizes="min(896px, 100vw)"
+                        priority
+                        imageClassName="object-cover"
                       />
                     </div>
                   </div>
                 ) : null}
 
                 {sIdx === 2 ? (
-                  <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+                  <div className="flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
                     {[ascenso2, ascenso3].map((src, i) => (
-                      <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                        <Image
+                      <div
+                        key={i}
+                        className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                      >
+                        <ProgressiveNextImage
                           src={src}
                           alt={`${title} — Ascenso al Peñón ${i + 2}`}
-                          width={src.width}
-                          height={src.height}
-                          className="w-full h-full object-cover"
                           sizes="50vw"
+                          loading="eager"
+                          imageClassName="object-cover"
                         />
                       </div>
                     ))}

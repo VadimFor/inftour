@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -185,16 +185,19 @@ export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <div className="grid grid-cols-2 gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+            <div className="grid w-full grid-cols-2 gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
               {[salinas1, salinas2, salinas3, salinas4].map((src, i) => (
-                <div key={i} className="h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                  <Image
+                <div
+                  key={i}
+                  className="relative h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                >
+                  <ProgressiveNextImage
                     src={src}
                     alt={`${title} — Las Salinas ${i + 1}`}
-                    width={src.width}
-                    height={src.height}
-                    className="w-full h-full object-cover"
                     sizes="50vw"
+                    priority={i === 0}
+                    loading={i < 2 ? "eager" : "lazy"}
+                    imageClassName="object-cover"
                   />
                 </div>
               ))}

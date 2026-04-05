@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -264,10 +264,20 @@ export default function HorizontesMarinosModal({
               </div>
             ) : null}
 
-            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+            <div className="flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
               {[playas1, playas2].map((src, i) => (
-                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                  <Image src={src} alt={`${title} — Playas ${i + 1}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                <div
+                  key={i}
+                  className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                >
+                  <ProgressiveNextImage
+                    src={src}
+                    alt={`${title} — Playas ${i + 1}`}
+                    sizes="50vw"
+                    priority={i === 0}
+                    loading={i < 2 ? "eager" : "lazy"}
+                    imageClassName="object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -311,10 +321,19 @@ export default function HorizontesMarinosModal({
               </div>
             ) : null}
 
-            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+            <div className="flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
               {[playas3, playas4].map((src, i) => (
-                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                  <Image src={src} alt={`${title} — Playas ${i + 3}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                <div
+                  key={i}
+                  className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                >
+                  <ProgressiveNextImage
+                    src={src}
+                    alt={`${title} — Playas ${i + 3}`}
+                    sizes="50vw"
+                    loading="lazy"
+                    imageClassName="object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -346,10 +365,19 @@ export default function HorizontesMarinosModal({
               </div>
             ) : null}
 
-            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+            <div className="flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
               {[horizontes1, horizontes2].map((src, i) => (
-                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                  <Image src={src} alt={`${title} — Horizontes marinos ${i + 1}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                <div
+                  key={i}
+                  className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                >
+                  <ProgressiveNextImage
+                    src={src}
+                    alt={`${title} — Horizontes marinos ${i + 1}`}
+                    sizes="50vw"
+                    loading="lazy"
+                    imageClassName="object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -388,10 +416,19 @@ export default function HorizontesMarinosModal({
               </div>
             ))}
 
-            <div className="flex flex-row gap-2 w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden">
+            <div className="flex w-full flex-row gap-2 overflow-hidden rounded-sm border border-gray-200 bg-gray-100 p-2">
               {[horizontes3, horizontes4].map((src, i) => (
-                <div key={i} className="flex-1 h-36 overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-                  <Image src={src} alt={`${title} — Horizontes marinos ${i + 3}`} width={src.width} height={src.height} className="w-full h-full object-cover" sizes="50vw" />
+                <div
+                  key={i}
+                  className="relative h-36 flex-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white"
+                >
+                  <ProgressiveNextImage
+                    src={src}
+                    alt={`${title} — Horizontes marinos ${i + 3}`}
+                    sizes="50vw"
+                    loading="lazy"
+                    imageClassName="object-cover"
+                  />
                 </div>
               ))}
             </div>

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { ProgressiveNextImage } from "../../components/ProgressiveNextImage";
 import { useLangStore } from "../../lib/langStore";
 import gastronomyImage from "../pictures/restaurante.png";
 import natureImage from "./naturaleza/pictures/Experiencias Naturaleza.jpeg";
@@ -61,13 +61,13 @@ export default function ExperienciasContent() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
           {/* Gastronomy – 8 cols */}
           <article className="md:col-span-8 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row group">
-            <div className="md:w-1/2 relative overflow-hidden h-64 md:h-auto min-h-64">
-              <Image
+            <div className="relative h-64 min-h-64 overflow-hidden md:h-auto md:min-h-64 md:w-1/2">
+              <ProgressiveNextImage
                 src={gastronomyImage}
                 alt={t("expGastronomy")}
-                fill
-                className="object-cover transition duration-700 group-hover:scale-105"
+                priority
                 sizes="(max-width: 768px) 100vw, 50vw"
+                imageClassName="object-cover transition duration-700 group-hover:scale-105"
               />
             </div>
             <div className="md:w-1/2 p-8 flex flex-col justify-center">
@@ -120,13 +120,13 @@ export default function ExperienciasContent() {
 
           {/* Nature – 4 cols, row-span-2 */}
           <article className="md:col-span-4 md:row-span-2 bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col group">
-            <div className="h-64 md:h-2/5 relative overflow-hidden min-h-48">
-              <Image
+            <div className="relative h-64 min-h-48 overflow-hidden md:h-2/5">
+              <ProgressiveNextImage
                 src={natureImage}
                 alt={t("expNature")}
-                fill
-                className="object-cover transition duration-700 group-hover:scale-105"
+                loading="eager"
                 sizes="(max-width: 768px) 100vw, 33vw"
+                imageClassName="object-cover transition duration-700 group-hover:scale-105"
               />
             </div>
             <div className="p-8 flex-1 flex flex-col">
@@ -248,22 +248,22 @@ export default function ExperienciasContent() {
               {t("expSportSub")}
             </p>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="relative h-24 rounded-sm overflow-hidden">
-                <Image
+              <div className="relative h-24 overflow-hidden rounded-sm">
+                <ProgressiveNextImage
                   src={sportEstiloImage1}
                   alt={t("expCycling")}
-                  fill
-                  className="object-cover"
                   sizes="150px"
+                  priority
+                  imageClassName="object-cover"
                 />
               </div>
-              <div className="relative h-24 rounded-sm overflow-hidden">
-                <Image
+              <div className="relative h-24 overflow-hidden rounded-sm">
+                <ProgressiveNextImage
                   src={sportEstiloImage2}
                   alt={t("expSportsFacilities")}
-                  fill
-                  className="object-cover"
                   sizes="150px"
+                  loading="eager"
+                  imageClassName="object-cover"
                 />
               </div>
             </div>
@@ -318,15 +318,22 @@ export default function ExperienciasContent() {
               aria-label={t("expRelax")}
               className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden p-4 cursor-pointer border-0 transition hover:brightness-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link"
             >
-              <div
-                className="w-full transition duration-700 flex items-center justify-center"
-                style={{ maxWidth: "760px", maxHeight: "440px" }}
-              >
-                <Image
-                  src={relaxImage}
-                  alt=""
-                  className="w-full h-full object-contain group-hover:scale-105 duration-700 pointer-events-none"
-                />
+              <div className="flex w-full items-center justify-center transition duration-700">
+                <div
+                  className="relative w-full max-w-[760px] overflow-hidden"
+                  style={{
+                    aspectRatio: `${relaxImage.width} / ${relaxImage.height}`,
+                    maxHeight: 440,
+                  }}
+                >
+                  <ProgressiveNextImage
+                    src={relaxImage}
+                    alt=""
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                    imageClassName="object-contain transition duration-700 group-hover:scale-105 pointer-events-none"
+                  />
+                </div>
               </div>
             </button>
           </article>

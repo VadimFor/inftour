@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -200,15 +200,14 @@ export default function CalpeGrandezaModal({
             {PLAYAS_GALLERY_IMAGES.map((img, i) => (
               <div
                 key={`playas-gallery-${i}`}
-                className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100"
+                className="relative h-48 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100"
               >
-                <Image
+                <ProgressiveNextImage
                   src={img}
                   alt={`Playas de Calpe ${i === 0 ? 1 : 3}`}
-                  width={img.width}
-                  height={img.height}
-                  className="w-full h-48 object-cover"
                   sizes="(max-width: 640px) 100vw, 50vw"
+                  loading={i === 0 ? "eager" : "lazy"}
+                  imageClassName="object-cover"
                 />
               </div>
             ))}
@@ -232,14 +231,12 @@ export default function CalpeGrandezaModal({
                     </p>
                   ) : null}
                   {sectionImage ? (
-                    <div className="overflow-hidden rounded-sm border border-gray-200 bg-gray-100 mt-1">
-                      <Image
+                    <div className="relative mt-1 h-56 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100">
+                      <ProgressiveNextImage
                         src={sectionImage}
                         alt={title || "Playas de Calpe"}
-                        width={sectionImage.width}
-                        height={sectionImage.height}
-                        className="w-full h-56 object-cover"
                         sizes="(max-width: 1024px) 100vw, 896px"
+                        imageClassName="object-cover"
                       />
                     </div>
                   ) : null}

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -161,14 +161,20 @@ export default function FeriaModal({ isOpen, onClose }: FeriaModalProps) {
 
           <div className="w-full border border-gray-200 bg-gray-100 p-2 rounded-sm overflow-hidden mb-6">
             <div className="overflow-hidden rounded-sm border border-gray-200/80 bg-white">
-              <Image
-                src={feria1}
-                alt={t("expFeriaModalTitle")}
-                width={feria1.width}
-                height={feria1.height}
-                className="w-full h-auto"
-                sizes="100vw"
-              />
+              <div
+                className="relative w-full"
+                style={{
+                  aspectRatio: `${feria1.width} / ${feria1.height}`,
+                }}
+              >
+                <ProgressiveNextImage
+                  src={feria1}
+                  alt={t("expFeriaModalTitle")}
+                  sizes="min(896px, 100vw)"
+                  priority
+                  imageClassName="object-contain"
+                />
+              </div>
             </div>
           </div>
 

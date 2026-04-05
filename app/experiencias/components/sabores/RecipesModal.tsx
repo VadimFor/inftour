@@ -2,8 +2,8 @@
 
 import { createPortal } from "react-dom";
 import { useCallback, useState } from "react";
-import Image from "next/image";
 import { useLangStore } from "../../../lib/langStore";
+import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
 import { recipesModalSectionsByLang } from "./recipes_modal_sections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
@@ -167,15 +167,28 @@ export default function RecipesModal({ isOpen, onClose }: RecipesModalProps) {
                 </div>
 
                 {RECIPE_IMAGES[sectionIndex] && !failedImages.has(sectionIndex) && (
-                  <div className="relative w-full h-72 rounded-sm overflow-hidden">
-                    <Image
-                      src={RECIPE_IMAGES[sectionIndex]}
-                      alt={section.title}
-                      fill
-                      onError={() => setFailedImages((prev) => new Set(prev).add(sectionIndex))}
-                      className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
-                      sizes="(max-width: 896px) 100vw, 896px"
-                    />
+                  <div className="relative h-72 w-full overflow-hidden rounded-sm">
+                    <div className="absolute inset-0 scale-110 transition-transform duration-500 ease-in-out group-hover:scale-100">
+                      <SaboresProgressiveImage
+                        src={RECIPE_IMAGES[sectionIndex]}
+                        alt={section.title}
+                        priority={sectionIndex === 0}
+                        loading={
+                          sectionIndex === 0
+                            ? undefined
+                            : sectionIndex < 4
+                              ? "eager"
+                              : "lazy"
+                        }
+                        quality={65}
+                        onError={() =>
+                          setFailedImages((prev) =>
+                            new Set(prev).add(sectionIndex),
+                          )
+                        }
+                        sizes="(max-width: 640px) 100vw, (max-width: 896px) calc(100vw - 4rem), 800px"
+                      />
+                    </div>
                   </div>
                 )}
 
