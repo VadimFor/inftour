@@ -51,21 +51,21 @@ export function ServiceRecipesStyleModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 p-3 backdrop-blur-[2px] sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby={ariaTitleId}
       onClick={onClose}
     >
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative flex max-h-[min(92vh,100dvh)] w-full max-w-4xl flex-col overflow-hidden rounded-md bg-white shadow-2xl sm:rounded-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-sm text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 sm:right-5 sm:top-5 sm:h-8 sm:w-8"
         >
           <svg
             viewBox="0 0 24 24"
@@ -83,24 +83,27 @@ export function ServiceRecipesStyleModal({
           </svg>
         </button>
 
-        <div className="scrollbar-modal overflow-y-auto flex-1 px-8 py-6">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3 id={ariaTitleId} className={MODAL_TITLE_CLASS}>
+        <div className="scrollbar-modal flex-1 overflow-y-auto px-5 py-5 sm:px-8 sm:py-6">
+          <div className="-mx-5 mb-6 border-b border-gray-200 bg-brand-bg px-5 pb-5 pt-5 pr-12 sm:-mx-8 sm:px-8 sm:pb-6 sm:pt-6 sm:pr-14">
+            <div className="mb-3 h-px w-12 bg-brand-gold sm:mb-4" aria-hidden />
+            <h3
+              id={ariaTitleId}
+              className={`${MODAL_TITLE_CLASS} max-w-[calc(100%-2.5rem)] wrap-break-word sm:max-w-none`}
+            >
               {t(titleKey)}
             </h3>
-            <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-gold sm:tracking-[0.2em]">
               {t(subtitleKey)}
             </p>
           </div>
           {children}
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
+        <div className="flex shrink-0 justify-end border-t border-gray-200 bg-white px-5 py-3 sm:px-6">
           <button
             type="button"
             onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+            className="min-h-10 rounded-sm bg-brand-darkgray px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
           >
             {t("close")}
           </button>

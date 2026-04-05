@@ -1,15 +1,42 @@
 ---
-description: Global localization rule template for all prompts
+description: All user-facing text must be translated to every app language; prefer client-provided copy when supplied
 alwaysApply: true
 ---
 
-# Global Localization Rule
+# INFTOUR — full localization for new text
 
-- Every user-facing text change must be translated to all supported languages: `eng`, `esp`, `ru`, `fr`, `it`, `de`, `uk`, `pl`.
-- Update related labels, titles, subtitles, descriptions, and modal copy where applicable.
-- Keep wording consistent across card/list text and corresponding modal translations.
-- Before finishing, verify there are no leftover old strings in any language.
+## Languages (required for every string)
 
-# Pending Rules To Define
+Use **all eight** locales from `Lang` in `app/lib/langStore.ts`:
 
-Replace this section with the exact rules you want to enforce globally.
+`eng`, `esp`, `ru`, `fr`, `it`, `de`, `uk`, `pl`
+
+- **`uk`** is **Ukrainian** in this project (not British English).
+- **`esp`** is Spanish; **`eng`** is English.
+
+Every new or changed user-visible string must have a value for **each** of these keys. Do not ship with only English/Spanish.
+
+## Source of truth (priority)
+
+1. **If the user attaches or points to an official copy file** (e.g. `.docx`, `.md`, a dedicated `*_translations.ts`, or pasted blocks per language), **use that text** for each locale. Match wording, punctuation, and terminology from the file; only adapt formatting (e.g. `\n`, `**bold**`) if the UI expects it.
+2. **If no file or per-language text is provided**, **translate yourself** into all eight languages: natural, tourist-friendly tone consistent with existing INFTOUR copy; keep proper names (Calpe, Costa Blanca, INFTOUR, product names) as in the rest of the site.
+
+## Where to put strings
+
+- **Feature-specific maps**: add or extend the relevant `*_translations.ts` (or section file) next to the feature, using the same shape as existing entries:
+
+  `Record<string, { eng; esp; ru; fr; it; de; uk; pl }>`.
+
+- **Merge into `useLangStore`**: spread the map into the big `translations` object in `app/lib/langStore.ts` if it is not already imported.
+- **Top bar / “translation” locale strip** (weather, webcams, “Now in Calpe”, close labels, etc.): whenever that UI’s visible text changes, update `app/components/TopBar/topbar_translations.ts` for **all eight** languages. If you add strings shown next to the site language switcher or main nav, also cover those via `menu_translations.ts` or the relevant map.
+
+## Implementation checklist
+
+- Replace hardcoded JSX text with `t("yourKey")` (or the project’s pattern) and define `yourKey` in the correct map.
+- Reuse an existing key if the meaning is identical; otherwise add a new key in **all** languages.
+- After edits, ensure **no** language column is missing, empty, or left as a copy-paste duplicate of English unless intentional.
+
+## Consistency
+
+- Align terminology with nearby strings in the same feature (e.g. modal + card + menu).
+- Long copy (modals, FAQ): keep structure parallel across languages (same paragraphs/bullets).
