@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useShallow } from "zustand/react/shallow";
+import { ProgressiveNextImage } from "../../components/ProgressiveNextImage";
 import { useLangStore } from "../../lib/langStore";
 import featuredImage from "../pictures/salon.png";
 import article1Image from "../pictures/jabon.png";
@@ -62,14 +62,13 @@ export default function RevistaContent({ pdfPath }: Props) {
       {/* Featured article */}
       <section className="container mx-auto px-4 mb-20">
         <article className="bg-white shadow-sm border border-gray-100 rounded-sm overflow-hidden flex flex-col lg:flex-row group">
-          <div className="lg:w-7/12 relative overflow-hidden h-72 lg:h-[400px] shrink-0">
-            <Image
+          <div className="relative h-72 shrink-0 overflow-hidden lg:h-[400px] lg:w-7/12">
+            <ProgressiveNextImage
               src={featuredImage}
               alt={t("revFeaturedTitle")}
-              fill
-              className="object-cover transition duration-700 group-hover:scale-105"
               sizes="(max-width: 1024px) 100vw, 58vw"
               priority
+              imageClassName="object-cover transition duration-700 group-hover:scale-105"
             />
           </div>
           <div className="lg:w-5/12 p-8 lg:p-12 flex flex-col justify-center">
@@ -94,13 +93,13 @@ export default function RevistaContent({ pdfPath }: Props) {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
-              <div className="h-48 relative overflow-hidden shrink-0">
-                <Image
+              <div className="relative h-48 shrink-0 overflow-hidden">
+                <ProgressiveNextImage
                   src={article1Image}
                   alt={t("revArticle1Title")}
-                  fill
-                  className="object-cover transition duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  loading="eager"
+                  imageClassName="object-cover transition duration-700 group-hover:scale-105"
                 />
                 <span className="absolute bottom-4 left-4 bg-brand-darkgray text-white px-2 py-1 text-[9px] uppercase tracking-widest">
                   {t("revArticle1Tag")}
@@ -116,13 +115,13 @@ export default function RevistaContent({ pdfPath }: Props) {
               </div>
             </article>
             <article className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden group flex flex-col">
-              <div className="h-48 relative overflow-hidden shrink-0">
-                <Image
+              <div className="relative h-48 shrink-0 overflow-hidden">
+                <ProgressiveNextImage
                   src={article2Image}
                   alt={t("revArticle2Title")}
-                  fill
-                  className="object-cover transition duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  loading="lazy"
+                  imageClassName="object-cover transition duration-700 group-hover:scale-105"
                 />
                 <span className="absolute bottom-4 left-4 bg-brand-gold text-white px-2 py-1 text-[9px] uppercase tracking-widest">
                   {t("revArticle2Tag")}

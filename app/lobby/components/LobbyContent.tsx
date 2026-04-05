@@ -58,7 +58,6 @@ const ABOUT_DOC_AREAS = [
   "lobAboutDocArea4",
 ] as const;
 
-
 // Icons in same order as ABOUT_DOC_AREAS: holiday rentals, property mgmt, sales, construction
 const AREA_ICONS = [
   <svg
@@ -411,7 +410,9 @@ export default function LobbyContent() {
   ]);
 
   const openAIChat = useCallback(() => {
-    const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
       open?: () => void;
       toggle?: () => void;
       shadowRoot?: ShadowRoot | null;
@@ -424,7 +425,11 @@ export default function LobbyContent() {
       const buttons = Array.from(root.querySelectorAll("button"));
       for (const btn of buttons) {
         const text = (btn.textContent || "").trim().toLowerCase();
-        if (text === "accept" || text === "aceptar" || text.includes("accept")) {
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
           (btn as HTMLButtonElement).click();
           return true;
         }
@@ -567,7 +572,10 @@ export default function LobbyContent() {
               <ul className="w-full max-w-sm text-center text-[15px] text-gray-700 font-light space-y-3.5 mb-8">
                 {(["lobAI1", "lobAI2", "lobAI3", "lobAI4"] as const).map(
                   (key) => (
-                    <li key={key} className="flex items-start justify-center gap-3">
+                    <li
+                      key={key}
+                      className="flex items-start justify-center gap-3"
+                    >
                       <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f7f2e6] text-brand-gold text-xs">
                         •
                       </span>
@@ -714,8 +722,8 @@ export default function LobbyContent() {
               {t("lobPoliciesTitle")}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {POLICIES.map(({ titleKey, descKey, href }) =>
-              titleKey === "privacyPolicy" ? (
+              {POLICIES.map(({ titleKey, descKey, href }) =>
+                titleKey === "privacyPolicy" ? (
                   <button
                     key={titleKey}
                     type="button"
@@ -729,48 +737,48 @@ export default function LobbyContent() {
                       {t(descKey)}
                     </p>
                   </button>
-              ) : titleKey === "cancellationPolicy" ? (
-                <button
-                  key={titleKey}
-                  type="button"
-                  onClick={() => setArrivalStayModalOpen(true)}
-                  className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
-                >
-                  <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
-                    {t(titleKey)}
-                  </h4>
-                  <p className="text-xs font-light text-gray-500">
-                    {t(descKey)}
-                  </p>
-                </button>
-              ) : titleKey === "paymentPolicy" ? (
-                <button
-                  key={titleKey}
-                  type="button"
-                  onClick={() => setFaqModalOpen(true)}
-                  className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
-                >
-                  <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
-                    {t(titleKey)}
-                  </h4>
-                  <p className="text-xs font-light text-gray-500">
-                    {t(descKey)}
-                  </p>
-                </button>
-              ) : titleKey === "termsPolicy" ? (
-                <button
-                  key={titleKey}
-                  type="button"
-                  onClick={() => setReportingChannelModalOpen(true)}
-                  className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
-                >
-                  <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
-                    {t(titleKey)}
-                  </h4>
-                  <p className="text-xs font-light text-gray-500">
-                    {t(descKey)}
-                  </p>
-                </button>
+                ) : titleKey === "cancellationPolicy" ? (
+                  <button
+                    key={titleKey}
+                    type="button"
+                    onClick={() => setArrivalStayModalOpen(true)}
+                    className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
+                  >
+                    <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
+                      {t(titleKey)}
+                    </h4>
+                    <p className="text-xs font-light text-gray-500">
+                      {t(descKey)}
+                    </p>
+                  </button>
+                ) : titleKey === "paymentPolicy" ? (
+                  <button
+                    key={titleKey}
+                    type="button"
+                    onClick={() => setFaqModalOpen(true)}
+                    className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
+                  >
+                    <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
+                      {t(titleKey)}
+                    </h4>
+                    <p className="text-xs font-light text-gray-500">
+                      {t(descKey)}
+                    </p>
+                  </button>
+                ) : titleKey === "termsPolicy" ? (
+                  <button
+                    key={titleKey}
+                    type="button"
+                    onClick={() => setReportingChannelModalOpen(true)}
+                    className="group w-full cursor-pointer rounded-lg border border-gray-100 bg-(--color-brand-bg) p-6 text-left transition hover:border-brand-gold hover:bg-white"
+                  >
+                    <h4 className="mb-2 text-sm font-bold text-brand-black transition group-hover:text-brand-gold">
+                      {t(titleKey)}
+                    </h4>
+                    <p className="text-xs font-light text-gray-500">
+                      {t(descKey)}
+                    </p>
+                  </button>
                 ) : (
                   <Link
                     key={titleKey}
@@ -798,10 +806,7 @@ export default function LobbyContent() {
         isOpen={arrivalStayModalOpen}
         onClose={() => setArrivalStayModalOpen(false)}
       />
-      <FaqModal
-        isOpen={faqModalOpen}
-        onClose={() => setFaqModalOpen(false)}
-      />
+      <FaqModal isOpen={faqModalOpen} onClose={() => setFaqModalOpen(false)} />
       <ReportingChannelModal
         isOpen={reportingChannelModalOpen}
         onClose={() => setReportingChannelModalOpen(false)}

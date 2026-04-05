@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { ProgressiveNextImage } from "../../components/ProgressiveNextImage";
 import { useLangStore } from "../../lib/langStore";
 import heroImage from "../pictures/chica_con_portatil.png";
 import OurServicesModal from "./OurServicesModal";
@@ -226,14 +226,13 @@ export default function ServicesContent() {
               className="absolute -top-4 -left-4 w-32 h-32 bg-brand-gold/10 z-0 rounded-sm"
               aria-hidden
             />
-            <div className="relative z-10 w-full min-h-[280px] h-[320px] sm:h-[380px] md:h-[500px] rounded-sm shadow-sm overflow-hidden">
-              <Image
+            <div className="relative z-10 h-[320px] min-h-[280px] w-full overflow-hidden rounded-sm shadow-sm sm:h-[380px] md:h-[500px]">
+              <ProgressiveNextImage
                 src={heroImage}
                 alt={t("svcHeroLabel")}
-                fill
-                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                imageClassName="object-cover"
               />
             </div>
           </div>
