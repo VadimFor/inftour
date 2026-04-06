@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useCallback, type ReactNode } from "react";
+import { useCallback, useEffect, type ReactNode } from "react";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -234,6 +234,10 @@ export default function EcosistemaDeportivoModal({
 }: EcosistemaDeportivoModalProps) {
   const t = useLangStore((s) => s.t);
   useModalBodyScrollLock(isOpen);
+  useEffect(() => {
+    [ecosistemaCalpe1, ecosistemaCalpe2, ecosistemaCalpe3, ecosistemaCalpe4, ecosistemaCalpe5, ecosistemaCalpe6]
+      .forEach((i) => { const img = new Image(); img.src = i.src; });
+  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector(
       "elevenlabs-convai",

@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -49,6 +49,9 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
   const t = useLangStore((s) => s.t);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   useModalBodyScrollLock(isOpen);
+  useEffect(() => {
+    CYCLING_IMAGES.forEach((src) => { const img = new Image(); img.src = src; });
+  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

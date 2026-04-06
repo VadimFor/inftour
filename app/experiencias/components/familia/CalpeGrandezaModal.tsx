@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
@@ -65,6 +65,10 @@ export default function CalpeGrandezaModal({
 }: CalpeGrandezaModalProps) {
   const t = useLangStore((s) => s.t);
   useModalBodyScrollLock(isOpen);
+  useEffect(() => {
+    [playas1, playas2, playas3, playas4]
+      .forEach((i) => { const img = new Image(); img.src = i.src; });
+  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

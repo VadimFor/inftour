@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
@@ -49,6 +49,10 @@ function renderLabeledLine(line: string) {
 export default function SalinasModal({ isOpen, onClose }: SalinasModalProps) {
   const t = useLangStore((s) => s.t);
   useModalBodyScrollLock(isOpen);
+  useEffect(() => {
+    [salinas1, salinas2, salinas3, salinas4]
+      .forEach((i) => { const img = new Image(); img.src = i.src; });
+  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

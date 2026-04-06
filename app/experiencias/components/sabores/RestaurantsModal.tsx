@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
@@ -56,6 +56,13 @@ export default function RestaurantsModal({
   const lang = useLangStore((s) => s.lang);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   useModalBodyScrollLock(isOpen);
+
+  useEffect(() => {
+    RESTAURANT_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;
