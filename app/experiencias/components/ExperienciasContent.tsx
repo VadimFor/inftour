@@ -316,24 +316,16 @@ export default function ExperienciasContent() {
               type="button"
               onClick={() => setRelaxOpen(true)}
               aria-label={t("expRelax")}
-              className="md:w-2/3 bg-[#e8e4df] flex items-center justify-center overflow-hidden p-4 cursor-pointer border-0 transition hover:brightness-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link"
+              className="md:w-2/3 bg-[#e8e4df] overflow-hidden cursor-pointer border-0 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link relative min-h-[440px] md:min-h-[500px]"
             >
-              <div className="flex w-full items-center justify-center transition duration-700">
-                <div
-                  className="relative w-full max-w-[760px] overflow-hidden"
-                  style={{
-                    aspectRatio: `${relaxImage.width} / ${relaxImage.height}`,
-                    maxHeight: 440,
-                  }}
-                >
-                  <ProgressiveNextImage
-                    src={relaxImage}
-                    alt=""
-                    loading="lazy"
-                    sizes="(max-width: 768px) 100vw, 66vw"
-                    imageClassName="object-contain transition duration-700 group-hover:scale-105 pointer-events-none"
-                  />
-                </div>
+              <div className="absolute inset-0">
+                <ProgressiveNextImage
+                  src={relaxImage}
+                  alt=""
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                  imageClassName="object-cover transition duration-700 group-hover:scale-105 pointer-events-none"
+                />
               </div>
             </button>
           </article>
