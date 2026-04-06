@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pdfjs-dist"],
   images: {
     qualities: [10, 65, 75, 100],
     remotePatterns: [
@@ -17,6 +18,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "media.licdn.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "drive.google.com",
         pathname: "/**",
       },
     ],

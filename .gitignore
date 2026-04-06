@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# local env files
+.env.local
+
 # dependencies
 /node_modules
 /.pnp
@@ -19,6 +22,9 @@
 
 # production
 /build
+
+# generated magazine PDF (upload to Google Drive; not served by the app)
+/scripts/generated-magazine/
 
 # misc
 .DS_Store

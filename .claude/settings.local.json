@@ -29,7 +29,9 @@
       "WebFetch(domain:app.unpkg.com)",
       "Bash(node -e \"const fs=require\\(''fs''\\); const s=fs.statSync\\(''app/lobby/pictures/lobby.png''\\); console.log\\(''size:'', s.size, ''bytes''\\);\")",
       "Bash(node -e \"const fs=require\\(''fs''\\); try { const s=fs.statSync\\(''ejemplos/lobby/Lobby.png''\\); console.log\\(''old size:'', s.size, ''bytes''\\); } catch\\(e\\) { console.log\\(''not found''\\); }\")",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(npm install:*)",
+      "Bash(npm list:*)"
     ]
   }
 }

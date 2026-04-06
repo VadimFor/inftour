@@ -1,11 +1,13 @@
 import PageShell from "../components/PageShell";
 import RevistaContent from "./components/RevistaContent";
-import { MAGAZINE_PDF_PATH } from "../config/magazine";
+import { getDrivePdfFiles } from "../lib/drive";
 
-export default function RevistaPage() {
+export default async function RevistaPage() {
+  const driveResult = await getDrivePdfFiles();
+
   return (
     <PageShell>
-      <RevistaContent pdfPath={MAGAZINE_PDF_PATH} />
+      <RevistaContent driveResult={driveResult} />
     </PageShell>
   );
 }
