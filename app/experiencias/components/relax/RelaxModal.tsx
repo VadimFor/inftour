@@ -4,6 +4,11 @@ import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
+import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
+import playas1 from "./Playas 1.jpeg";
+import playas2 from "./Playas 2.jpeg";
+import playas3 from "./Playas 3.jpeg";
+import playas4 from "./Playas 4.jpeg";
 
 type RelaxModalProps = {
   isOpen: boolean;
@@ -73,6 +78,59 @@ function renderMainLine(line: string) {
 function isTimeOrSeasonBullet(line: string) {
   // Seasons include degrees (..C) inside parentheses; times include HH:MM inside parentheses.
   return /\(\s*\d{1,2}:\d{2}/.test(line) || /\(\s*.*C\s*\)/i.test(line);
+}
+
+function openElevenLabsChat() {
+  const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
+    open?: () => void;
+    toggle?: () => void;
+    shadowRoot?: ShadowRoot | null;
+  };
+  if (!widget) return;
+
+  const clickAcceptIfPresent = () => {
+    const root = widget.shadowRoot;
+    if (!root) return false;
+    const buttons = Array.from(root.querySelectorAll("button"));
+    for (const btn of buttons) {
+      const text = (btn.textContent || "").trim().toLowerCase();
+      if (text === "accept" || text === "aceptar" || text.includes("accept")) {
+        (btn as HTMLButtonElement).click();
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (typeof widget.open === "function") {
+    widget.open();
+  } else if (typeof widget.toggle === "function") {
+    widget.toggle();
+  } else {
+    const root = widget.shadowRoot;
+    if (!root) return;
+    const avatar = root.querySelector(
+      "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
+    ) as HTMLElement | null;
+    if (avatar) {
+      avatar.click();
+    } else {
+      const clickable = root.querySelector(
+        "button, [role='button']",
+      ) as HTMLElement | null;
+      clickable?.click();
+    }
+  }
+
+  let attempts = 0;
+  const maxAttempts = 20;
+  const timer = window.setInterval(() => {
+    attempts += 1;
+    const accepted = clickAcceptIfPresent();
+    if (accepted || attempts >= maxAttempts) {
+      window.clearInterval(timer);
+    }
+  }, 150);
 }
 
 export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
@@ -204,44 +262,74 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {sections.map((section, sIdx) => (
-              <div
-                key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
-              >
-                {section.title && (
-                  <p className="text-sm font-semibold text-gray-800">
-                    {section.title}
-                  </p>
-                )}
-                {section.subgroups.map((sg, sgIdx) => (
+            {(() => {
+              const images = [playas1, playas2, playas3, playas4];
+              const total = sections.length;
+              // Insert images after sections at evenly spread indices
+              const imageAfter = new Set(
+                images.map((_, i) => Math.floor(((i + 1) * total) / (images.length + 1)) - 1)
+              );
+              return sections.map((section, sIdx) => (
+                <>
                   <div
-                    key={`sg-${sgIdx}-${sg.main.slice(0, 20)}`}
-                    className="flex flex-col gap-2"
+                    key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
+                    className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
                   >
-                    <p className="text-sm text-gray-900">
-                      {renderMainLine(sg.main)}
-                    </p>
-                    {sg.bullets.length > 0 && (
-                      <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
-                        {sg.bullets.map((b: string) => (
-                          <li
-                            key={b}
-                            className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
-                          >
-                            {renderLabeledLine(b)}
-                          </li>
-                        ))}
-                      </ul>
+                    {section.title && (
+                      <p className="text-sm font-semibold text-gray-800">
+                        {section.title}
+                      </p>
                     )}
+                    {section.subgroups.map((sg, sgIdx) => (
+                      <div
+                        key={`sg-${sgIdx}-${sg.main.slice(0, 20)}`}
+                        className="flex flex-col gap-2"
+                      >
+                        <p className="text-sm text-gray-900">
+                          {renderMainLine(sg.main)}
+                        </p>
+                        {sg.bullets.length > 0 && (
+                          <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                            {sg.bullets.map((b: string) => (
+                              <li
+                                key={b}
+                                className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
+                              >
+                                {renderLabeledLine(b)}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ))}
+                  {imageAfter.has(sIdx) && (() => {
+                    const imgIdx = [...imageAfter].sort((a, b) => a - b).indexOf(sIdx);
+                    const src = images[imgIdx];
+                    return (
+                      <div key={`img-${sIdx}`} className="relative w-full h-48 overflow-hidden rounded-sm border border-gray-200">
+                        <ProgressiveNextImage
+                          src={src}
+                          alt={`Playas ${imgIdx + 1}`}
+                          sizes="100vw"
+                          priority={imgIdx === 0}
+                          loading={imgIdx === 0 ? "eager" : "lazy"}
+                          imageClassName="object-cover"
+                        />
+                      </div>
+                    );
+                  })()}
+                </>
+              ));
+            })()}
           </div>
 
           {tip ? (
-            <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
+            <button
+              type="button"
+              onClick={() => { onClose(); openElevenLabsChat(); }}
+              className="mt-6 w-full text-left bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer "
+            >
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -259,7 +347,7 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
               <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
                 {tip}
               </p>
-            </div>
+            </button>
           ) : null}
         </div>
         <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
