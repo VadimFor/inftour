@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useLangStore } from "../../lib/langStore";
-import lobbyAboutImage from "../pictures/lobby.png";
+import lobbyAboutImage from "../pictures/Inftour.png";
 import ArrivalStayModal from "./ArrivalStayModal";
 import FaqModal from "./FaqModal";
 import PrivacyModal from "./PrivacyModal";
