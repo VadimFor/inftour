@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import PageShell from "../components/PageShell";
 import RevistaContent from "./components/RevistaContent";
