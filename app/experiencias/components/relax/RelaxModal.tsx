@@ -5,10 +5,21 @@ import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
-import playas1 from "./Playas 1.jpeg";
-import playas2 from "./Playas 2.jpeg";
-import playas3 from "./Playas 3.jpeg";
-import playas4 from "./Playas 4.jpeg";
+import relax1 from "./1 Gigantes de oro.png";
+import relax2 from "./2 Un toque de historia.png";
+import relax3 from "./3 Gastronomía y relax.png";
+import relax4 from "./4 Mundos submarinos.png";
+import relax5 from "./5 Libertad salvaje.png";
+import relax6 from "./6 Fiordos secretos.png";
+
+const relaxImages: Record<number, typeof relax1> = {
+  1: relax1,
+  2: relax2,
+  3: relax3,
+  4: relax4,
+  5: relax5,
+  6: relax6,
+};
 
 type RelaxModalProps = {
   isOpen: boolean;
@@ -263,34 +274,11 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
 
           <div className="grid grid-cols-1 gap-4">
             {(() => {
-              // playas4 goes after the Arenal Bol section
-              const arenalIdx = sections.findIndex((s) =>
-                /arenal[-\s]*bol/i.test(
-                  [s.title ?? "", ...s.subgroups.map((sg) => sg.main)].join(" ")
-                )
-              );
-              // playas1 goes after the Cantal Roig section
-              const cantalIdx = sections.findIndex((s) =>
-                /cantal\s*roig/i.test(
-                  [s.title ?? "", ...s.subgroups.map((sg) => sg.main)].join(" ")
-                )
-              );
-              // Distribute playas3 among remaining sections
-              const otherIndices = sections
-                .map((_, i) => i)
-                .filter((i) => i !== arenalIdx && i !== cantalIdx);
-              const midIdx = otherIndices[Math.floor(otherIndices.length / 2)] ?? otherIndices[0];
-
               return sections.map((section, sIdx) => {
-                const extraImg = sIdx === arenalIdx ? playas4 : null;
-                const mainImg =
-                  sIdx === arenalIdx
-                    ? playas2
-                    : sIdx === cantalIdx
-                    ? playas1
-                    : sIdx === midIdx
-                    ? playas3
-                    : null;
+                const sectionNum = section.title
+                  ? parseInt(section.title.match(/^(\d+)\./)?.[1] ?? "0", 10)
+                  : 0;
+                const sectionImg = sectionNum >= 1 && sectionNum <= 6 ? relaxImages[sectionNum] : null;
 
                 return (
                   <>
@@ -326,25 +314,14 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
                         </div>
                       ))}
                     </div>
-                    {extraImg && (
-                      <div key={`img-extra-${sIdx}`} className="relative w-full h-72 overflow-hidden rounded-sm border border-gray-200">
+                    {sectionImg && (
+                      <div key={`img-${sIdx}`} className="relative w-full h-96 overflow-hidden rounded-sm border border-gray-200">
                         <ProgressiveNextImage
-                          src={extraImg}
-                          alt="Playas 4"
+                          src={sectionImg}
+                          alt={section.title ?? ""}
                           sizes="100vw"
-                          loading="lazy"
-                          imageClassName="object-cover"
-                        />
-                      </div>
-                    )}
-                    {mainImg && (
-                      <div key={`img-main-${sIdx}`} className="relative w-full h-72 overflow-hidden rounded-sm border border-gray-200">
-                        <ProgressiveNextImage
-                          src={mainImg}
-                          alt={sIdx === arenalIdx ? "Playas 2" : sIdx === cantalIdx ? "Playas 1" : "Playas 3"}
-                          sizes="100vw"
-                          priority={sIdx === cantalIdx}
-                          loading={sIdx === cantalIdx ? "eager" : "lazy"}
+                          priority={sectionNum === 1}
+                          loading={sectionNum === 1 ? "eager" : "lazy"}
                           imageClassName="object-cover"
                         />
                       </div>
