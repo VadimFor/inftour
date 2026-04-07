@@ -263,64 +263,95 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
 
           <div className="grid grid-cols-1 gap-4">
             {(() => {
-              const images = [playas1, playas2, playas3, playas4];
-              const total = sections.length;
-              // Insert images after sections at evenly spread indices
-              const imageAfter = new Set(
-                images.map((_, i) => Math.floor(((i + 1) * total) / (images.length + 1)) - 1)
+              // playas4 goes after the Arenal Bol section
+              const arenalIdx = sections.findIndex((s) =>
+                /arenal[-\s]*bol/i.test(
+                  [s.title ?? "", ...s.subgroups.map((sg) => sg.main)].join(" ")
+                )
               );
-              return sections.map((section, sIdx) => (
-                <>
-                  <div
-                    key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
-                    className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
-                  >
-                    {section.title && (
-                      <p className="text-sm font-semibold text-gray-800">
-                        {section.title}
-                      </p>
-                    )}
-                    {section.subgroups.map((sg, sgIdx) => (
-                      <div
-                        key={`sg-${sgIdx}-${sg.main.slice(0, 20)}`}
-                        className="flex flex-col gap-2"
-                      >
-                        <p className="text-sm text-gray-900">
-                          {renderMainLine(sg.main)}
+              // playas1 goes after the Cantal Roig section
+              const cantalIdx = sections.findIndex((s) =>
+                /cantal\s*roig/i.test(
+                  [s.title ?? "", ...s.subgroups.map((sg) => sg.main)].join(" ")
+                )
+              );
+              // Distribute playas3 among remaining sections
+              const otherIndices = sections
+                .map((_, i) => i)
+                .filter((i) => i !== arenalIdx && i !== cantalIdx);
+              const midIdx = otherIndices[Math.floor(otherIndices.length / 2)] ?? otherIndices[0];
+
+              return sections.map((section, sIdx) => {
+                const extraImg = sIdx === arenalIdx ? playas4 : null;
+                const mainImg =
+                  sIdx === arenalIdx
+                    ? playas2
+                    : sIdx === cantalIdx
+                    ? playas1
+                    : sIdx === midIdx
+                    ? playas3
+                    : null;
+
+                return (
+                  <>
+                    <div
+                      key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
+                      className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+                    >
+                      {section.title && (
+                        <p className="text-sm font-semibold text-gray-800">
+                          {section.title}
                         </p>
-                        {sg.bullets.length > 0 && (
-                          <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
-                            {sg.bullets.map((b: string) => (
-                              <li
-                                key={b}
-                                className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
-                              >
-                                {renderLabeledLine(b)}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {imageAfter.has(sIdx) && (() => {
-                    const imgIdx = [...imageAfter].sort((a, b) => a - b).indexOf(sIdx);
-                    const src = images[imgIdx];
-                    return (
-                      <div key={`img-${sIdx}`} className="relative w-full h-48 overflow-hidden rounded-sm border border-gray-200">
+                      )}
+                      {section.subgroups.map((sg, sgIdx) => (
+                        <div
+                          key={`sg-${sgIdx}-${sg.main.slice(0, 20)}`}
+                          className="flex flex-col gap-2"
+                        >
+                          <p className="text-sm text-gray-900">
+                            {renderMainLine(sg.main)}
+                          </p>
+                          {sg.bullets.length > 0 && (
+                            <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                              {sg.bullets.map((b: string) => (
+                                <li
+                                  key={b}
+                                  className="text-sm text-gray-700 leading-relaxed list-disc list-inside"
+                                >
+                                  {renderLabeledLine(b)}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {extraImg && (
+                      <div key={`img-extra-${sIdx}`} className="relative w-full h-72 overflow-hidden rounded-sm border border-gray-200">
                         <ProgressiveNextImage
-                          src={src}
-                          alt={`Playas ${imgIdx + 1}`}
+                          src={extraImg}
+                          alt="Playas 4"
                           sizes="100vw"
-                          priority={imgIdx === 0}
-                          loading={imgIdx === 0 ? "eager" : "lazy"}
+                          loading="lazy"
                           imageClassName="object-cover"
                         />
                       </div>
-                    );
-                  })()}
-                </>
-              ));
+                    )}
+                    {mainImg && (
+                      <div key={`img-main-${sIdx}`} className="relative w-full h-72 overflow-hidden rounded-sm border border-gray-200">
+                        <ProgressiveNextImage
+                          src={mainImg}
+                          alt={sIdx === arenalIdx ? "Playas 2" : sIdx === cantalIdx ? "Playas 1" : "Playas 3"}
+                          sizes="100vw"
+                          priority={sIdx === cantalIdx}
+                          loading={sIdx === cantalIdx ? "eager" : "lazy"}
+                          imageClassName="object-cover"
+                        />
+                      </div>
+                    )}
+                  </>
+                );
+              });
             })()}
           </div>
 
