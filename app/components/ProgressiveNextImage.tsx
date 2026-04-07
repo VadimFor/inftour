@@ -76,7 +76,7 @@ export function ProgressiveNextImage({
         loading={loading}
         placeholder="blur"
         blurDataURL={MODAL_MICRO_BLUR_DATA_URL}
-        onLoadingComplete={() => setHqReady(true)}
+        onLoad={() => setHqReady(true)}
         onError={onError}
         className={`z-1 transition-opacity duration-500 ease-out ${
           hqReady ? "opacity-100" : "opacity-0"
