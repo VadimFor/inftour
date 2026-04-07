@@ -508,7 +508,7 @@ export default function LobbyContent() {
 
         {/* About us: compact card + full story modal */}
         <section className="mb-24">
-          <div className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row md:min-h-[560px] lg:min-h-[620px]">
+          <div className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden flex flex-col md:flex-row">
             <div className="md:w-1/2 overflow-hidden">
               <Image
                 src={lobbyAboutImage}
@@ -519,7 +519,7 @@ export default function LobbyContent() {
                 unoptimized
               />
             </div>
-            <div className="md:w-1/2 p-8 md:p-14 lg:p-16 flex flex-col justify-center md:min-h-[560px] lg:min-h-[620px]">
+            <div className="md:w-1/2 p-8 md:p-14 lg:p-16 flex flex-col justify-center">
               <h2 className="text-3xl font-serif text-gray-900 mb-4">
                 {t("lobAboutTitle")}
               </h2>
