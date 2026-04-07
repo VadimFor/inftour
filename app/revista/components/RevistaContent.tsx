@@ -4,14 +4,13 @@ import { useShallow } from "zustand/react/shallow";
 import { ProgressiveNextImage } from "../../components/ProgressiveNextImage";
 import { useLangStore } from "../../lib/langStore";
 import featuredImage from "../pictures/salon.png";
-import type { DrivePdfResult } from "../../lib/drive";
-import PdfGrid from "./PdfGrid";
+import type { ReactNode } from "react";
 
 type Props = {
-  driveResult: DrivePdfResult;
+  children: ReactNode;
 };
 
-export default function RevistaContent({ driveResult }: Props) {
+export default function RevistaContent({ children }: Props) {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
 
   return (
@@ -61,7 +60,7 @@ export default function RevistaContent({ driveResult }: Props) {
           <h3 className="text-2xl font-serif text-gray-900 mb-8 pb-4 border-b border-gray-200">
             {t("revLatestTitle")}
           </h3>
-          <PdfGrid driveResult={driveResult} />
+          {children}
         </div>
         <aside className="lg:w-1/3">
           <h3 className="text-2xl font-serif text-gray-900 mb-8 pb-4 border-b border-gray-200">

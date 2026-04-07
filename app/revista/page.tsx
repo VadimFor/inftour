@@ -1,13 +1,17 @@
+import { Suspense } from "react";
 import PageShell from "../components/PageShell";
 import RevistaContent from "./components/RevistaContent";
-import { getDrivePdfFiles } from "../lib/drive";
+import PdfGridAsync from "./components/PdfGridAsync";
+import PdfGridSkeleton from "./components/PdfGridSkeleton";
 
-export default async function RevistaPage() {
-  const driveResult = await getDrivePdfFiles();
-
+export default function RevistaPage() {
   return (
     <PageShell>
-      <RevistaContent driveResult={driveResult} />
+      <RevistaContent>
+        <Suspense fallback={<PdfGridSkeleton />}>
+          <PdfGridAsync />
+        </Suspense>
+      </RevistaContent>
     </PageShell>
   );
 }

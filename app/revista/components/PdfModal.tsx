@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DriveFile } from "../../lib/drive";
+import { usePdfDetails } from "./usePdfDetails";
 
 type PdfModalProps = {
   file: DriveFile;
@@ -10,6 +11,8 @@ type PdfModalProps = {
 };
 
 export default function PdfModal({ file, onClose }: PdfModalProps) {
+  const details = usePdfDetails(file.id);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -75,21 +78,31 @@ export default function PdfModal({ file, onClose }: PdfModalProps) {
           >
             {displayTitle}
           </h2>
-          {file.pages !== null && (
+          {details?.pages != null && (
             <p className="text-xs font-bold uppercase tracking-widest mt-1 text-brand-gold">
-              {file.pages} {file.pages === 1 ? "página" : "páginas"}
+              {details.pages} {details.pages === 1 ? "página" : "páginas"}
             </p>
           )}
         </div>
 
         {/* PDF viewer */}
-        <div className="flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+        <div className="flex-1 overflow-hidden relative" style={{ minHeight: 0 }}>
+          {!iframeLoaded && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50">
+              <svg className="w-8 h-8 animate-spin text-brand-gold" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">Cargando revista…</p>
+            </div>
+          )}
           <iframe
             src={`https://drive.google.com/file/d/${file.id}/preview`}
             className="w-full h-full border-0"
-            style={{ minHeight: "75vh" }}
+            style={{ minHeight: "75vh", opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.3s" }}
             allow="autoplay"
             title={displayTitle}
+            onLoad={() => setIframeLoaded(true)}
           />
         </div>
 
