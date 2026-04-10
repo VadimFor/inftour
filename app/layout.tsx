@@ -17,8 +17,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "INFTOUR | Calpe Private Collection",
-  description: "Коллекция апартаментов с видом на Скалу. Сервис отеля. Приватность дома.",
+  title: "INFTOUR | Apartamentos premium en Calpe",
+  description:
+    "Apartamentos premium en Calpe con reserva directa, servicio tipo hotel y asistencia local durante toda la estancia.",
 };
 
 import RestoreLang from "./components/RestoreLang";
@@ -30,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${cormorant.variable} ${manrope.variable} antialiased bg-brand-stone text-brand-black font-sans selection:bg-brand-gold selection:text-white overflow-x-hidden`}
       >
