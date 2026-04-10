@@ -10,7 +10,7 @@ export default function HomeContent() {
       id="booking-engine"
       className="relative z-20 pt-6 pb-12 container mx-auto px-4"
     >
-      <div className="max-w-7xl mx-auto mb-4">
+      <div className="sr-only">
         <h2 className="text-xl md:text-2xl font-serif text-gray-900">Motor de reserva</h2>
         <p className="text-sm text-gray-600 mt-1">
           Consulta disponibilidad en tiempo real y completa tu reserva online.

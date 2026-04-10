@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomeSeoIntro() {
   return (
-    <section className="relative z-20 container mx-auto px-4 pt-10">
+    <section className="sr-only">
       <div className="max-w-4xl mx-auto bg-white border border-gray-100 shadow-sm rounded-xl p-6 md:p-8">
         <h1 className="text-3xl md:text-5xl font-serif text-gray-900 leading-tight">
           Apartamentos premium en Calpe con reserva directa
