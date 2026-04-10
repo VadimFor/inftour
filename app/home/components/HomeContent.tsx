@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLangStore } from "../../lib/langStore";
 
 export default function HomeContent() {
@@ -14,6 +15,31 @@ export default function HomeContent() {
         <p className="text-sm text-gray-600 mt-1">
           Consulta disponibilidad en tiempo real y completa tu reserva online.
         </p>
+        <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+          En INFTOUR puedes reservar apartamento en Calpe con gestion directa, tarifas transparentes y
+          asistencia local antes y durante la estancia. El calendario oficial muestra disponibilidad
+          actualizada para apartamentos premium cerca del Penon de Ifach y las principales playas de la zona.
+        </p>
+        <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+          Antes de confirmar tu viaje, revisa nuestras secciones de{" "}
+          <Link href="/experiencias" className="underline hover:text-brand-gold transition">
+            experiencias
+          </Link>
+          ,{" "}
+          <Link href="/services" className="underline hover:text-brand-gold transition">
+            servicios
+          </Link>{" "}
+          y{" "}
+          <Link href="/revista" className="underline hover:text-brand-gold transition">
+            revista
+          </Link>{" "}
+          para planificar tu estancia en Calpe con informacion practica y recomendaciones locales.
+        </p>
+        <ul className="text-sm text-gray-600 mt-3 list-disc pl-5 space-y-1">
+          <li>Reserva directa sin intermediarios.</li>
+          <li>Atencion local y soporte al huesped en destino.</li>
+          <li>Proceso de reserva online con disponibilidad en tiempo real.</li>
+        </ul>
       </div>
       <div className="bg-white shadow-2xl rounded-t-xl overflow-hidden max-w-7xl mx-auto">
         <div className="relative">

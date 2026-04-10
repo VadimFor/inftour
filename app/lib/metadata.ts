@@ -22,6 +22,10 @@ export function buildPageMetadata({
     description,
     alternates: {
       canonical: url,
+      languages: {
+        "es-ES": url,
+        "x-default": url,
+      },
     },
     openGraph: {
       title,
