@@ -7,6 +7,9 @@ import Image, { type StaticImageData } from "next/image";
 export const MODAL_MICRO_BLUR_DATA_URL =
   "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRwfAEcbH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABkRAAICAwAAAAAAAAAAAAAAAAABAhEDMEL/2gAMAwEAAhEDEQA/AKGpCp//2Q==";
 
+// Tracks images that have already been loaded at least once in this browser session.
+const loadedImageSrcs = new Set<string>();
+
 function resolveImageSrc(src: string | StaticImageData): string {
   return typeof src === "string" ? src : src.src;
 }
@@ -47,13 +50,17 @@ export function ProgressiveNextImage({
   onError,
   imageClassName = "",
 }: ProgressiveNextImageProps) {
-  const [hqReady, setHqReady] = useState(false);
+  const isPriority = Boolean(priority);
+  const resolvedSrc = resolveImageSrc(src);
+  const alreadyLoaded = typeof window !== "undefined" && loadedImageSrcs.has(resolvedSrc);
+  const useProgressive = !isPriority && !alreadyLoaded;
+  const [hqReady, setHqReady] = useState(alreadyLoaded);
   const [lqipHidden, setLqipHidden] = useState(false);
-  const lqipUrl = lqipSrc(resolveImageSrc(src));
+  const lqipUrl = lqipSrc(resolvedSrc);
 
   return (
     <div className="relative h-full w-full bg-stone-200/60">
-      {!lqipHidden && (
+      {useProgressive && !lqipHidden && (
         // eslint-disable-next-line @next/next/no-img-element -- intentional tiny LQIP; not duplicate of <Image> semantics
         <img
           src={lqipUrl}
@@ -74,12 +81,15 @@ export function ProgressiveNextImage({
         quality={quality}
         priority={priority}
         loading={loading}
-        placeholder="blur"
-        blurDataURL={MODAL_MICRO_BLUR_DATA_URL}
-        onLoad={() => setHqReady(true)}
+        placeholder={useProgressive ? "blur" : "empty"}
+        blurDataURL={useProgressive ? MODAL_MICRO_BLUR_DATA_URL : undefined}
+        onLoad={() => {
+          loadedImageSrcs.add(resolvedSrc);
+          setHqReady(true);
+        }}
         onError={onError}
-        className={`z-1 transition-opacity duration-500 ease-out ${
-          hqReady ? "opacity-100" : "opacity-0"
+        className={`z-1 ${useProgressive ? "transition-opacity duration-500 ease-out" : ""} ${
+          useProgressive ? (hqReady ? "opacity-100" : "opacity-0") : "opacity-100"
         } ${imageClassName || "object-cover"}`.trim()}
       />
     </div>
