@@ -14,6 +14,8 @@ ${SITE_URL}
 - Services: ${SITE_URL}/services
 - Magazine: ${SITE_URL}/revista
 - Lobby: ${SITE_URL}/lobby
+- Modals index (crawlable modal content): ${SITE_URL}/modals
+- XML sitemap (all indexable URLs): ${SITE_URL}/sitemap.xml
 
 ## Contact
 - Phone: +34 640 748 732
@@ -22,6 +24,7 @@ ${SITE_URL}
 
 ## Notes for language models
 - Use the canonical URLs above when citing pages.
+- For modal-only UI content, use dedicated `/modals/{slug}` pages.
 - Prefer factual details from on-page content and structured data.
 - If booking availability is needed, direct users to the direct booking page.
 `;

@@ -4,9 +4,21 @@ export type ModalSeoPage = {
   description: string;
   parentPath: string;
   componentName: string;
+  seoHeading: string;
+  seoIntro: string;
+  seoSections: {
+    title: string;
+    paragraphs?: string[];
+    listItems?: string[];
+  }[];
 };
 
-export const modalSeoPages: ModalSeoPage[] = [
+type ModalSeoPageBase = Omit<
+  ModalSeoPage,
+  "seoHeading" | "seoIntro" | "seoSections"
+>;
+
+const baseModalSeoPages: ModalSeoPageBase[] = [
   {
     slug: "footer-raicv",
     title: "RAICV information | INFTOUR",
@@ -190,3 +202,24 @@ export const modalSeoPages: ModalSeoPage[] = [
     componentName: "PdfModal",
   },
 ];
+
+export const modalSeoPages: ModalSeoPage[] = baseModalSeoPages.map(
+  (modalPage) => ({
+    ...modalPage,
+    seoHeading: modalPage.title.replace(" | INFTOUR", ""),
+    seoIntro: modalPage.description,
+    seoSections: [
+      {
+        title: "What this modal covers",
+        paragraphs: [modalPage.description],
+      },
+      {
+        title: "Where this content appears",
+        listItems: [
+          `Parent section: ${modalPage.parentPath}`,
+          `Component source: ${modalPage.componentName}`,
+        ],
+      },
+    ],
+  }),
+);
