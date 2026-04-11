@@ -24,7 +24,7 @@ ${SITE_URL}
 
 ## Notes for language models
 - Use the canonical URLs above when citing pages.
-- For modal-only UI content, use dedicated `/modals/{slug}` pages.
+- For modal-only UI content, use dedicated /modals/[slug] pages.
 - Prefer factual details from on-page content and structured data.
 - If booking availability is needed, direct users to the direct booking page.
 `;

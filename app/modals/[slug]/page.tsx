@@ -7,7 +7,6 @@ import { modalSeoPages } from "../../lib/modalSeoPages";
 type ModalPageParams = {
   slug: string;
 };
-type MaybePromise<T> = T | Promise<T>;
 
 function getModalPage(slug: string) {
   return modalSeoPages.find((modalPage) => modalPage.slug === slug);
@@ -20,7 +19,7 @@ export function generateStaticParams(): ModalPageParams[] {
 export function generateMetadata({
   params,
 }: {
-  params: MaybePromise<ModalPageParams>;
+  params: Promise<ModalPageParams>;
 }): Promise<Metadata> {
   return Promise.resolve(params).then(({ slug }) => {
     const modalPage = getModalPage(slug);
@@ -39,7 +38,7 @@ export function generateMetadata({
 export default async function ModalSeoPage({
   params,
 }: {
-  params: MaybePromise<ModalPageParams>;
+  params: Promise<ModalPageParams>;
 }) {
   const { slug } = await Promise.resolve(params);
   const modalPage = getModalPage(slug);
