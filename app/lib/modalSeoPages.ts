@@ -120,13 +120,6 @@ export const modalSeoPages: ModalSeoPage[] = [
     componentName: "HorizontesMarinosModal",
   },
   {
-    slug: "experiencias-horizontes-marinos-legacy",
-    title: "Experiencias: Horizontes marinos legacy | INFTOUR",
-    description: "Legacy Horizontes Marinos modal content currently stored in the pictures module.",
-    parentPath: "/experiencias",
-    componentName: "HorizontesMarinosModal (pictures)",
-  },
-  {
     slug: "experiencias-salinas",
     title: "Experiencias: Salinas | INFTOUR",
     description: "Salinas and natural landscape content from the Experiencias salinas modal.",
