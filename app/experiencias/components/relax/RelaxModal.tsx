@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { createPortal } from "react-dom";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -281,9 +282,10 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
                 const sectionImg = sectionNum >= 1 && sectionNum <= 6 ? relaxImages[sectionNum] : null;
 
                 return (
-                  <>
+                  <Fragment
+                    key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
+                  >
                     <div
-                      key={`s-${sIdx}-${(section.title ?? section.subgroups[0]?.main ?? "").slice(0, 20)}`}
                       className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
                     >
                       {section.title && (
@@ -315,7 +317,7 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
                       ))}
                     </div>
                     {sectionImg && (
-                      <div key={`img-${sIdx}`} className="relative w-full h-96 overflow-hidden rounded-sm border border-gray-200">
+                      <div className="relative w-full h-96 overflow-hidden rounded-sm border border-gray-200">
                         <ProgressiveNextImage
                           src={sectionImg}
                           alt={section.title ?? ""}
@@ -326,7 +328,7 @@ export default function RelaxModal({ isOpen, onClose }: RelaxModalProps) {
                         />
                       </div>
                     )}
-                  </>
+                  </Fragment>
                 );
               });
             })()}
