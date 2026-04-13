@@ -19,9 +19,6 @@ function getSameAsUrls() {
 
   if (missing.length > 0) {
     const message = `[SEO] Missing social URL env vars: ${missing.join(", ")}. Set them in the production environment to keep sameAs complete.`;
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(message);
-    }
     console.warn(message);
   }
 
@@ -50,7 +47,7 @@ const lodgingBusinessJsonLd = {
   priceRange: "EUR 90-450",
   telephone: "+34 640 748 732",
   email: "mail@inftour.net",
-  sameAs: SAME_AS,
+  ...(SAME_AS.length > 0 ? { sameAs: SAME_AS } : {}),
   geo: {
     "@type": "GeoCoordinates",
     latitude: 38.6416,

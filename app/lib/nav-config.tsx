@@ -56,8 +56,7 @@ export const navItems: Array<{
   Icon: ComponentType<{ className?: string }>;
 }> = [
   { href: "/", labelKey: "reservaDirecta", first: true, Icon: IconCalendar },
-  // Temporarily hidden from navigation.
-  // { href: "/reserva-directa-v2", labelKey: "reservaDirectaV2", first: false, Icon: IconCalendar },
+  { href: "/reserva-directa-v2", labelKey: "reservaDirectaV2", first: false, Icon: IconCalendar },
   { href: "/experiencias", labelKey: "experiencias", first: false, Icon: IconExperiencias },
   { href: "/services", labelKey: "services", first: false, Icon: IconServices },
   { href: "/revista", labelKey: "revista", first: false, Icon: IconRevista },

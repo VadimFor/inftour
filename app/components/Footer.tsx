@@ -48,6 +48,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/reserva-directa-v2"
+                  className="hover:text-brand-gold transition"
+                >
+                  {t("reservaDirectaV2")}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/experiencias"
                   className="hover:text-brand-gold transition"
                 >
