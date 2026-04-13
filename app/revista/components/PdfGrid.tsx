@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { DriveFile, DriveListResult } from "../../lib/drive";
-import { getThumbnailUrl } from "../../lib/drive";
+import type { DriveFileWithSlug, DriveListResult } from "../../lib/drive";
+import { getPdfTitle, getThumbnailUrl, withDriveFileSlugs } from "../../lib/drive";
 import PdfModal from "./PdfModal";
 import { usePdfDetails } from "./usePdfDetails";
 
@@ -12,28 +13,37 @@ type PdfGridProps = {
 
 function PdfCard({
   file,
-  onClick,
+  onOpenModal,
 }: {
-  file: DriveFile;
-  onClick: () => void;
+  file: DriveFileWithSlug;
+  onOpenModal: (file: DriveFileWithSlug) => void;
 }) {
   const details = usePdfDetails(file.id);
   const [preload, setPreload] = useState(false);
-  const title = file.name.replace(/\.pdf$/i, "").replace(/[-_]/g, " ");
-  const displayTitle = title.charAt(0).toUpperCase() + title.slice(1);
+  const displayTitle = getPdfTitle(file.name);
   const thumbnailUrl = getThumbnailUrl(file.id);
 
   return (
-    <div
+    <Link
+      href={`/revista/${file.slug}`}
       className="bg-white border border-gray-100 shadow-sm overflow-hidden flex flex-col cursor-pointer group rounded-sm w-full lg:w-[calc(50%-12px)] lg:shrink-0 lg:snap-start"
-      onClick={onClick}
       onMouseEnter={() => setPreload(true)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onClick();
+      onClick={(e) => {
+        if (
+          e.defaultPrevented ||
+          e.button !== 0 ||
+          e.metaKey ||
+          e.ctrlKey ||
+          e.shiftKey ||
+          e.altKey
+        ) {
+          return;
+        }
+
+        e.preventDefault();
+        onOpenModal(file);
       }}
-      aria-label={`Abrir ${displayTitle}`}
+      aria-label={`Open ${displayTitle}`}
     >
       <div className="relative h-48 shrink-0 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -73,13 +83,13 @@ function PdfCard({
           title=""
         />
       )}
-    </div>
+    </Link>
   );
 }
 
 export default function PdfGrid({ driveResult }: PdfGridProps) {
-  const [selected, setSelected] = useState<DriveFile | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<DriveFileWithSlug | null>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -115,7 +125,7 @@ export default function PdfGrid({ driveResult }: PdfGridProps) {
     );
   }
 
-  const files = driveResult.files;
+  const files: DriveFileWithSlug[] = withDriveFileSlugs(driveResult.files);
 
   if (files.length === 0) {
     return <p className="italic text-gray-400 text-sm">No PDF files found.</p>;
@@ -147,14 +157,14 @@ export default function PdfGrid({ driveResult }: PdfGridProps) {
 
         <div ref={scrollRef} className="flex flex-col gap-8 lg:flex-row lg:overflow-x-auto lg:snap-x lg:snap-mandatory lg:pb-4 lg:gap-6">
           {files.map((file) => (
-            <PdfCard key={file.id} file={file} onClick={() => setSelected(file)} />
+            <PdfCard key={file.id} file={file} onOpenModal={setSelected} />
           ))}
         </div>
       </div>
 
-      {selected && (
+      {selected ? (
         <PdfModal file={selected} onClose={() => setSelected(null)} />
-      )}
+      ) : null}
     </>
   );
 }

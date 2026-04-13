@@ -8,12 +8,43 @@ export interface DriveFile {
 export interface DriveFileDetails {
   pages: number | null;
   excerpt: string | null;
+  content: string | null;
+}
+
+export interface DriveFileWithSlug extends DriveFile {
+  slug: string;
 }
 
 const FOLDER_ID = "1tEdwGPSe6PJuMEa56nLVp249P-4CPCQC";
 
 export function getThumbnailUrl(fileId: string): string {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+}
+
+export function getPdfPreviewUrl(fileId: string): string {
+  return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+export function getPdfDownloadUrl(fileId: string): string {
+  return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+}
+
+export function getPdfTitle(fileName: string): string {
+  const title = fileName.replace(/\.pdf$/i, "").replace(/[-_]+/g, " ").trim();
+  return title ? title.charAt(0).toUpperCase() + title.slice(1) : "INFTOUR article";
+}
+
+export function slugifyPdfTitle(fileName: string): string {
+  const base = fileName
+    .replace(/\.pdf$/i, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return base || "pdf";
 }
 
 export type DriveListResult =
@@ -43,11 +74,44 @@ export const getDriveFileList = unstable_cache(
   { revalidate: 3600 },
 );
 
-export async function getPdfDetails(fileId: string): Promise<DriveFileDetails> {
+export async function getDriveFileListWithSlugs(): Promise<
+  | { ok: true; files: DriveFileWithSlug[] }
+  | { ok: false; error: "no_api_key" | "api_error" }
+> {
+  const result = await getDriveFileList();
+  if (!result.ok) return result;
+
+  return { ok: true, files: withDriveFileSlugs(result.files) };
+}
+
+export function withDriveFileSlugs(files: DriveFile[]): DriveFileWithSlug[] {
+  const slugCounts = new Map<string, number>();
+  return files.map((file) => {
+      const baseSlug = slugifyPdfTitle(file.name);
+      const count = slugCounts.get(baseSlug) ?? 0;
+      slugCounts.set(baseSlug, count + 1);
+
+      return {
+        ...file,
+        slug: count === 0 ? baseSlug : `${baseSlug}-${count + 1}`,
+      };
+  });
+}
+
+export async function getDriveFileBySlug(
+  slug: string,
+): Promise<DriveFileWithSlug | null> {
+  const result = await getDriveFileListWithSlugs();
+  if (!result.ok) return null;
+  return result.files.find((file) => file.slug === slug) ?? null;
+}
+
+const fetchPdfDetails = unstable_cache(
+  async (fileId: string): Promise<DriveFileDetails> => {
   try {
-    const url = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+    const url = getPdfDownloadUrl(fileId);
     const res = await fetch(url, { next: { revalidate: 86400 } });
-    if (!res.ok) return { pages: null, excerpt: null };
+    if (!res.ok) return { pages: null, excerpt: null, content: null };
 
     const data = new Uint8Array(await res.arrayBuffer());
     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
@@ -55,22 +119,28 @@ export async function getPdfDetails(fileId: string): Promise<DriveFileDetails> {
     const pages = pdf.numPages;
 
     let text = "";
-    const maxPages = Math.min(pages, 3);
-    for (let i = 1; i <= maxPages; i++) {
+    for (let i = 1; i <= pages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       const pageText = content.items
         .map((item) => ("str" in item ? item.str : ""))
         .join(" ");
       text += pageText + " ";
-      if (text.trim().length > 600) break;
     }
 
-    const excerpt = text.replace(/\s+/g, " ").trim() || null;
-    return { pages, excerpt };
+    const normalizedText = text.replace(/\s+/g, " ").trim() || null;
+    const excerpt = normalizedText ? normalizedText.slice(0, 420).trim() : null;
+    return { pages, excerpt, content: normalizedText };
   } catch {
-    return { pages: null, excerpt: null };
+    return { pages: null, excerpt: null, content: null };
   }
+  },
+  ["pdf-details"],
+  { revalidate: 86400 },
+);
+
+export async function getPdfDetails(fileId: string): Promise<DriveFileDetails> {
+  return fetchPdfDetails(fileId);
 }
 
 // Keep for backwards compat if anything still imports these

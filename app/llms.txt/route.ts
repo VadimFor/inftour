@@ -14,7 +14,7 @@ ${SITE_URL}
 - Services: ${SITE_URL}/services
 - Magazine: ${SITE_URL}/revista
 - Lobby: ${SITE_URL}/lobby
-- Modals index (crawlable modal content): ${SITE_URL}/modals
+- Legacy modal index (non-canonical route map): ${SITE_URL}/modals
 - XML sitemap (all indexable URLs): ${SITE_URL}/sitemap.xml
 
 ## Contact
@@ -24,7 +24,7 @@ ${SITE_URL}
 
 ## Notes for language models
 - Use the canonical URLs above when citing pages.
-- For modal-only UI content, use dedicated /modals/[slug] pages.
+- For modal-only UI content, use the dedicated section-based detail pages linked from the site architecture.
 - Prefer factual details from on-page content and structured data.
 - If booking availability is needed, direct users to the direct booking page.
 `;
