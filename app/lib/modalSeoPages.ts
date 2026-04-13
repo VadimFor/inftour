@@ -189,6 +189,22 @@ const baseModalSeoPages: ModalSeoPageBase[] = [
     componentName: "ServiceRecipesStyleModal",
   },
   {
+    slug: "lobby-about-us",
+    seoPath: "/lobby/about-us",
+    title: "Lobby: About us | INFTOUR",
+    description: "About INFTOUR company history and profile shown in the lobby about us modal.",
+    parentPath: "/lobby",
+    componentName: "LobbyAboutModal",
+  },
+  {
+    slug: "lobby-instructions",
+    seoPath: "/lobby/instructions",
+    title: "Lobby: Instructions | INFTOUR",
+    description: "Guest instructions and what-to-do guidance shown in the lobby instructions modal.",
+    parentPath: "/lobby",
+    componentName: "LobbyInstructionsModal",
+  },
+  {
     slug: "lobby-privacy",
     seoPath: "/lobby/privacy-policy",
     title: "Lobby: Privacy policy | INFTOUR",

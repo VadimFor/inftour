@@ -100,6 +100,11 @@ type ParquesAtraccionesModalProps = {
   onClose: () => void;
 };
 
+type ParquesAtraccionesContentProps = {
+  isModal?: boolean;
+  onClose?: () => void;
+};
+
 function renderLabeledLine(line: string) {
   const [label, ...rest] = line.split(":");
   const hasLabel = rest.length > 0;
@@ -155,6 +160,69 @@ export default function ParquesAtraccionesModal({
 }: ParquesAtraccionesModalProps) {
   const t = useLangStore((s) => s.t);
   useModalBodyScrollLock(isOpen);
+  if (!isOpen || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="parques-attractions-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("close")}
+          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="w-4 h-4"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <ParquesAtraccionesContent isModal onClose={onClose} />
+        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
+          <a
+            href="/experiencias/parques-atracciones"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+          >
+            {t("close")}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function ParquesAtraccionesContent({
+  isModal = false,
+  onClose,
+}: ParquesAtraccionesContentProps) {
+  const t = useLangStore((s) => s.t);
   useEffect(() => {
     [terra1, terra2, terra3, terra4, terra5, terra6]
       .forEach((i) => { const img = new Image(); img.src = i.src; });
@@ -210,7 +278,7 @@ export default function ParquesAtraccionesModal({
     }, 150);
   }, []);
   const handleAdviceBoxClick = useCallback(() => {
-    onClose();
+    onClose?.();
     openAIWidget();
   }, [onClose, openAIWidget]);
 
@@ -235,157 +303,110 @@ export default function ParquesAtraccionesModal({
 
   const rowsWithIds = useMemo(() => assignScrollIds(parkGroups), [parkGroups]);
 
-  if (!isOpen || typeof document === "undefined") return null;
-
   const title = t("expParquesAtraccionesModalTitle");
   const subtitle = t("expParquesAtraccionesModalSubtitle");
   const intro = t("expParquesAtraccionesModalIntro");
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="parques-attractions-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+  return (
+    <div className={isModal ? "overflow-y-auto flex-1 px-8 py-6 scrollbar-modal" : "container mx-auto px-4 py-12"}>
+      <div className={isModal ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14" : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"}>
+        <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+        <h1
+          id="parques-attractions-modal-title"
+          className={isModal ? MODAL_TITLE_CLASS : "text-3xl md:text-4xl font-serif text-gray-900"}
+        >
+          {title}
+        </h1>
+        <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
+          {subtitle}
+        </p>
+      </div>
+
+      {intro ? (
+        <p className="text-sm text-gray-700 leading-relaxed mb-6 border-l-2 border-brand-gold pl-4 whitespace-pre-line">
+          {intro}
+        </p>
+      ) : null}
+
+      <div className="grid grid-cols-1 gap-4">
+        {rowsWithIds.map(({ group, mainId, bulletIds }, idx) => (
+          <div
+            key={`${idx}-${group.main.slice(0, 20)}`}
+            id={mainId}
+            className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors scroll-mt-6"
+          >
+            <>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                {renderLabeledLine(group.main)}
+              </p>
+              {group.bullets.length > 0 && (
+                <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
+                  {group.bullets.map((bullet, bIdx) => {
+                    const bid = bulletIds[bIdx];
+                    return (
+                      <li
+                        key={bIdx}
+                        id={bid}
+                        className="text-sm text-gray-700 leading-relaxed list-disc list-inside scroll-mt-6"
+                      >
+                        {renderLabeledLine(bullet)}
+                        {bid &&
+                          TERRA_IMAGES_BY_PARK[bid] &&
+                          shouldRenderImageBelowParagraph(bid) && (
+                            <div className="mt-2">
+                              <TerraImagesForPark parkId={bid} />
+                            </div>
+                          )}
+                        {bid &&
+                          TERRA_IMAGES_BY_PARK[bid] &&
+                          !shouldRenderImageBelowParagraph(bid) && (
+                            <TerraImagesForPark parkId={bid} />
+                          )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {mainId && TERRA_IMAGES_BY_PARK[mainId] && (
+                <TerraImagesForPark parkId={mainId} imgClassName={mainId === "park-terra-mitica" ? "max-h-24 object-cover" : undefined} />
+              )}
+            </>
+          </div>
+        ))}
+      </div>
+
+      {tip ? (
+        <div
+          className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
+          role="button"
+          tabIndex={0}
+          onClick={handleAdviceBoxClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleAdviceBoxClick();
+            }
+          }}
         >
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth={2}
-            className="w-4 h-4"
+            strokeWidth={1.5}
+            className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
             aria-hidden
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
+              d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
             />
           </svg>
-        </button>
-
-        <div className="overflow-y-auto flex-1 px-8 py-6 scrollbar-modal">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3
-              id="parques-attractions-modal-title"
-              className={MODAL_TITLE_CLASS}
-            >
-              {title}
-            </h3>
-            <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
-              {subtitle}
-            </p>
-          </div>
-
-          {intro ? (
-            <p className="text-sm text-gray-700 leading-relaxed mb-6 border-l-2 border-brand-gold pl-4 whitespace-pre-line">
-              {intro}
-            </p>
-          ) : null}
-
-          <div className="grid grid-cols-1 gap-4">
-            {rowsWithIds.map(({ group, mainId, bulletIds }, idx) => (
-              <div
-                key={`${idx}-${group.main.slice(0, 20)}`}
-                id={mainId}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors scroll-mt-6"
-              >
-                <>
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                    {renderLabeledLine(group.main)}
-                  </p>
-                  {group.bullets.length > 0 && (
-                    <ul className="flex flex-col gap-2 pl-4 border-l-2 border-brand-gold/30">
-                      {group.bullets.map((bullet, bIdx) => {
-                        const bid = bulletIds[bIdx];
-                        return (
-                          <li
-                            key={bIdx}
-                            id={bid}
-                            className="text-sm text-gray-700 leading-relaxed list-disc list-inside scroll-mt-6"
-                          >
-                            {renderLabeledLine(bullet)}
-                            {bid &&
-                              TERRA_IMAGES_BY_PARK[bid] &&
-                              shouldRenderImageBelowParagraph(bid) && (
-                                <div className="mt-2">
-                                  <TerraImagesForPark parkId={bid} />
-                                </div>
-                              )}
-                            {bid &&
-                              TERRA_IMAGES_BY_PARK[bid] &&
-                              !shouldRenderImageBelowParagraph(bid) && (
-                                <TerraImagesForPark parkId={bid} />
-                              )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                  {mainId && TERRA_IMAGES_BY_PARK[mainId] && (
-                    <TerraImagesForPark parkId={mainId} imgClassName={mainId === "park-terra-mitica" ? "max-h-24 object-cover" : undefined} />
-                  )}
-                </>
-              </div>
-            ))}
-          </div>
-
-          {tip ? (
-            <div
-              className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
-              role="button"
-              tabIndex={0}
-              onClick={handleAdviceBoxClick}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleAdviceBoxClick();
-                }
-              }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-                />
-              </svg>
-              <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
-                {tip}
-              </p>
-            </div>
-          ) : null}
+          <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
+            {tip}
+          </p>
         </div>
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
-          >
-            {t("close")}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
+      ) : null}
+    </div>
   );
 }

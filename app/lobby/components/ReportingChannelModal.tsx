@@ -3,10 +3,15 @@
 import { createPortal } from "react-dom";
 import { useEffect } from "react";
 import { useLangStore } from "../../lib/langStore";
+import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
 
 type ReportingChannelModalProps = {
   isOpen: boolean;
   onClose: () => void;
+};
+
+type ReportingChannelContentProps = {
+  isModal?: boolean;
 };
 
 const BODY = "text-sm text-gray-600 leading-relaxed";
@@ -50,70 +55,37 @@ function renderComplaintWhatsappLine(text: string) {
   );
 }
 
-export default function ReportingChannelModal({
-  isOpen,
-  onClose,
-}: ReportingChannelModalProps) {
+export function ReportingChannelContent({
+  isModal = false,
+}: ReportingChannelContentProps) {
   const t = useLangStore((s) => s.t);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-9999 overflow-y-auto bg-black/60 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reporting-channel-modal-title"
-      onClick={onClose}
-    >
-      <div className="min-h-full flex items-start justify-center p-0 sm:p-6">
-        <div
-          className="relative w-full max-w-3xl bg-white shadow-2xl rounded-t-2xl sm:rounded-xl overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
+  return (
+    <div className={isModal ? "" : "container mx-auto px-4 py-12"}>
+      <div
+        className={
+          isModal
+            ? "w-full max-w-3xl bg-white overflow-hidden"
+            : "rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        }
+      >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-8 py-6 bg-brand-stone">
           <div>
             <div className="mb-3 h-px w-10 bg-brand-gold" aria-hidden />
-            <h2
+            <h1
               id="reporting-channel-modal-title"
-              className="text-2xl font-serif font-semibold text-brand-black leading-tight"
+              className={
+                isModal
+                  ? "text-2xl font-serif font-semibold text-brand-black leading-tight"
+                  : "text-3xl md:text-4xl font-serif font-semibold text-brand-black leading-tight"
+              }
             >
               {t("reportingChannelModalTitle")}
-            </h2>
+            </h1>
             <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-brand-gold">
               {t("reportingChannelModalSubtitle")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("lobCloseModal")}
-            className="mt-1 shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-200 hover:text-gray-900"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              className="h-4 w-4"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
         </div>
 
         <div className="px-8 pt-7 pb-0 space-y-5">
@@ -148,8 +120,73 @@ export default function ReportingChannelModal({
             </a>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <div className="shrink-0 border-t border-gray-100 bg-brand-stone px-8 py-4 flex justify-end">
+export default function ReportingChannelModal({
+  isOpen,
+  onClose,
+}: ReportingChannelModalProps) {
+  const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-9999 overflow-y-auto bg-black/60 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reporting-channel-modal-title"
+      onClick={onClose}
+    >
+      <div className="min-h-full flex items-start justify-center p-0 sm:p-6">
+        <div
+          className="relative w-full max-w-3xl bg-white shadow-2xl rounded-t-2xl sm:rounded-xl overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("lobCloseModal")}
+            className="absolute top-6 right-6 z-10 mt-1 shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-200 hover:text-gray-900"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="h-4 w-4"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <ReportingChannelContent isModal />
+
+        <div className="shrink-0 border-t border-gray-100 bg-brand-stone px-8 py-4 flex items-center justify-between gap-3">
+          <a
+            href="/lobby/reporting-channel"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
           <button
             type="button"
             onClick={onClose}

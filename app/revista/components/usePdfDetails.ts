@@ -9,7 +9,7 @@ export function usePdfDetails(fileId: string): DriveFileDetails | null {
     fetch(`/api/pdf-details?id=${fileId}`)
       .then((r) => r.json())
       .then(setDetails)
-      .catch(() => setDetails({ pages: null, excerpt: null }));
+      .catch(() => setDetails({ pages: null, excerpt: null, content: null }));
   }, [fileId]);
   return details;
 }

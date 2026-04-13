@@ -19,6 +19,11 @@ type CyclingModalProps = {
   onClose: () => void;
 };
 
+type CyclingContentProps = {
+  isModal?: boolean;
+  onClose?: () => void;
+};
+
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -47,11 +52,80 @@ function renderTextWithBoldRoutes(text: string, routeNames: string[]) {
 
 export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
   const t = useLangStore((s) => s.t);
-  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   useModalBodyScrollLock(isOpen);
+
+  if (!isOpen || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cycling-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("close")}
+          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="w-4 h-4"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <CyclingContent isModal onClose={onClose} />
+        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
+          <a
+            href="/experiencias/ciclismo"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+          >
+            {t("close")}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function CyclingContent({
+  isModal = false,
+  onClose,
+}: CyclingContentProps) {
+  const t = useLangStore((s) => s.t);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+
   useEffect(() => {
-    CYCLING_IMAGES.forEach((src) => { const img = new Image(); img.src = src; });
+    CYCLING_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
   }, []);
+
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;
@@ -102,10 +176,12 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
       }
     }, 150);
   }, []);
+
   const handleAdviceBoxClick = useCallback(() => {
-    onClose();
+    onClose?.();
     openAIWidget();
   }, [onClose, openAIWidget]);
+
   const routeNames = [
     "Coll de Rates",
     "Cumbre del Sol",
@@ -119,10 +195,8 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
     "Cap de la Nau",
     "Calpe",
   ];
-  const introParagraphs = [
-    t("expCyclingRichIntro1"),
-    t("expCyclingRichIntro2"),
-  ];
+
+  const introParagraphs = [t("expCyclingRichIntro1"), t("expCyclingRichIntro2")];
   const quotes = [
     t("expCyclingRichQuote1"),
     t("expCyclingRichQuote2"),
@@ -150,193 +224,154 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
     t("expCyclingRichBase3"),
   ];
 
-  if (!isOpen || typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="cycling-modal-title"
-      onClick={onClose}
-    >
+  return (
+    <div className={isModal ? "overflow-y-auto flex-1 px-8 py-6" : "container mx-auto px-4 py-12"}>
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className={
+          isModal
+            ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14"
+            : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"
+        }
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+        <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+        <h1
+          id="cycling-modal-title"
+          className={isModal ? MODAL_TITLE_CLASS : "text-3xl md:text-4xl font-serif text-gray-900"}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className="w-4 h-4"
-            aria-hidden
+          {t("expCyclingRichTitle")}
+        </h1>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-6">
+        {CYCLING_IMAGES.map((src, idx) =>
+          !failedImages.has(idx) ? (
+            <div
+              key={idx}
+              className="relative h-48 w-full overflow-hidden rounded-sm"
+            >
+              <ProgressiveNextImage
+                src={src}
+                alt=""
+                priority={idx === 0}
+                loading={idx < 2 ? "eager" : "lazy"}
+                onError={() => setFailedImages((prev) => new Set(prev).add(idx))}
+                sizes="(max-width: 896px) 50vw, 448px"
+                imageClassName="object-cover transition-transform duration-500 ease-in-out hover:scale-105"
+              />
+            </div>
+          ) : null,
+        )}
+      </div>
+
+      <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
+        {introParagraphs.map((p, idx) => (
+          <p
+            key={`intro-${idx}`}
+            className={idx === 0 ? "border-l-2 border-brand-gold pl-4" : ""}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            {renderTextWithBoldRoutes(p, routeNames)}
+          </p>
+        ))}
 
-        <div className="overflow-y-auto flex-1 px-8 py-6">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3 id="cycling-modal-title" className={MODAL_TITLE_CLASS}>
-              {t("expCyclingRichTitle")}
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2 mb-6">
-            {CYCLING_IMAGES.map((src, idx) =>
-              !failedImages.has(idx) ? (
-                <div
-                  key={idx}
-                  className="relative h-48 w-full overflow-hidden rounded-sm"
-                >
-                  <ProgressiveNextImage
-                    src={src}
-                    alt=""
-                    priority={idx === 0}
-                    loading={idx < 2 ? "eager" : "lazy"}
-                    onError={() =>
-                      setFailedImages((prev) => new Set(prev).add(idx))
-                    }
-                    sizes="(max-width: 896px) 50vw, 448px"
-                    imageClassName="object-cover transition-transform duration-500 ease-in-out hover:scale-105"
-                  />
-                </div>
-              ) : null
-            )}
-          </div>
-
-          <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
-            {introParagraphs.map((p, idx) => (
-              <p
-                key={`intro-${idx}`}
-                className={idx === 0 ? "border-l-2 border-brand-gold pl-4" : ""}
+        <div>
+          <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
+            {t("expCyclingRichVoicesTitle")}
+          </h4>
+          <p className="mb-3">{t("expCyclingRichVoicesIntro")}</p>
+          <div className="grid grid-cols-1 gap-4">
+            {quotes.map((q, idx) => (
+              <blockquote
+                key={`quote-${idx}`}
+                className="relative bg-brand-bg border border-gray-100 border-l-2 border-l-brand-gold rounded-sm px-5 py-4 text-gray-700 italic"
               >
+                <span className="absolute -top-2 left-3 text-brand-gold text-xl leading-none">
+                  &quot;
+                </span>
+                <p className="text-sm leading-relaxed">
+                  {renderTextWithBoldRoutes(q, routeNames)}
+                </p>
+              </blockquote>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
+            {t("expCyclingRichRoutesTitle")}
+          </h4>
+          <p className="mb-3">{t("expCyclingRichRoutesIntro")}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {routes.map((route, idx) => (
+              <div
+                key={`route-${idx}`}
+                className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors"
+              >
+                <p className="text-xs leading-relaxed">
+                  {renderTextWithBoldRoutes(route, routeNames)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
+            {t("expCyclingRichCalendarTitle")}
+          </h4>
+          <p className="mb-3">{t("expCyclingRichCalendarIntro")}</p>
+          <ul className="list-disc pl-5 space-y-2">
+            {calendarItems.map((item, idx) => (
+              <li key={`cal-${idx}`}>
+                {renderTextWithBoldRoutes(item, routeNames)}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
+            {t("expCyclingRichBaseTitle")}
+          </h4>
+          <div className="space-y-3">
+            {baseCampParagraphs.map((p, idx) => (
+              <p key={`base-${idx}`}>
                 {renderTextWithBoldRoutes(p, routeNames)}
               </p>
             ))}
-
-            <div>
-              <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
-                {t("expCyclingRichVoicesTitle")}
-              </h4>
-              <p className="mb-3">{t("expCyclingRichVoicesIntro")}</p>
-              <div className="grid grid-cols-1 gap-4">
-                {quotes.map((q, idx) => (
-                  <blockquote
-                    key={`quote-${idx}`}
-                    className="relative bg-brand-bg border border-gray-100 border-l-2 border-l-brand-gold rounded-sm px-5 py-4 text-gray-700 italic"
-                  >
-                    <span className="absolute -top-2 left-3 text-brand-gold text-xl leading-none">
-                      &quot;
-                    </span>
-                    <p className="text-sm leading-relaxed">
-                      {renderTextWithBoldRoutes(q, routeNames)}
-                    </p>
-                  </blockquote>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
-                {t("expCyclingRichRoutesTitle")}
-              </h4>
-              <p className="mb-3">{t("expCyclingRichRoutesIntro")}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {routes.map((route, idx) => (
-                  <div
-                    key={`route-${idx}`}
-                    className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors"
-                  >
-                    <p className="text-xs leading-relaxed">
-                      {renderTextWithBoldRoutes(route, routeNames)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
-                {t("expCyclingRichCalendarTitle")}
-              </h4>
-              <p className="mb-3">{t("expCyclingRichCalendarIntro")}</p>
-              <ul className="list-disc pl-5 space-y-2">
-                {calendarItems.map((item, idx) => (
-                  <li key={`cal-${idx}`}>
-                    {renderTextWithBoldRoutes(item, routeNames)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mb-3">
-                {t("expCyclingRichBaseTitle")}
-              </h4>
-              <div className="space-y-3">
-                {baseCampParagraphs.map((p, idx) => (
-                  <p key={`base-${idx}`}>
-                    {renderTextWithBoldRoutes(p, routeNames)}
-                  </p>
-                ))}
-              </div>
-            </div>
           </div>
-
-          <div
-            className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
-            role="button"
-            tabIndex={0}
-            onClick={handleAdviceBoxClick}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleAdviceBoxClick();
-              }
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-              />
-            </svg>
-            <p className="text-xs leading-relaxed text-gray-300">
-              {t("expCyclingRichTip")}
-            </p>
-          </div>
-        </div>
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
-          >
-            {t("close")}
-          </button>
         </div>
       </div>
-    </div>,
-    document.body,
+
+      <div
+        className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
+        role="button"
+        tabIndex={0}
+        onClick={handleAdviceBoxClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleAdviceBoxClick();
+          }
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
+          aria-hidden
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+          />
+        </svg>
+        <p className="text-xs leading-relaxed text-gray-300">
+          {t("expCyclingRichTip")}
+        </p>
+      </div>
+    </div>
   );
 }

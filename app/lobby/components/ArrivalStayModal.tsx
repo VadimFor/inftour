@@ -3,10 +3,15 @@
 import { createPortal } from "react-dom";
 import { useEffect } from "react";
 import { useLangStore } from "../../lib/langStore";
+import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
 
 type ArrivalStayModalProps = {
   isOpen: boolean;
   onClose: () => void;
+};
+
+type ArrivalStayContentProps = {
+  isModal?: boolean;
 };
 
 const BODY = "text-sm text-gray-600 leading-relaxed";
@@ -34,56 +39,38 @@ const STAY_DEPARTURE_BULLETS = [
   "lobStayBeforeDepartureB4",
 ] as const;
 
-export default function ArrivalStayModal({ isOpen, onClose }: ArrivalStayModalProps) {
+export function ArrivalStayContent({
+  isModal = false,
+}: ArrivalStayContentProps) {
   const t = useLangStore((s) => s.t);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || typeof document === "undefined") return null;
-
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 z-9999 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="arrival-stay-modal-title"
-      onClick={onClose}
+      className={
+        isModal ? "scrollbar-modal flex-1 overflow-y-auto" : "container mx-auto px-4 py-12"
+      }
     >
       <div
-        className="relative flex w-full max-w-3xl flex-col bg-white shadow-2xl rounded-t-2xl sm:rounded-xl overflow-hidden max-h-[92vh]"
-        onClick={(e) => e.stopPropagation()}
+        className={
+          isModal ? "" : "rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        }
       >
-        {/* Header */}
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-8 py-6 bg-linear-to-br from-brand-bg via-white to-amber-50/30">
           <div>
             <div className="mb-3 h-px w-10 bg-brand-gold" aria-hidden />
-            <h2
+            <h1
               id="arrival-stay-modal-title"
-              className="text-2xl font-serif font-semibold text-brand-black leading-tight"
+              className={
+                isModal
+                  ? "text-2xl font-serif font-semibold text-brand-black leading-tight"
+                  : "text-3xl md:text-4xl font-serif font-semibold text-brand-black leading-tight"
+              }
             >
               {t("lobStayTitle")}
-            </h2>
+            </h1>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("lobCloseModal")}
-            className="mt-1 shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-200 hover:text-gray-900"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
-        {/* Body */}
         <div className="scrollbar-modal flex-1 overflow-y-auto">
           {/* Intro */}
           <div className="px-8 py-6 space-y-3 text-[15px] font-light leading-relaxed text-gray-600 border-b border-gray-100">
@@ -292,9 +279,58 @@ export default function ArrivalStayModal({ isOpen, onClose }: ArrivalStayModalPr
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Footer */}
-        <div className="shrink-0 border-t border-gray-100 bg-brand-stone px-8 py-4 flex justify-end">
+export default function ArrivalStayModal({ isOpen, onClose }: ArrivalStayModalProps) {
+  const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-9999 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="arrival-stay-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex w-full max-w-3xl flex-col bg-white shadow-2xl rounded-t-2xl sm:rounded-xl overflow-hidden max-h-[92vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("lobCloseModal")}
+          className="absolute top-6 right-6 z-10 mt-1 shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-200 hover:text-gray-900"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <ArrivalStayContent isModal />
+
+        <div className="shrink-0 border-t border-gray-100 bg-brand-stone px-8 py-4 flex items-center justify-between gap-3">
+          <a
+            href="/lobby/arrival-and-stay"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
           <button
             type="button"
             onClick={onClose}

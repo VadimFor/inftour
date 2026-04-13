@@ -16,6 +16,11 @@ type CalpeGrandezaModalProps = {
   onClose: () => void;
 };
 
+type CalpeGrandezaContentProps = {
+  isModal?: boolean;
+  onClose?: () => void;
+};
+
 const sectionsMeta = [
   { key: "expCalpeGrandeurModalSection1" },
   { key: "expCalpeGrandeurModalSection2" },
@@ -65,6 +70,69 @@ export default function CalpeGrandezaModal({
 }: CalpeGrandezaModalProps) {
   const t = useLangStore((s) => s.t);
   useModalBodyScrollLock(isOpen);
+  if (!isOpen || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="calpe-grandeza-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("close")}
+          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="w-4 h-4"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <CalpeGrandezaContent isModal onClose={onClose} />
+        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
+          <a
+            href="/experiencias/calpe-grandeza"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+          >
+            {t("close")}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function CalpeGrandezaContent({
+  isModal = false,
+  onClose,
+}: CalpeGrandezaContentProps) {
+  const t = useLangStore((s) => s.t);
   useEffect(() => {
     [playas1, playas2, playas3, playas4]
       .forEach((i) => { const img = new Image(); img.src = i.src; });
@@ -120,7 +188,7 @@ export default function CalpeGrandezaModal({
     }, 150);
   }, []);
   const handleAdviceBoxClick = useCallback(() => {
-    onClose();
+    onClose?.();
     openAIWidget();
   }, [onClose, openAIWidget]);
 
@@ -131,166 +199,119 @@ export default function CalpeGrandezaModal({
 
   const subtitleLines = parseSubtitleLines(t("expCalpeGrandeurModalSubtitle"));
 
-  if (!isOpen || typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="calpe-grandeza-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className="w-4 h-4"
-            aria-hidden
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-
-        <div className="overflow-y-auto flex-1 px-8 sm:px-10 py-6 scrollbar-modal">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 sm:-mx-10 px-8 sm:px-10 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3 id="calpe-grandeza-modal-title" className={MODAL_TITLE_CLASS}>
-              {t("expCalpeGrandeurModalTitle")}
-            </h3>
-            <div className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2 space-y-1">
-              {subtitleLines.map((line, i) => {
-                const isUrl = /^https?:\/\//i.test(line);
-                if (isUrl) {
-                  return (
-                    <p key={`calpe-sub-${i}`}>
-                      <a
-                        href={line}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="normal-case font-semibold tracking-normal text-brand-link underline underline-offset-2 decoration-brand-link/40 hover:decoration-brand-link hover:text-brand-link break-all"
-                      >
-                        {line}
-                      </a>
-                    </p>
-                  );
-                }
-                return <p key={`calpe-sub-${i}`}>{line}</p>;
-              })}
-            </div>
-          </div>
-          <div className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4 space-y-4">
-            {introParagraphs.map((para, i) => (
-              <p key={`calpe-intro-${i}`}>{para}</p>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-            {PLAYAS_GALLERY_IMAGES.map((img, i) => (
-              <div
-                key={`playas-gallery-${i}`}
-                className="relative h-48 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100"
-              >
-                <ProgressiveNextImage
-                  src={img}
-                  alt={`Playas de Calpe ${i === 0 ? 1 : 3}`}
-                  sizes="(max-width: 640px) 100vw, 50vw"
-                  loading={i === 0 ? "eager" : "lazy"}
-                  imageClassName="object-cover"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {sectionsMeta.map(({ key }) => {
-              const { title, body } = parseSection(t(key));
-              const sectionImage = SECTION_IMAGE_BY_KEY[key];
+  return (
+    <div className={isModal ? "overflow-y-auto flex-1 px-8 sm:px-10 py-6 scrollbar-modal" : "container mx-auto px-4 py-12"}>
+      <div className={isModal ? "bg-brand-bg border-b border-gray-200 -mx-8 sm:-mx-10 px-8 sm:px-10 pt-6 pb-6 mb-6 pr-14" : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"}>
+        <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+        <h1 id="calpe-grandeza-modal-title" className={isModal ? MODAL_TITLE_CLASS : "text-3xl md:text-4xl font-serif text-gray-900"}>
+          {t("expCalpeGrandeurModalTitle")}
+        </h1>
+        <div className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2 space-y-1">
+          {subtitleLines.map((line, i) => {
+            const isUrl = /^https?:\/\//i.test(line);
+            if (isUrl) {
               return (
-                <div
-                  key={key}
-                  className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
-                >
-                  <h4 className="text-base font-semibold text-gray-900 leading-snug">
-                    {title}
-                  </h4>
-                  {body ? (
-                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                      {body}
-                    </p>
-                  ) : null}
-                  {sectionImage ? (
-                    <div className="relative mt-1 h-56 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100">
-                      <ProgressiveNextImage
-                        src={sectionImage}
-                        alt={title || "Playas de Calpe"}
-                        sizes="(max-width: 1024px) 100vw, 896px"
-                        imageClassName="object-cover"
-                      />
-                    </div>
-                  ) : null}
-                </div>
+                <p key={`calpe-sub-${i}`}>
+                  <a
+                    href={line}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="normal-case font-semibold tracking-normal text-brand-link underline underline-offset-2 decoration-brand-link/40 hover:decoration-brand-link hover:text-brand-link break-all"
+                  >
+                    {line}
+                  </a>
+                </p>
               );
-            })}
-          </div>
-
-          <div
-            className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
-            role="button"
-            tabIndex={0}
-            onClick={handleAdviceBoxClick}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleAdviceBoxClick();
-              }
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-              />
-            </svg>
-            <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
-              {t("expCalpeGrandeurModalTip")}
-            </p>
-          </div>
-        </div>
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
-          >
-            {t("close")}
-          </button>
+            }
+            return <p key={`calpe-sub-${i}`}>{line}</p>;
+          })}
         </div>
       </div>
-    </div>,
-    document.body,
+      <div className="text-sm text-gray-700 leading-relaxed mb-8 border-l-2 border-brand-gold pl-4 space-y-4">
+        {introParagraphs.map((para, i) => (
+          <p key={`calpe-intro-${i}`}>{para}</p>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        {PLAYAS_GALLERY_IMAGES.map((img, i) => (
+          <div
+            key={`playas-gallery-${i}`}
+            className="relative h-48 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100"
+          >
+            <ProgressiveNextImage
+              src={img}
+              alt={`Playas de Calpe ${i === 0 ? 1 : 3}`}
+              sizes="(max-width: 640px) 100vw, 50vw"
+              loading={i === 0 ? "eager" : "lazy"}
+              imageClassName="object-cover"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {sectionsMeta.map(({ key }) => {
+          const { title, body } = parseSection(t(key));
+          const sectionImage = SECTION_IMAGE_BY_KEY[key];
+          return (
+            <div
+              key={key}
+              className="bg-brand-bg border border-gray-100 rounded-sm p-5 flex flex-col gap-3 hover:border-brand-gold/40 transition-colors"
+            >
+              <h4 className="text-base font-semibold text-gray-900 leading-snug">
+                {title}
+              </h4>
+              {body ? (
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                  {body}
+                </p>
+              ) : null}
+              {sectionImage ? (
+                <div className="relative mt-1 h-56 w-full overflow-hidden rounded-sm border border-gray-200 bg-gray-100">
+                  <ProgressiveNextImage
+                    src={sectionImage}
+                    alt={title || "Playas de Calpe"}
+                    sizes="(max-width: 1024px) 100vw, 896px"
+                    imageClassName="object-cover"
+                  />
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
+        role="button"
+        tabIndex={0}
+        onClick={handleAdviceBoxClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleAdviceBoxClick();
+          }
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
+          aria-hidden
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+          />
+        </svg>
+        <p className="text-xs leading-relaxed text-gray-300 whitespace-pre-line">
+          {t("expCalpeGrandeurModalTip")}
+        </p>
+      </div>
+    </div>
   );
 }

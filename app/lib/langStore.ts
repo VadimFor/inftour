@@ -88,6 +88,17 @@ const translations: TranslationMap = {
   },
   send: { eng: "Send", esp: "Enviar", ru: "Отправить", fr: "Envoyer", it: "Invia", de: "Senden", uk: "Надіслати", pl: "Wyślij" },
 
+  openPage: {
+    eng: "Open page",
+    esp: "Abrir página",
+    ru: "Открыть страницу",
+    fr: "Ouvrir la page",
+    it: "Apri pagina",
+    de: "Seite öffnen",
+    uk: "Відкрити сторінку",
+    pl: "Otwórz stronę",
+  },
+
   // Home
   loadingCalendar: {
     eng: "Loading calendar...",

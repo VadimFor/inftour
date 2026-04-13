@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import ModalSeoPageArticle from "../../components/ModalSeoPageArticle";
 import { buildPageMetadata } from "../../lib/metadata";
 import { getModalSeoPagesByPrefix } from "../../lib/modalSeoPages";
+import { OurServicesContent } from "../components/OurServicesModal";
+import { ReferenceNumbersContent } from "../components/ReferenceNumbersModal";
+import { RequestsCommentsContent } from "../components/RequestsCommentsModal";
 
 type RouteParams = {
   slug: string;
@@ -48,6 +51,18 @@ export default async function ServiceSeoPage({
 
   if (!modalPage) {
     notFound();
+  }
+
+  if (slug === "reference-numbers") {
+    return <ReferenceNumbersContent />;
+  }
+
+  if (slug === "our-services") {
+    return <OurServicesContent />;
+  }
+
+  if (slug === "requests-comments") {
+    return <RequestsCommentsContent />;
   }
 
   return <ModalSeoPageArticle modalPage={modalPage} />;

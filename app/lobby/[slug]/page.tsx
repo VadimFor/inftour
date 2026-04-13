@@ -3,6 +3,12 @@ import { notFound } from "next/navigation";
 import ModalSeoPageArticle from "../../components/ModalSeoPageArticle";
 import { buildPageMetadata } from "../../lib/metadata";
 import { getModalSeoPagesByPrefix } from "../../lib/modalSeoPages";
+import AboutUsContent from "../components/AboutUsContent";
+import { ArrivalStayContent } from "../components/ArrivalStayModal";
+import { FaqContent } from "../components/FaqModal";
+import InstructionsContent from "../components/InstructionsContent";
+import { PrivacyContent } from "../components/PrivacyModal";
+import { ReportingChannelContent } from "../components/ReportingChannelModal";
 
 type RouteParams = {
   slug: string;
@@ -48,6 +54,30 @@ export default async function LobbySeoPage({
 
   if (!modalPage) {
     notFound();
+  }
+
+  if (slug === "about-us") {
+    return <AboutUsContent />;
+  }
+
+  if (slug === "instructions") {
+    return <InstructionsContent />;
+  }
+
+  if (slug === "arrival-and-stay") {
+    return <ArrivalStayContent />;
+  }
+
+  if (slug === "faq") {
+    return <FaqContent />;
+  }
+
+  if (slug === "privacy-policy") {
+    return <PrivacyContent />;
+  }
+
+  if (slug === "reporting-channel") {
+    return <ReportingChannelContent />;
   }
 
   return <ModalSeoPageArticle modalPage={modalPage} />;

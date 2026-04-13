@@ -16,6 +16,11 @@ type FaqSection = {
   lines: string[];
 };
 
+type FaqContentProps = {
+  isModal?: boolean;
+  onOpenAIAdvice?: () => void;
+};
+
 function normalizeAdviceLine(line: string): string {
   return line
     .replace(
@@ -358,72 +363,176 @@ function renderSectionLines(lines: string[], sectionKey: string): ReactNode[] {
   return rendered;
 }
 
-export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
+function FaqContentBody({
+  introLines,
+  introHeading,
+  introDescription,
+  introChecklist,
+  sections,
+  mainContentLines,
+  adviceLines,
+  onOpenAIAdvice,
+}: {
+  introLines: string[];
+  introHeading: string;
+  introDescription: string;
+  introChecklist: string[];
+  sections: FaqSection[];
+  mainContentLines: string[];
+  adviceLines: string[];
+  onOpenAIAdvice?: () => void;
+}) {
+  const t = useLangStore((s) => s.t);
+
+  return (
+    <div className="scrollbar-modal overflow-y-auto flex-1 px-8 py-6">
+      <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
+        <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+        <h1
+          id="faq-modal-title"
+          className="text-3xl font-serif text-gray-900 leading-tight"
+        >
+          {t("faqModalTitle")}
+        </h1>
+        <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
+          {t("faqModalSubtitle")}
+        </p>
+      </div>
+
+      {introLines.length > 0 && (
+        <div className="mb-6 rounded-lg border border-brand-gold/25 bg-linear-to-b from-white to-brand-bg/40 p-5 shadow-sm sm:p-6">
+          {(!!introHeading || !!introDescription) && (
+            <div className="pb-4 border-b border-brand-gold/20">
+              {!!introHeading && (
+                <div className="flex items-start gap-3">
+                  <span
+                    className="mt-1 inline-block h-5 w-1.5 rounded-full bg-brand-gold"
+                    aria-hidden
+                  />
+                  <h4 className="text-[17px] font-semibold tracking-tight text-brand-black leading-tight">
+                    {introHeading}
+                  </h4>
+                </div>
+              )}
+              {!!introDescription && (
+                <p className="mt-2 text-sm text-gray-700 leading-relaxed max-w-prose">
+                  {introDescription}
+                </p>
+              )}
+            </div>
+          )}
+          {introChecklist.length > 0 && (
+            <ul className="mt-4 space-y-2.5">
+              {introChecklist.map((line, idx) => (
+                <li
+                  key={`intro-check-${idx}`}
+                  className="flex items-start gap-2.5 rounded-md bg-white/80 px-3 py-2 text-sm text-gray-800"
+                >
+                  <span
+                    className="mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-gold/15 text-brand-gold"
+                    aria-hidden
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-gold" />
+                  </span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-5">
+        {sections.map((section, sectionIdx) => (
+          <article
+            key={`faq-section-${sectionIdx}`}
+            className="group bg-brand-bg border border-gray-100 rounded-sm p-5 sm:p-6 flex flex-col gap-3 hover:border-brand-gold/40 hover:shadow-sm transition-all"
+          >
+            {section.heading &&
+              (() => {
+                const parsedHeading = splitSectionHeading(section.heading);
+                return (
+                  <div className="flex items-start gap-3 pb-3 border-b border-gray-200/80">
+                    <span
+                      className="mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-gold px-2 text-[11px] font-bold text-white"
+                      aria-hidden
+                    >
+                      {parsedHeading?.number ?? `${sectionIdx + 1}`}
+                    </span>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
+                      {parsedHeading?.title ?? section.heading}
+                    </h4>
+                  </div>
+                );
+              })()}
+            <div className="space-y-2.5">
+              {renderSectionLines(
+                section.lines,
+                `faq-section-${sectionIdx}`,
+              )}
+            </div>
+          </article>
+        ))}
+
+        {sections.length === 0 &&
+          mainContentLines.map((line, idx) => (
+            <Fragment key={`faq-fallback-wrapper-${idx}`}>
+              {line ? (
+                renderFaqLine(line, `faq-fallback-${idx}`)
+              ) : (
+                <div className="h-2" aria-hidden />
+              )}
+            </Fragment>
+          ))}
+      </div>
+
+      {adviceLines.length > 0 && (
+        <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+            />
+          </svg>
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-white">
+              {adviceLines[0]}
+            </p>
+            {adviceLines.slice(1).map((line, idx) =>
+              isAIAdviceLine(line) && onOpenAIAdvice ? (
+                <button
+                  key={`faq-advice-ai-${idx}`}
+                  type="button"
+                  onClick={onOpenAIAdvice}
+                  className="text-left text-xs leading-relaxed text-gray-300 hover:text-brand-gold hover:underline transition-colors"
+                >
+                  {line}
+                </button>
+              ) : (
+                renderLinkedContactLine(line, `faq-advice-${idx}`)
+              ),
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function FaqContent({
+  isModal = false,
+  onOpenAIAdvice,
+}: FaqContentProps) {
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
-  useModalBodyScrollLock(isOpen);
-  const openAIWidget = useCallback(() => {
-    const widget = document.querySelector(
-      "elevenlabs-convai",
-    ) as HTMLElement & {
-      open?: () => void;
-      toggle?: () => void;
-      shadowRoot?: ShadowRoot | null;
-    };
-    if (!widget) return;
-
-    const clickAcceptIfPresent = () => {
-      const root = widget.shadowRoot;
-      if (!root) return false;
-      const buttons = Array.from(root.querySelectorAll("button"));
-      for (const btn of buttons) {
-        const text = (btn.textContent || "").trim().toLowerCase();
-        if (
-          text === "accept" ||
-          text === "aceptar" ||
-          text.includes("accept")
-        ) {
-          (btn as HTMLButtonElement).click();
-          return true;
-        }
-      }
-      return false;
-    };
-
-    if (typeof widget.open === "function") {
-      widget.open();
-    } else if (typeof widget.toggle === "function") {
-      widget.toggle();
-    } else {
-      const root = widget.shadowRoot;
-      if (!root) return;
-      const avatar = root.querySelector(
-        "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
-      ) as HTMLElement | null;
-      if (avatar) {
-        avatar.click();
-      } else {
-        const clickable = root.querySelector(
-          "button, [role='button']",
-        ) as HTMLElement | null;
-        clickable?.click();
-      }
-    }
-
-    let attempts = 0;
-    const maxAttempts = 20;
-    const timer = window.setInterval(() => {
-      attempts += 1;
-      const accepted = clickAcceptIfPresent();
-      if (accepted || attempts >= maxAttempts) {
-        window.clearInterval(timer);
-      }
-    }, 150);
-  }, []);
-  const handleAIAdviceClick = useCallback(() => {
-    onClose();
-    openAIWidget();
-  }, [onClose, openAIWidget]);
   const faqLines = useMemo(
     () =>
       t("faqModalContent")
@@ -510,6 +619,96 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
     return parsed;
   }, [mainContentLines]);
 
+  return (
+    <div className={isModal ? "flex-1 overflow-hidden" : "container mx-auto px-4 py-12"}>
+      <div
+        className={
+          isModal
+            ? "w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col"
+            : "rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        }
+      >
+        <FaqContentBody
+          introLines={introLines}
+          introHeading={introHeading}
+          introDescription={introDescription}
+          introChecklist={introChecklist}
+          sections={sections}
+          mainContentLines={mainContentLines}
+          adviceLines={adviceLines}
+          onOpenAIAdvice={onOpenAIAdvice}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
+  const t = useLangStore((s) => s.t);
+  useModalBodyScrollLock(isOpen);
+  const openAIWidget = useCallback(() => {
+    const widget = document.querySelector(
+      "elevenlabs-convai",
+    ) as HTMLElement & {
+      open?: () => void;
+      toggle?: () => void;
+      shadowRoot?: ShadowRoot | null;
+    };
+    if (!widget) return;
+
+    const clickAcceptIfPresent = () => {
+      const root = widget.shadowRoot;
+      if (!root) return false;
+      const buttons = Array.from(root.querySelectorAll("button"));
+      for (const btn of buttons) {
+        const text = (btn.textContent || "").trim().toLowerCase();
+        if (
+          text === "accept" ||
+          text === "aceptar" ||
+          text.includes("accept")
+        ) {
+          (btn as HTMLButtonElement).click();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (typeof widget.open === "function") {
+      widget.open();
+    } else if (typeof widget.toggle === "function") {
+      widget.toggle();
+    } else {
+      const root = widget.shadowRoot;
+      if (!root) return;
+      const avatar = root.querySelector(
+        "div.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover",
+      ) as HTMLElement | null;
+      if (avatar) {
+        avatar.click();
+      } else {
+        const clickable = root.querySelector(
+          "button, [role='button']",
+        ) as HTMLElement | null;
+        clickable?.click();
+      }
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      const accepted = clickAcceptIfPresent();
+      if (accepted || attempts >= maxAttempts) {
+        window.clearInterval(timer);
+      }
+    }, 150);
+  }, []);
+  const handleAIAdviceClick = useCallback(() => {
+    onClose();
+    openAIWidget();
+  }, [onClose, openAIWidget]);
+
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e: KeyboardEvent) {
@@ -555,147 +754,15 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
           </svg>
         </button>
 
-        <div className="scrollbar-modal overflow-y-auto flex-1 px-8 py-6">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h2
-              id="faq-modal-title"
-              className="text-3xl font-serif text-gray-900 leading-tight"
-            >
-              {t("faqModalTitle")}
-            </h2>
-            <p className="text-brand-gold text-xs font-bold uppercase tracking-[0.2em] mt-2">
-              {t("faqModalSubtitle")}
-            </p>
-          </div>
+        <FaqContent isModal onOpenAIAdvice={handleAIAdviceClick} />
 
-          {introLines.length > 0 && (
-            <div className="mb-6 rounded-lg border border-brand-gold/25 bg-linear-to-b from-white to-brand-bg/40 p-5 shadow-sm sm:p-6">
-              {(!!introHeading || !!introDescription) && (
-                <div className="pb-4 border-b border-brand-gold/20">
-                  {!!introHeading && (
-                    <div className="flex items-start gap-3">
-                      <span
-                        className="mt-1 inline-block h-5 w-1.5 rounded-full bg-brand-gold"
-                        aria-hidden
-                      />
-                      <h4 className="text-[17px] font-semibold tracking-tight text-brand-black leading-tight">
-                        {introHeading}
-                      </h4>
-                    </div>
-                  )}
-                  {!!introDescription && (
-                    <p className="mt-2 text-sm text-gray-700 leading-relaxed max-w-prose">
-                      {introDescription}
-                    </p>
-                  )}
-                </div>
-              )}
-              {introChecklist.length > 0 && (
-                <ul className="mt-4 space-y-2.5">
-                  {introChecklist.map((line, idx) => (
-                    <li
-                      key={`intro-check-${idx}`}
-                      className="flex items-start gap-2.5 rounded-md bg-white/80 px-3 py-2 text-sm text-gray-800"
-                    >
-                      <span
-                        className="mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-gold/15 text-brand-gold"
-                        aria-hidden
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-brand-gold" />
-                      </span>
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-5">
-            {sections.map((section, sectionIdx) => (
-              <article
-                key={`faq-section-${sectionIdx}`}
-                className="group bg-brand-bg border border-gray-100 rounded-sm p-5 sm:p-6 flex flex-col gap-3 hover:border-brand-gold/40 hover:shadow-sm transition-all"
-              >
-                {section.heading &&
-                  (() => {
-                    const parsedHeading = splitSectionHeading(section.heading);
-                    return (
-                      <div className="flex items-start gap-3 pb-3 border-b border-gray-200/80">
-                        <span
-                          className="mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-gold px-2 text-[11px] font-bold text-white"
-                          aria-hidden
-                        >
-                          {parsedHeading?.number ?? `${sectionIdx + 1}`}
-                        </span>
-                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
-                          {parsedHeading?.title ?? section.heading}
-                        </h4>
-                      </div>
-                    );
-                  })()}
-                <div className="space-y-2.5">
-                  {renderSectionLines(
-                    section.lines,
-                    `faq-section-${sectionIdx}`,
-                  )}
-                </div>
-              </article>
-            ))}
-
-            {sections.length === 0 &&
-              mainContentLines.map((line, idx) => (
-                <Fragment key={`faq-fallback-wrapper-${idx}`}>
-                  {line ? (
-                    renderFaqLine(line, `faq-fallback-${idx}`)
-                  ) : (
-                    <div className="h-2" aria-hidden />
-                  )}
-                </Fragment>
-              ))}
-          </div>
-
-          {adviceLines.length > 0 && (
-            <div className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                className="w-5 h-5 shrink-0 text-brand-gold mt-0.5"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-                />
-              </svg>
-              <div className="space-y-1.5">
-                <p className="text-sm font-semibold text-white">
-                  {adviceLines[0]}
-                </p>
-                {adviceLines.slice(1).map((line, idx) =>
-                  isAIAdviceLine(line) ? (
-                    <button
-                      key={`faq-advice-ai-${idx}`}
-                      type="button"
-                      onClick={handleAIAdviceClick}
-                      className="text-left text-xs leading-relaxed text-gray-300 hover:text-brand-gold hover:underline transition-colors"
-                    >
-                      {line}
-                    </button>
-                  ) : (
-                    renderLinkedContactLine(line, `faq-advice-${idx}`)
-                  ),
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end bg-white">
+        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3 bg-white">
+          <a
+            href="/lobby/faq"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
           <button
             type="button"
             onClick={onClose}

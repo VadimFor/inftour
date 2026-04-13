@@ -11,6 +11,11 @@ type RequestsCommentsModalProps = {
   onClose: () => void;
 };
 
+type RequestsCommentsContentProps = {
+  isModal?: boolean;
+  onClose?: () => void;
+};
+
 const REQUEST_EMAIL = "mail@inftour.net";
 const REQUEST_WA_HREF = "https://wa.me/34640748732";
 
@@ -137,9 +142,27 @@ function ActionButtons() {
   );
 }
 
-function RequestsCommentsBody() {
+export function RequestsCommentsContent({
+  isModal = false,
+}: RequestsCommentsContentProps) {
+  const t = useLangStore((s) => s.t);
   return (
-    <div className="space-y-6 pb-1 sm:space-y-8">
+    <div className={isModal ? "space-y-6 pb-1 sm:space-y-8" : "container mx-auto space-y-6 px-4 py-12 sm:space-y-8"}>
+      <div
+        className={
+          isModal
+            ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14"
+            : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"
+        }
+      >
+        <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
+        <h1
+          id="requests-comments-modal-title"
+          className={isModal ? MODAL_TITLE_CLASS : "text-3xl md:text-4xl font-serif text-gray-900"}
+        >
+          {t("requestsCommentsModalTitle")}
+        </h1>
+      </div>
       <RefContentGroup tone={0}>
         <Tp k="reqIntro1" />
         <Tp k="reqIntro2" />
@@ -245,19 +268,16 @@ export default function RequestsCommentsModal({
         </button>
 
         <div className="overflow-y-auto flex-1 px-8 py-6">
-          <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
-            <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
-            <h3
-              id="requests-comments-modal-title"
-              className={MODAL_TITLE_CLASS}
-            >
-              {t("requestsCommentsModalTitle")}
-            </h3>
-          </div>
-          <RequestsCommentsBody />
+          <RequestsCommentsContent isModal />
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-2 flex justify-end">
+        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
+          <a
+            href="/services/requests-comments"
+            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+          >
+            {t("openPage")}
+          </a>
           <button
             type="button"
             onClick={onClose}
