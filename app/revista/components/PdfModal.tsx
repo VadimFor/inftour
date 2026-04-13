@@ -1,25 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { DriveFile } from "../../lib/drive";
+import type { DriveFileWithSlug } from "../../lib/drive";
+import { getPdfDownloadUrl, getPdfTitle } from "../../lib/drive";
+import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
 import { usePdfDetails } from "./usePdfDetails";
 
 type PdfModalProps = {
-  file: DriveFile;
+  file: DriveFileWithSlug;
   onClose: () => void;
 };
 
 export default function PdfModal({ file, onClose }: PdfModalProps) {
   const details = usePdfDetails(file.id);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  useModalBodyScrollLock(true);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -29,8 +26,8 @@ export default function PdfModal({ file, onClose }: PdfModalProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const title = file.name.replace(/\.pdf$/i, "").replace(/[-_]/g, " ");
-  const displayTitle = title.charAt(0).toUpperCase() + title.slice(1);
+  const displayTitle = getPdfTitle(file.name);
+  const articleHref = `/revista/${file.slug}`;
 
   if (typeof document === "undefined") return null;
 
@@ -107,29 +104,39 @@ export default function PdfModal({ file, onClose }: PdfModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 px-6 py-3 flex items-center justify-between bg-gray-50">
-          <a
-            href={`https://drive.usercontent.google.com/download?id=${file.id}&export=download`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-brand-gold text-white text-sm font-semibold px-5 py-2 rounded transition hover:opacity-90"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              className="w-4 h-4"
-              aria-hidden
+        <div className="border-t border-gray-200 px-6 py-3 flex items-center justify-between gap-3 bg-gray-50">
+          <div className="flex items-center gap-3 flex-wrap">
+            <a
+              href={getPdfDownloadUrl(file.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-brand-gold text-white text-sm font-semibold px-5 py-2 rounded transition hover:opacity-90"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-              />
-            </svg>
-            Descargar PDF
-          </a>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                className="w-4 h-4"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                />
+              </svg>
+              Descargar PDF
+            </a>
+
+            <Link
+              href={articleHref}
+              className="text-sm font-semibold px-5 py-2 rounded border border-gray-300 text-gray-700 transition hover:border-brand-gold hover:text-brand-gold"
+              onClick={onClose}
+            >
+              Ver artículo
+            </Link>
+          </div>
 
           <button
             type="button"
