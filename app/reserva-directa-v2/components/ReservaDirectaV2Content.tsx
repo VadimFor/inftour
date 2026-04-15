@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-const API = "https://api.avaibook.com/api/owner";
-const TK = "4db2e6f6b9e3dfab5f52b9a59a5d2a5f4b5a908c2ff34236ee0ac48529e76beb";
+const API = "/api/avaibook";
 const BOOK = "https://inftour.bookonline.pro/es/property";
 
 const FEAT_LABELS: Record<string, string> = {
@@ -92,6 +91,36 @@ interface Property {
   license: string;
 }
 
+type AccommodationListItem = {
+  id: number;
+  name?: string;
+  tradeName?: { es?: string; en?: string };
+};
+
+function getAccommodationListName(item: AccommodationListItem): string {
+  return item.tradeName?.es || item.name || "";
+}
+
+function createPlaceholderProperty(item: AccommodationListItem): Property {
+  return {
+    id: item.id,
+    name: getAccommodationListName(item),
+    type: "",
+    city: "",
+    region: "",
+    capacity: 0,
+    bedrooms: 0,
+    beds: 0,
+    bathrooms: 0,
+    sqm: 0,
+    features: {},
+    images: [],
+    introduction: "",
+    description: "",
+    license: "",
+  };
+}
+
 function normalize(a: RawProperty): Property {
   return {
     id: a.id,
@@ -123,29 +152,20 @@ function getTopFeats(
     (k) =>
       features[k] === "1" ||
       features[k] === true ||
-      (typeof features[k] === "number" && (features[k] as number) > 0),
-  );
-}
-
-function getAllFeats(
-  features: Record<string, string | boolean | number>,
-): string[] {
-  return Object.keys(features).filter(
-    (k) =>
-      FEAT_LABELS[k] &&
-      (features[k] === "1" ||
-        features[k] === true ||
-        (typeof features[k] === "number" &&
-          (features[k] as number) > 0 &&
-          !["n_hab", "n_camas", "n_banos", "superficie"].includes(k))),
+    (typeof features[k] === "number" && (features[k] as number) > 0),
   );
 }
 
 async function apiFetch(path: string): Promise<unknown> {
-  const r = await fetch(API + path, {
-    headers: { accept: "application/json", "X-AUTH-TOKEN": TK },
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const r = await fetch(API + normalizedPath, {
+    headers: { accept: "application/json" },
   });
-  if (!r.ok) throw new Error(`API ${r.status}`);
+  if (!r.ok) {
+    const error = new Error(`API ${r.status}`) as Error & { status?: number };
+    error.status = r.status;
+    throw error;
+  }
   return r.json();
 }
 
@@ -153,15 +173,28 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function apiFetchWithRetry(path: string, retries = 2): Promise<unknown> {
+function buildBookingUrl(
+  propertyId: number,
+  options?: { guests?: string; startDate?: string; endDate?: string },
+): string {
+  const params = new URLSearchParams();
+  if (options?.guests) params.set("guests", options.guests);
+  if (options?.startDate) params.set("startDate", options.startDate);
+  if (options?.endDate) params.set("endDate", options.endDate);
+  const query = params.toString();
+  return query ? `${BOOK}/${propertyId}?${query}` : `${BOOK}/${propertyId}`;
+}
+
+async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await apiFetch(path);
     } catch (err) {
       lastError = err;
+      const status = err && typeof err === "object" ? (err as { status?: number }).status : undefined;
       if (attempt < retries) {
-        await wait(250 * (attempt + 1));
+        await wait(status === 429 ? 1000 * (attempt + 1) : 300 * (attempt + 1));
       }
     }
   }
@@ -253,22 +286,26 @@ function StatItem({ icon, text }: { icon: React.ReactNode; text: string }) {
 
 function PropertyCard({
   prop,
-  onClick,
+  bookingUrl,
 }: {
   prop: Property;
-  onClick: () => void;
+  bookingUrl: string;
 }) {
   const feats = getTopFeats(prop.features);
+  const title = prop.name || `Alojamiento #${prop.id}`;
+  const location = prop.city && prop.region
+    ? `${prop.city} (${prop.region})`
+    : "Cargando datos...";
 
   return (
     <div
-      onClick={onClick}
+      onClick={() => window.open(bookingUrl, "_blank", "noopener,noreferrer")}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onClick();
+          window.open(bookingUrl, "_blank", "noopener,noreferrer");
         }
       }}
       className="group bg-white overflow-hidden border border-[#e0e0e0] cursor-pointer transition-all duration-200 hover:-translate-y-1 focus-visible:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c2a457] focus-visible:ring-offset-2"
@@ -282,10 +319,10 @@ function PropertyCard({
       </div>
       <div style={{ padding: "14px 16px 16px" }}>
         <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111", margin: "0 0 2px", lineHeight: 1.25 }}>
-          {prop.name}
+          {title}
         </h3>
         <p style={{ fontSize: "13px", color: "#777", margin: "0 0 12px" }}>
-          {prop.city} ({prop.region})
+          {location}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", fontSize: "12px", color: "#555", marginBottom: "12px", alignItems: "center" }}>
           {prop.capacity > 0 && (
@@ -370,343 +407,10 @@ function PropertyCard({
 
 // ─── GalleryModal ─────────────────────────────────────────────────────────────
 
-function GalleryModal({
-  images,
-  startIdx,
-  onClose,
-}: {
-  images: Property["images"];
-  startIdx: number;
-  onClose: () => void;
-}) {
-  const [idx, setIdx] = useState(startIdx);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft")
-        setIdx((i) => (i - 1 + images.length) % images.length);
-      if (e.key === "ArrowRight") setIdx((i) => (i + 1) % images.length);
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [images.length, onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-600 bg-black/95 flex items-center justify-center"
-      onClick={onClose}
-    >
-      <div className="relative" onClick={(e) => e.stopPropagation()}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={images[idx]?.ORIGINAL}
-          alt=""
-          className="max-w-[90vw] max-h-[85vh] object-contain rounded"
-        />
-        <button
-          onClick={onClose}
-          className="absolute top-0 right-0 -translate-y-8 text-white/70 hover:text-white text-2xl"
-        >
-          ✕
-        </button>
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={() =>
-                setIdx((i) => (i - 1 + images.length) % images.length)
-              }
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-white/60 hover:text-white text-3xl px-3"
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => setIdx((i) => (i + 1) % images.length)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-white/60 hover:text-white text-3xl px-3"
-            >
-              ›
-            </button>
-          </>
-        )}
-        <p className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-6 text-white/50 text-xs">
-          {idx + 1} / {images.length}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ─── PropertyModal ────────────────────────────────────────────────────────────
-
-function PropertyModal({
-  prop,
-  onClose,
-}: {
-  prop: Property;
-  onClose: () => void;
-}) {
-  const [galleryIdx, setGalleryIdx] = useState<number | null>(null);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
-
-  const feats = getAllFeats(prop.features);
-
-  const bookingUrl = (() => {
-    const params = new URLSearchParams({ guests });
-    if (checkIn) params.set("startDate", checkIn);
-    if (checkOut) params.set("endDate", checkOut);
-    return `${BOOK}/${prop.id}?${params.toString()}`;
-  })();
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && galleryIdx === null) onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handler);
-    };
-  }, [onClose, galleryIdx]);
-
-  const mainImage = prop.images[0];
-  const sideImages = prop.images.slice(1, 5);
-
-  return (
-    <>
-      <div className="fixed inset-0 z-300 bg-brand-bg overflow-y-auto">
-        {/* Top bar */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-3 z-10 flex items-center justify-between shadow-sm">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors"
-          >
-            ← Volver
-          </button>
-          <span className="text-sm font-medium text-gray-500 hidden sm:block">
-            {prop.city}, {prop.region}
-          </span>
-        </div>
-
-        {/* Image mosaic */}
-        {prop.images.length > 0 && (
-          <div className="max-w-[1280px] mx-auto px-6 mt-1">
-            <div className="grid grid-cols-3 grid-rows-2 gap-1 h-[220px] sm:h-[380px] rounded-lg overflow-hidden">
-              <div
-                className="row-span-2 overflow-hidden cursor-pointer"
-                onClick={() => setGalleryIdx(0)}
-              >
-                {mainImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={mainImage.BIG}
-                    alt={prop.name}
-                    className="w-full h-full object-cover hover:scale-[1.02] transition-transform"
-                  />
-                )}
-              </div>
-              {sideImages.map((img, i) => (
-                <div
-                  key={i}
-                  className="overflow-hidden cursor-pointer relative"
-                  onClick={() => setGalleryIdx(i + 1)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={img.BIG}
-                    alt=""
-                    className="w-full h-full object-cover hover:scale-[1.02] transition-transform"
-                  />
-                  {i === 3 && prop.images.length > 5 && (
-                    <div className="absolute inset-0 bg-black/40 flex items-end justify-end p-2">
-                      <span className="bg-white text-gray-900 text-xs font-bold px-3 py-1.5 rounded shadow">
-                        Ver fotos ({prop.images.length})
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Body */}
-        <div className="max-w-[1280px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10">
-          {/* Left */}
-          <div>
-            <h1 className="font-serif text-3xl font-bold text-gray-900 mb-1">
-              {prop.name}
-            </h1>
-            <p className="text-sm text-gray-500 mb-5">
-              {prop.type?.toUpperCase()} · {prop.city}, {prop.region}
-              {prop.license && (
-                <>
-                  {" "}
-                  · <span className="text-[#C5A85F]">Lic. {prop.license}</span>
-                </>
-              )}
-            </p>
-
-            <div className="flex flex-wrap gap-5 py-4 border-t border-b border-gray-200 mb-6">
-              {prop.capacity > 0 && (
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  👤 {prop.capacity} huéspedes
-                </div>
-              )}
-              {prop.bedrooms > 0 && (
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  🛏 {prop.bedrooms} dormitorios
-                </div>
-              )}
-              {prop.beds > 0 && (
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  🛋 {prop.beds} camas
-                </div>
-              )}
-              {prop.bathrooms > 0 && (
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  🚿 {prop.bathrooms} baños
-                </div>
-              )}
-              {prop.sqm > 0 && (
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  📐 {prop.sqm} m²
-                </div>
-              )}
-            </div>
-
-            {prop.introduction && (
-              <p className="text-sm text-[#C5A85F] leading-relaxed mb-6 italic">
-                {prop.introduction}
-              </p>
-            )}
-
-            {prop.description && (
-              <div className="mb-8">
-                <h2 className="font-serif text-xl font-bold text-gray-900 mb-3">
-                  Descripción
-                </h2>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                  {prop.description}
-                </p>
-              </div>
-            )}
-
-            {feats.length > 0 && (
-              <div>
-                <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-                  Comodidades
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {feats.map((f) => (
-                    <div
-                      key={f}
-                      className="flex items-center gap-2 text-sm text-gray-600 py-1.5"
-                    >
-                      <span className="text-[#C5A85F]">✓</span> {FEAT_LABELS[f]}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right: booking widget */}
-          <div className="lg:sticky lg:top-20 self-start bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-            <p className="text-sm font-semibold text-gray-500 mb-1">
-              Añade fechas
-            </p>
-            <p className="text-xs text-gray-400 mb-4">Para ver el precio</p>
-
-            <div className="border border-gray-300 rounded-lg overflow-hidden mb-3">
-              <div className="grid grid-cols-2">
-                <div className="p-3 border-r border-gray-300">
-                  <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                    Llegada
-                  </label>
-                  <input
-                    type="date"
-                    value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full border-none outline-none text-xs font-medium text-gray-900 bg-transparent"
-                  />
-                </div>
-                <div className="p-3">
-                  <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                    Salida
-                  </label>
-                  <input
-                    type="date"
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full border-none outline-none text-xs font-medium text-gray-900 bg-transparent"
-                  />
-                </div>
-              </div>
-              <div className="p-3 border-t border-gray-300">
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                  Huéspedes
-                </label>
-                <select
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value)}
-                  className="w-full border-none outline-none text-xs font-medium text-gray-900 bg-transparent"
-                >
-                  {Array.from(
-                    { length: prop.capacity || 6 },
-                    (_, i) => i + 1,
-                  ).map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n === 1 ? "huésped" : "huéspedes"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <a
-              href={bookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full bg-gray-900 text-white text-center py-3 text-xs font-bold uppercase tracking-widest rounded-lg mb-2 hover:bg-gray-700 transition-colors"
-            >
-              Comprobar disponibilidad
-            </a>
-            <a
-              href={bookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full bg-[#C5A85F] text-white text-center py-3 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-[#a8903f] transition-colors"
-            >
-              Reservar ahora
-            </a>
-            <p className="text-center text-[11px] text-gray-400 mt-3">
-              Reserva segura a través de AvaiBook
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {galleryIdx !== null && (
-        <GalleryModal
-          images={prop.images}
-          startIdx={galleryIdx}
-          onClose={() => setGalleryIdx(null)}
-        />
-      )}
-    </>
-  );
-}
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
-
 export default function ReservaDirectaV2Content() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<Property | null>(null);
   const [guestFilter, setGuestFilter] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -716,29 +420,30 @@ export default function ReservaDirectaV2Content() {
 
     async function load() {
       try {
-        const list = (await apiFetchWithRetry("/accommodations/")) as {
-          id: number;
-        }[];
+        const list = (await apiFetchWithRetry("/accommodations/")) as AccommodationListItem[];
         if (cancelled) return;
 
-        // Fetch full details in chunks of 6 (same as the reference HTML)
-        const chunks: { id: number }[][] = [];
-        for (let i = 0; i < list.length; i += 6)
-          chunks.push(list.slice(i, i + 6));
+        const placeholders = list.map((item) => createPlaceholderProperty(item));
+        setProperties(placeholders);
+        setLoading(false);
 
-        for (const chunk of chunks) {
+        for (const item of list) {
           if (cancelled) return;
-          const results = await Promise.allSettled(
-            chunk.map((a) => apiFetchWithRetry(`/accommodations/${a.id}/`)),
-          );
-          const batch: Property[] = [];
-          results.forEach((r) => {
-            if (r.status === "fulfilled" && r.value) {
-              batch.push(normalize(r.value as RawProperty));
+          try {
+            const detail = await apiFetchWithRetry(
+              `/accommodations/${item.id}/`,
+            );
+            const normalized = normalize(detail as RawProperty);
+            if (!cancelled) {
+              setProperties((prev) =>
+                prev.map((prop) => (prop.id === normalized.id ? normalized : prop)),
+              );
             }
-          });
-          if (!cancelled && batch.length) {
-            setProperties((prev) => [...prev, ...batch]);
+          } catch {
+            // Keep the placeholder if the upstream still rate-limits it.
+          }
+          if (!cancelled) {
+            await wait(250);
           }
         }
       } catch {
@@ -754,19 +459,11 @@ export default function ReservaDirectaV2Content() {
     };
   }, []);
 
-  const openModal = useCallback(async (prop: Property) => {
-    try {
-      const detail = await apiFetch(`/accommodations/${prop.id}/`);
-      setSelected(normalize(detail as RawProperty));
-    } catch {
-      setSelected(prop);
-    }
-  }, []);
-
   const filtered = properties.filter((p) => {
     if (guestFilter !== "0" && p.capacity < parseInt(guestFilter)) return false;
     return true;
   });
+  const loadingDetails = properties.some((prop) => !prop.name);
 
   return (
     <div className="min-h-screen bg-[#efefef]">
@@ -916,9 +613,9 @@ export default function ReservaDirectaV2Content() {
                   {filtered.length}
                 </strong>{" "}
                 alojamientos en Calpe
-                {loading && (
+                {(loading || loadingDetails) && (
                   <span className="ml-2 text-[#c2a457] text-sm font-medium">
-                    · cargando más...
+                    · cargando detalles...
                   </span>
                 )}
               </p>
@@ -927,7 +624,9 @@ export default function ReservaDirectaV2Content() {
                   <PropertyCard
                     key={prop.id}
                     prop={prop}
-                    onClick={() => openModal(prop)}
+                    bookingUrl={buildBookingUrl(prop.id, {
+                      guests: guestFilter !== "0" ? guestFilter : undefined,
+                    })}
                   />
                 ))}
               </div>
@@ -936,9 +635,6 @@ export default function ReservaDirectaV2Content() {
         </div>
       </div>
 
-      {selected && (
-        <PropertyModal prop={selected} onClose={() => setSelected(null)} />
-      )}
     </div>
   );
 }

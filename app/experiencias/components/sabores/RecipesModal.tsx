@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
 import { recipesModalSectionsByLang } from "./recipes_modal_sections";
@@ -113,9 +113,6 @@ export function RecipesContent({
   const lang = useLangStore((s) => s.lang);
   const sections = recipesModalSectionsByLang[lang];
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-  useEffect(() => {
-    RECIPE_IMAGES.forEach((src) => { const img = new Image(); img.src = src; });
-  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

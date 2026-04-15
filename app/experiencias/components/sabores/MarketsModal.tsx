@@ -1,18 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
+import { useCallback, useState } from "react";
 import { useLangStore } from "../../../lib/langStore";
+import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
 
 const MARKET_IMAGES = [
-  "/sabores/pictures/Mercado Lonja 1.png",
-  "/sabores/pictures/Mercado Lonja 2.jpg",
-  "/sabores/pictures/Mercado Lonja 3.png",
+  undefined,
   "/sabores/pictures/Mercado Lonja 4.jpg",
-];
+  "/sabores/pictures/Mercado Lonja 3.png",
+] as const;
 
 type MarketsModalProps = {
   isOpen: boolean;
@@ -74,12 +74,12 @@ export default function MarketsModal({ isOpen, onClose }: MarketsModalProps) {
 
         <MarketsContent isModal onClose={onClose} />
         <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-          <a
+          <Link
             href="/experiencias/mercados"
             className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
             onClick={onClose}
@@ -100,9 +100,6 @@ export function MarketsContent({
 }: MarketsContentProps) {
   const t = useLangStore((s) => s.t);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-  useEffect(() => {
-    MARKET_IMAGES.forEach((src) => { const img = new window.Image(); img.src = src; });
-  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;
@@ -206,13 +203,14 @@ export function MarketsContent({
 
                 {MARKET_IMAGES[index] && !failedImages.has(index) && (
                   <div className="relative w-full h-72 overflow-hidden">
-                    <Image
+                    <SaboresProgressiveImage
                       src={MARKET_IMAGES[index]}
                       alt={section.title}
-                      fill
+                      quality={65}
+                      loading="eager"
                       onError={() => setFailedImages((prev) => new Set(prev).add(index))}
-                      className="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
                       sizes="(max-width: 896px) 100vw, 896px"
+                      imageClassName="object-cover scale-110 group-hover:scale-100 transition-transform duration-500 ease-in-out"
                     />
                   </div>
                 )}

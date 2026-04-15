@@ -2,7 +2,7 @@
 
 import type { StaticImageData } from "next/image";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -223,10 +223,6 @@ export function ParquesAtraccionesContent({
   onClose,
 }: ParquesAtraccionesContentProps) {
   const t = useLangStore((s) => s.t);
-  useEffect(() => {
-    [terra1, terra2, terra3, terra4, terra5, terra6]
-      .forEach((i) => { const img = new Image(); img.src = i.src; });
-  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;

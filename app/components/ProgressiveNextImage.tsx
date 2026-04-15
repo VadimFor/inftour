@@ -10,6 +10,10 @@ export const MODAL_MICRO_BLUR_DATA_URL =
 // Tracks images that have already been loaded at least once in this browser session.
 const loadedImageSrcs = new Set<string>();
 
+export function markImageLoaded(src: string) {
+  loadedImageSrcs.add(src);
+}
+
 function resolveImageSrc(src: string | StaticImageData): string {
   return typeof src === "string" ? src : src.src;
 }
@@ -84,7 +88,7 @@ export function ProgressiveNextImage({
         placeholder={useProgressive ? "blur" : "empty"}
         blurDataURL={useProgressive ? MODAL_MICRO_BLUR_DATA_URL : undefined}
         onLoad={() => {
-          loadedImageSrcs.add(resolvedSrc);
+          markImageLoaded(resolvedSrc);
           setHqReady(true);
         }}
         onError={onError}

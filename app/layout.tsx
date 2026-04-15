@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 
 import RestoreLang from "./components/RestoreLang";
 import ElevenLabsWidget from "./components/ElevenLabsWidget";
+import { ExperienciasModalImageWarmup } from "./experiencias/components/ExperienciasModalImageWarmup";
 
 export default function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={`${cormorant.variable} ${manrope.variable} antialiased bg-brand-stone text-brand-black font-sans selection:bg-brand-gold selection:text-white overflow-x-hidden`}
       >
         <RestoreLang />
+        <ExperienciasModalImageWarmup />
         {children}
         <ElevenLabsWidget />
         <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />

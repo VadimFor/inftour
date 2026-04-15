@@ -1,18 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLangStore } from "../../../lib/langStore";
 import { SaboresProgressiveImage } from "./SaboresProgressiveImage";
+import {
+  RESTAURANT_IMAGES,
+  RESTAURANT_IMAGE_SIZES,
+} from "./restaurantsImages";
 import { restaurantsDocSectionsByLang } from "./restaurantsDocSections";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
 import { useModalBodyScrollLock } from "../useModalBodyScrollLock";
-
-const RESTAURANT_IMAGES = [
-  "/sabores/pictures/Restaurantes 1.jpeg",
-  "/sabores/pictures/Restaurantes 2.jpg",
-  "/sabores/pictures/Restaurantes 3.png",
-] as const;
 
 type RestaurantsModalProps = {
   isOpen: boolean;
@@ -98,12 +97,12 @@ export default function RestaurantsModal({
 
         <RestaurantsContent isModal onClose={onClose} />
         <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-          <a
+          <Link
             href="/experiencias/restaurantes"
             className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
             onClick={onClose}
@@ -125,13 +124,6 @@ export function RestaurantsContent({
   const t = useLangStore((s) => s.t);
   const lang = useLangStore((s) => s.lang);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    RESTAURANT_IMAGES.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
       open?: () => void;
@@ -241,7 +233,7 @@ export function RestaurantsContent({
                       onError={() =>
                         setFailedImages((prev) => new Set(prev).add(index))
                       }
-                      sizes="(max-width: 640px) 100vw, (max-width: 896px) calc(100vw - 4rem), 800px"
+                      sizes={RESTAURANT_IMAGE_SIZES}
                     />
                   </div>
                 </div>

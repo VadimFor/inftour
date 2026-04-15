@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
@@ -142,13 +142,6 @@ export function HorizontesMarinosContent({
   onClose,
 }: HorizontesMarinosContentProps) {
   const t = useLangStore((s) => s.t);
-
-  useEffect(() => {
-    [playas1, playas2, playas3, playas4, horizontes1, horizontes2, horizontes3, horizontes4].forEach((image) => {
-      const img = new Image();
-      img.src = image.src;
-    });
-  }, []);
 
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
@@ -101,7 +101,6 @@ export function FeriaContent({
   onClose,
 }: FeriaContentProps) {
   const t = useLangStore((s) => s.t);
-  useEffect(() => { const img = new Image(); img.src = feria1.src; }, []);
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector(
       "elevenlabs-convai",

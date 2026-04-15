@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
@@ -114,13 +114,6 @@ export function SalinasContent({
   onClose,
 }: SalinasContentProps) {
   const t = useLangStore((s) => s.t);
-
-  useEffect(() => {
-    [salinas1, salinas2, salinas3, salinas4].forEach((image) => {
-      const img = new Image();
-      img.src = image.src;
-    });
-  }, []);
 
   const openAIWidget = useCallback(() => {
     const widget = document.querySelector("elevenlabs-convai") as HTMLElement & {
