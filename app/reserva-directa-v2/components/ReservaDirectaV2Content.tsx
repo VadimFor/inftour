@@ -39,6 +39,103 @@ const FEAT_LABELS: Record<string, string> = {
   piscina_compartida: "Piscina compart.",
 };
 
+function AmenityIcon({ feature }: { feature: string }) {
+  const commonProps = {
+    width: 12,
+    height: 12,
+    viewBox: "0 0 16 16",
+    fill: "none",
+    "aria-hidden": "true" as const,
+  };
+
+  switch (feature) {
+    case "wifi":
+      return (
+        <svg {...commonProps}>
+          <path d="M2.5 6.5A8 8 0 0 1 13.5 6.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M4.75 9A5 5 0 0 1 11.25 9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M7 11.5a2 2 0 0 1 2 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <circle cx="8" cy="13" r="1" fill="currentColor" />
+        </svg>
+      );
+    case "ac":
+    case "aire_acondicionado_individual":
+      return (
+        <svg {...commonProps}>
+          <path d="M8 2.5v11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M4.5 4.5 11.5 11.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M11.5 4.5 4.5 11.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+    case "tv":
+    case "tv_pantalla_plana":
+      return (
+        <svg {...commonProps}>
+          <rect x="2.5" y="3" width="11" height="7.5" rx="1.2" stroke="currentColor" strokeWidth="1.3" />
+          <path d="M6.5 13h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+    case "parking_pago_solicitud":
+      return (
+        <svg {...commonProps}>
+          <path d="M5 13V3h3.5a2.5 2.5 0 1 1 0 5H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "lavadora":
+    case "lavavajillas":
+      return (
+        <svg {...commonProps}>
+          <rect x="3" y="2.5" width="10" height="11" rx="1.3" stroke="currentColor" strokeWidth="1.3" />
+          <circle cx="8" cy="8.5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+          <circle cx="5.2" cy="4.7" r=".6" fill="currentColor" />
+          <circle cx="7.2" cy="4.7" r=".6" fill="currentColor" />
+        </svg>
+      );
+    case "ascensor":
+      return (
+        <svg {...commonProps}>
+          <rect x="4" y="2.5" width="8" height="11" rx="1.3" stroke="currentColor" strokeWidth="1.3" />
+          <path d="M8 5V11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="m6.5 6.5 1.5-1.5 1.5 1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="m6.5 9.5 1.5 1.5 1.5-1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "vistas":
+    case "vistas_ciudad":
+      return (
+        <svg {...commonProps}>
+          <path d="M2.5 8s2-3 5.5-3 5.5 3 5.5 3-2 3-5.5 3-5.5-3-5.5-3Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+          <circle cx="8" cy="8" r="1.6" stroke="currentColor" strokeWidth="1.3" />
+        </svg>
+      );
+    case "playa":
+    case "cerca_mar":
+      return (
+        <svg {...commonProps}>
+          <path d="M2.5 10.5c1 .8 2 .8 3 0s2-.8 3 0 2 .8 3 0 2-.8 2.5-.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M5 7.5c.7-.8 1.4-1.2 2.2-1.2S8.8 6.7 9.5 7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+    case "piscina":
+    case "piscina_compartida":
+      return (
+        <svg {...commonProps}>
+          <path d="M2.5 11c1 .7 2 .7 3 0s2-.7 3 0 2 .7 3 0 2-.7 2.5-.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M5 10V4.5a1 1 0 0 1 2 0V10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M5 6h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...commonProps}>
+          <circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.3" />
+          <path d="M8 5.5v5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M5.5 8h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      );
+  }
+}
+
 const TOP_FEATS = [
   "wifi",
   "ac",
@@ -235,8 +332,7 @@ function CardCarousel({
 }) {
   const [idx, setIdx] = useState(0);
   const gallery = (images ?? [])
-    .filter((img) => Boolean(img.SMALL))
-    .slice(0, 5);
+    .filter((img) => Boolean(img.SMALL));
 
   if (!gallery.length) return <div className="w-full h-full bg-gray-100" />;
   const safeIdx = idx % gallery.length;
@@ -582,7 +678,7 @@ function PropertyCard({
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      justifyContent: "center",
+                      gap: "6px",
                       minWidth: index === 5 ? "38px" : "64px",
                       height: "28px",
                       padding: "4px 10px",
@@ -591,6 +687,7 @@ function PropertyCard({
                       color: "#555",
                     }}
                   >
+                    <span className="block h-3 w-3 rounded-full bg-[#ece7d8]" />
                     <span className="block h-3 w-8 animate-pulse rounded-full bg-[#ece7d8]" />
                   </span>
                 ))
@@ -598,6 +695,9 @@ function PropertyCard({
                   <span
                     key={f}
                     style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
                       fontSize: "12px",
                       padding: "4px 10px",
                       border: "1px solid #ddd",
@@ -605,12 +705,16 @@ function PropertyCard({
                       color: "#555",
                     }}
                   >
+                    <AmenityIcon feature={f} />
                     {FEAT_LABELS[f]}
                   </span>
                 ))}
             {!showStatsLoading && feats.length > 6 && (
               <span
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   fontSize: "12px",
                   padding: "4px 10px",
                   border: "1px solid #ddd",
