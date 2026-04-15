@@ -1,9 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLangStore } from "@/app/lib/langStore";
+import type { Lang } from "@/app/lib/langStore";
 
 const API = "/api/avaibook";
-const BOOK = "https://inftour.bookonline.pro/es/property";
+const BOOK = "https://inftour.bookonline.pro";
+const BOOK_LANG_TO_PATH: Record<Lang, string> = {
+  eng: "en",
+  esp: "es",
+  ru: "ru",
+  fr: "fr",
+  it: "it",
+  de: "de",
+  uk: "uk",
+  pl: "pl",
+};
 
 const FEAT_LABELS: Record<string, string> = {
   wifi: "WiFi",
@@ -152,6 +164,49 @@ const TOP_FEATS = [
   "lavavajillas",
 ];
 
+const modalTranslations = {
+  visitActualPage: {
+    eng: "Visit page",
+    esp: "Visitar pagina",
+    ru: "Открыть страницу",
+    fr: "Voir la page",
+    it: "Visita pagina",
+    de: "Seite offnen",
+    uk: "Вiдкрити сторiнку",
+    pl: "Otworz strone",
+  },
+  closeModal: {
+    eng: "Close",
+    esp: "Cerrar",
+    ru: "Закрыть",
+    fr: "Fermer",
+    it: "Chiudi",
+    de: "Schliessen",
+    uk: "Закрити",
+    pl: "Zamknij",
+  },
+  bookingProperty: {
+    eng: "Booking property",
+    esp: "Reserva de propiedad",
+    ru: "Бронирование объекта",
+    fr: "Reservation du logement",
+    it: "Prenotazione proprieta",
+    de: "Objektbuchung",
+    uk: "Бронювання об'єкта",
+    pl: "Rezerwacja obiektu",
+  },
+  loadingPage: {
+    eng: "Loading page...",
+    esp: "Cargando pagina...",
+    ru: "Загрузка страницы...",
+    fr: "Chargement de la page...",
+    it: "Caricamento pagina...",
+    de: "Seite wird geladen...",
+    uk: "Завантаження сторiнки...",
+    pl: "Ladowanie strony...",
+  },
+} as const;
+
 // Raw shape from AvaiBook API
 interface RawProperty {
   id: number;
@@ -292,14 +347,21 @@ function wait(ms: number): Promise<void> {
 
 function buildBookingUrl(
   propertyId: number,
-  options?: { guests?: string; startDate?: string; endDate?: string },
+  options?: {
+    lang?: Lang;
+    guests?: string;
+    startDate?: string;
+    endDate?: string;
+  },
 ): string {
   const params = new URLSearchParams();
   if (options?.guests) params.set("guests", options.guests);
   if (options?.startDate) params.set("startDate", options.startDate);
   if (options?.endDate) params.set("endDate", options.endDate);
   const query = params.toString();
-  return query ? `${BOOK}/${propertyId}?${query}` : `${BOOK}/${propertyId}`;
+  const bookLang = BOOK_LANG_TO_PATH[options?.lang ?? "esp"] ?? "es";
+  const baseUrl = `${BOOK}/${bookLang}/property/${propertyId}`;
+  return query ? `${baseUrl}?${query}` : baseUrl;
 }
 
 async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
@@ -437,10 +499,12 @@ function PropertyCard({
   prop,
   bookingUrl,
   onRetry,
+  onOpen,
 }: {
   prop: Property;
   bookingUrl: string;
   onRetry: (id: number) => void;
+  onOpen: (url: string) => void;
 }) {
   const feats = getTopFeats(prop.features);
   const title = prop.name || `Alojamiento #${prop.id}`;
@@ -460,13 +524,13 @@ function PropertyCard({
 
   return (
     <div
-      onClick={() => window.open(bookingUrl, "_blank", "noopener,noreferrer")}
+      onClick={() => onOpen(bookingUrl)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          window.open(bookingUrl, "_blank", "noopener,noreferrer");
+          onOpen(bookingUrl);
         }
       }}
       className="group bg-white overflow-hidden border border-[#e0e0e0] cursor-pointer transition-all duration-200 hover:-translate-y-1 focus-visible:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c2a457] focus-visible:ring-offset-2"
@@ -735,6 +799,7 @@ function PropertyCard({
 // ─── GalleryModal ─────────────────────────────────────────────────────────────
 
 export default function ReservaDirectaV2Content() {
+  const lang = useLangStore((s) => s.lang);
   const [properties, setProperties] = useState<Property[]>(() =>
     createInitialGridPlaceholders(9),
   );
@@ -743,6 +808,8 @@ export default function ReservaDirectaV2Content() {
   const [guestFilter, setGuestFilter] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(null);
+  const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -806,6 +873,10 @@ export default function ReservaDirectaV2Content() {
   const loadingDetails = properties.some((prop) => !prop.name);
   const showingInitialPlaceholders =
     loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
+  const visitActualPageLabel = modalTranslations.visitActualPage[lang];
+  const closeModalLabel = modalTranslations.closeModal[lang];
+  const bookingPropertyLabel = modalTranslations.bookingProperty[lang];
+  const loadingPageLabel = modalTranslations.loadingPage[lang];
 
   function retryProperty(id: number) {
     void (async () => {
@@ -820,6 +891,27 @@ export default function ReservaDirectaV2Content() {
       }
     })();
   }
+
+  useEffect(() => {
+    if (!selectedBookingUrl) return;
+
+    setIsBookingModalLoading(true);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedBookingUrl(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selectedBookingUrl]);
 
   return (
     <div className="min-h-screen bg-[#efefef]">
@@ -916,6 +1008,7 @@ export default function ReservaDirectaV2Content() {
                     key={prop.id}
                     prop={prop}
                     onRetry={retryProperty}
+                    onOpen={setSelectedBookingUrl}
                     bookingUrl={buildBookingUrl(prop.id, {
                       guests: guestFilter !== "0" ? guestFilter : undefined,
                     })}
@@ -926,6 +1019,49 @@ export default function ReservaDirectaV2Content() {
           )}
         </div>
       </div>
+      {selectedBookingUrl && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 p-3 sm:p-5"
+          onClick={() => setSelectedBookingUrl(null)}
+        >
+          <div
+            className="relative mx-auto flex h-full w-full max-w-[1280px] flex-col overflow-hidden rounded-[20px] bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isBookingModalLoading && (
+              <div className="absolute inset-x-0 top-0 bottom-[57px] z-10 flex items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-3 text-[#6b6b6b]">
+                  <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
+                  <span className="text-sm font-medium">{loadingPageLabel}</span>
+                </div>
+              </div>
+            )}
+            <iframe
+              src={selectedBookingUrl}
+              title={bookingPropertyLabel}
+              className="min-h-0 flex-1 border-0"
+              onLoad={() => setIsBookingModalLoading(false)}
+            />
+            <div className="flex items-center justify-between gap-3 border-t border-[#e7e7e7] bg-white px-4 py-3">
+              <a
+                href={selectedBookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full border border-[#d7d7d7] px-4 py-2 text-sm font-medium text-[#444] transition-colors hover:bg-[#f6f6f6]"
+              >
+                {visitActualPageLabel}
+              </a>
+              <button
+                type="button"
+                onClick={() => setSelectedBookingUrl(null)}
+                className="inline-flex items-center rounded-full bg-[#2d2d2d] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              >
+                {closeModalLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
