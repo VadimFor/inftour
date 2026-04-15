@@ -121,6 +121,26 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
   };
 }
 
+function createInitialGridPlaceholders(count: number): Property[] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: -(index + 1),
+    name: `Propiedad ${index + 1}`,
+    type: "",
+    city: "",
+    region: "",
+    capacity: 0,
+    bedrooms: 0,
+    beds: 0,
+    bathrooms: 0,
+    sqm: 0,
+    features: {},
+    images: [],
+    introduction: "",
+    description: "",
+    license: "",
+  }));
+}
+
 function normalize(a: RawProperty): Property {
   return {
     id: a.id,
@@ -152,7 +172,7 @@ function getTopFeats(
     (k) =>
       features[k] === "1" ||
       features[k] === true ||
-    (typeof features[k] === "number" && (features[k] as number) > 0),
+      (typeof features[k] === "number" && (features[k] as number) > 0),
   );
 }
 
@@ -192,9 +212,12 @@ async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
       return await apiFetch(path);
     } catch (err) {
       lastError = err;
-      const status = err && typeof err === "object" ? (err as { status?: number }).status : undefined;
+      const status =
+        err && typeof err === "object"
+          ? (err as { status?: number }).status
+          : undefined;
       if (attempt < retries) {
-        await wait(status === 429 ? 1000 * (attempt + 1) : 300 * (attempt + 1));
+        await wait(status === 429 ? 2000 : 300 * (attempt + 1));
       }
     }
   }
@@ -273,11 +296,41 @@ function CardCarousel({
   );
 }
 
-function StatItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+function StatItem({
+  icon,
+  text,
+  loading = false,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  loading?: boolean;
+}) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", color: "#555" }}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        fontSize: "12px",
+        color: "#555",
+      }}
+    >
       {icon}
-      {text}
+      {loading ? (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "18px",
+            height: "18px",
+          }}
+        >
+          <span className="block h-3 w-3 animate-spin rounded-full border border-[#c2a457]/40 border-t-[#c2a457]" />
+        </span>
+      ) : (
+        text
+      )}
     </span>
   );
 }
@@ -287,15 +340,27 @@ function StatItem({ icon, text }: { icon: React.ReactNode; text: string }) {
 function PropertyCard({
   prop,
   bookingUrl,
+  onRetry,
 }: {
   prop: Property;
   bookingUrl: string;
+  onRetry: (id: number) => void;
 }) {
   const feats = getTopFeats(prop.features);
   const title = prop.name || `Alojamiento #${prop.id}`;
-  const location = prop.city && prop.region
-    ? `${prop.city} (${prop.region})`
-    : "Cargando datos...";
+  const location =
+    prop.city && prop.region
+      ? `${prop.city} (${prop.region})`
+      : "Cargando datos...";
+  const isPending =
+    !prop.images.length &&
+    !prop.capacity &&
+    !prop.bedrooms &&
+    !prop.beds &&
+    !prop.bathrooms &&
+    !prop.sqm;
+  const canRetry = isPending && prop.id > 0;
+  const showStatsLoading = isPending;
 
   return (
     <div
@@ -316,84 +381,242 @@ function PropertyCard({
         style={{ height: "180px" }}
       >
         <CardCarousel images={prop.images} name={prop.name} />
+        {canRetry && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRetry(prop.id);
+            }}
+            className="absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-2 rounded-full bg-red-600/80 px-5 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-sm hover:bg-red-600/90 active:bg-red-700/90"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M3 8a5 5 0 1 1 1.46 3.54"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M3 5v3h3"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Reintentar
+          </button>
+        )}
       </div>
-      <div style={{ padding: "14px 16px 16px" }}>
-        <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111", margin: "0 0 2px", lineHeight: 1.25 }}>
+      <div
+        style={{
+          padding: "14px 16px 16px",
+          minHeight: "168px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "16px",
+            fontWeight: 600,
+            color: "#111",
+            margin: "0 0 2px",
+            lineHeight: 1.25,
+          }}
+        >
           {title}
         </h3>
         <p style={{ fontSize: "13px", color: "#777", margin: "0 0 12px" }}>
           {location}
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", fontSize: "12px", color: "#555", marginBottom: "12px", alignItems: "center" }}>
-          {prop.capacity > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "14px",
+            fontSize: "12px",
+            color: "#555",
+            marginBottom: "12px",
+            alignItems: "center",
+            minHeight: "18px",
+          }}
+        >
+          {(showStatsLoading || prop.capacity > 0) && (
             <StatItem
               text={`${prop.capacity}`}
+              loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  <circle
+                    cx="8"
+                    cy="5"
+                    r="3"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               }
             />
           )}
-          {prop.bedrooms > 0 && (
+          {(showStatsLoading || prop.bedrooms > 0) && (
             <StatItem
               text={`${prop.bedrooms} hab.`}
+              loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="4" width="12" height="9" rx="1" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke="currentColor" strokeWidth="1.2" />
+                  <rect
+                    x="2"
+                    y="4"
+                    width="12"
+                    height="9"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
                 </svg>
               }
             />
           )}
-          {prop.beds > 0 && (
+          {(showStatsLoading || prop.beds > 0) && (
             <StatItem
               text={`${prop.beds} camas`}
+              loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="6" width="10" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M4 6V4a2 2 0 014 0v2" stroke="currentColor" strokeWidth="1.2" />
+                  <rect
+                    x="2"
+                    y="6"
+                    width="10"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M4 6V4a2 2 0 014 0v2"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
                 </svg>
               }
             />
           )}
-          {prop.bathrooms > 0 && (
+          {(showStatsLoading || prop.bathrooms > 0) && (
             <StatItem
               text={`${prop.bathrooms} baños`}
+              loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="12" height="12" rx="6" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M8 6v4M6 10h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  <rect
+                    x="2"
+                    y="2"
+                    width="12"
+                    height="12"
+                    rx="6"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M8 6v4M6 10h4"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               }
             />
           )}
-          {prop.sqm > 0 && (
+          {(showStatsLoading || prop.sqm > 0) && (
             <StatItem
               text={`${prop.sqm} m²`}
+              loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M2 6h12M6 2v12" stroke="currentColor" strokeWidth="1.2" />
+                  <rect
+                    x="2"
+                    y="2"
+                    width="12"
+                    height="12"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M2 6h12M6 2v12"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
                 </svg>
               }
             />
           )}
         </div>
-        {feats.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {feats.slice(0, 6).map((f) => (
+        {(showStatsLoading || feats.length > 0) && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "6px",
+              minHeight: "62px",
+              alignContent: "flex-start",
+            }}
+          >
+            {showStatsLoading
+              ? Array.from({ length: 6 }).map((_, index) => (
+                  <span
+                    key={`feat-placeholder-${index}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: index === 5 ? "38px" : "64px",
+                      height: "28px",
+                      padding: "4px 10px",
+                      border: "1px solid #ddd",
+                      borderRadius: "20px",
+                      color: "#555",
+                    }}
+                  >
+                    <span className="block h-3 w-8 animate-pulse rounded-full bg-[#ece7d8]" />
+                  </span>
+                ))
+              : feats.slice(0, 6).map((f) => (
+                  <span
+                    key={f}
+                    style={{
+                      fontSize: "12px",
+                      padding: "4px 10px",
+                      border: "1px solid #ddd",
+                      borderRadius: "20px",
+                      color: "#555",
+                    }}
+                  >
+                    {FEAT_LABELS[f]}
+                  </span>
+                ))}
+            {!showStatsLoading && feats.length > 6 && (
               <span
-                key={f}
-                style={{ fontSize: "12px", padding: "4px 10px", border: "1px solid #ddd", borderRadius: "20px", color: "#555" }}
-              >
-                {FEAT_LABELS[f]}
-              </span>
-            ))}
-            {feats.length > 6 && (
-              <span
-                style={{ fontSize: "12px", padding: "4px 10px", border: "1px solid #ddd", borderRadius: "20px", color: "#555" }}
+                style={{
+                  fontSize: "12px",
+                  padding: "4px 10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "20px",
+                  color: "#555",
+                }}
               >
                 +{feats.length - 6}
               </span>
@@ -408,7 +631,9 @@ function PropertyCard({
 // ─── GalleryModal ─────────────────────────────────────────────────────────────
 
 export default function ReservaDirectaV2Content() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<Property[]>(() =>
+    createInitialGridPlaceholders(9),
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [guestFilter, setGuestFilter] = useState("0");
@@ -420,28 +645,39 @@ export default function ReservaDirectaV2Content() {
 
     async function load() {
       try {
-        const list = (await apiFetchWithRetry("/accommodations/")) as AccommodationListItem[];
+        const list = (await apiFetchWithRetry(
+          "/accommodations/",
+        )) as AccommodationListItem[];
         if (cancelled) return;
 
-        const placeholders = list.map((item) => createPlaceholderProperty(item));
+        const placeholders = list.map((item) =>
+          createPlaceholderProperty(item),
+        );
         setProperties(placeholders);
         setLoading(false);
 
-        for (const item of list) {
+        for (let i = 0; i < list.length; i += 3) {
           if (cancelled) return;
-          try {
-            const detail = await apiFetchWithRetry(
-              `/accommodations/${item.id}/`,
+
+          const chunk = list.slice(i, i + 3);
+          const results = await Promise.allSettled(
+            chunk.map((item) =>
+              apiFetchWithRetry(`/accommodations/${item.id}/`),
+            ),
+          );
+
+          if (cancelled) return;
+
+          results.forEach((result) => {
+            if (result.status !== "fulfilled" || !result.value) return;
+            const normalized = normalize(result.value as RawProperty);
+            setProperties((prev) =>
+              prev.map((prop) =>
+                prop.id === normalized.id ? normalized : prop,
+              ),
             );
-            const normalized = normalize(detail as RawProperty);
-            if (!cancelled) {
-              setProperties((prev) =>
-                prev.map((prop) => (prop.id === normalized.id ? normalized : prop)),
-              );
-            }
-          } catch {
-            // Keep the placeholder if the upstream still rate-limits it.
-          }
+          });
+
           if (!cancelled) {
             await wait(250);
           }
@@ -464,84 +700,31 @@ export default function ReservaDirectaV2Content() {
     return true;
   });
   const loadingDetails = properties.some((prop) => !prop.name);
+  const showingInitialPlaceholders =
+    loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
+
+  function retryProperty(id: number) {
+    void (async () => {
+      try {
+        const detail = await apiFetchWithRetry(`/accommodations/${id}/`);
+        const normalized = normalize(detail as RawProperty);
+        setProperties((prev) =>
+          prev.map((prop) => (prop.id === normalized.id ? normalized : prop)),
+        );
+      } catch {
+        // Leave the placeholder and allow another manual retry.
+      }
+    })();
+  }
 
   return (
     <div className="min-h-screen bg-[#efefef]">
-      <style jsx>{`
-        .search-row {
-          display: grid;
-          grid-template-columns: 1fr;
-          background: #fff;
-          border: 1px solid #d9d9d9;
-          overflow: hidden;
-          min-height: 50px;
-        }
-        .search-cell {
-          padding: 8px 12px;
-          border-bottom: 1px solid #ececec;
-        }
-        .search-label {
-          display: block;
-          font-size: 8px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: #8e8e8e;
-          margin-bottom: 4px;
-        }
-        .search-control {
-          width: 100%;
-          border: 0;
-          outline: 0;
-          background: transparent;
-          color: #2d2d2d;
-          font-size: 15px;
-          font-weight: 500;
-        }
-        .search-btn {
-          border: 0;
-          background: #c2a457;
-          color: #fff;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          min-height: 50px;
-        }
-        @media (min-width: 640px) {
-          .search-row {
-            grid-template-columns: 1fr 1fr;
-          }
-          .search-cell {
-            border-right: 1px solid #ececec;
-          }
-          .search-cell:nth-child(2n) {
-            border-right: 0;
-          }
-        }
-        @media (min-width: 960px) {
-          .search-row {
-            grid-template-columns: 1fr 1fr 1fr 96px;
-          }
-          .search-cell {
-            border-bottom: 0;
-          }
-          .search-cell:nth-child(1),
-          .search-cell:nth-child(2),
-          .search-cell:nth-child(3) {
-            border-right: 1px solid #ececec;
-          }
-          .search-cell:nth-child(2n) {
-            border-right: 1px solid #ececec;
-          }
-        }
-      `}</style>
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
         <div className="pt-3 pb-2">
-          <div className="max-w-[1240px] mx-auto search-row">
-            <div className="search-cell">
-              <label className="search-label">Llegada</label>
+          <div className="mx-auto grid max-w-[1240px] grid-cols-1 overflow-hidden border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
+            <div className="border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0">
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Llegada</label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
@@ -549,15 +732,15 @@ export default function ReservaDirectaV2Content() {
                   placeholder="dd/mm/aaaa"
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
-                  className="search-control placeholder:text-[#2d2d2d]"
+                  className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
                   ◴
                 </span>
               </div>
             </div>
-            <div className="search-cell">
-              <label className="search-label">Salida</label>
+            <div className="border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r">
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Salida</label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
@@ -565,19 +748,19 @@ export default function ReservaDirectaV2Content() {
                   placeholder="dd/mm/aaaa"
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
-                  className="search-control placeholder:text-[#2d2d2d]"
+                  className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
                   ◴
                 </span>
               </div>
             </div>
-            <div className="search-cell">
-              <label className="search-label">Huéspedes</label>
+            <div className="border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0">
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Huéspedes</label>
               <select
                 value={guestFilter}
                 onChange={(e) => setGuestFilter(e.target.value)}
-                className="search-control"
+                className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0"
               >
                 <option value="0">2 huéspedes</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
@@ -587,7 +770,7 @@ export default function ReservaDirectaV2Content() {
                 ))}
               </select>
             </div>
-            <button className="search-btn hover:bg-[#af944f] transition-colors">
+            <button className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f]">
               Buscar
             </button>
           </div>
@@ -609,8 +792,12 @@ export default function ReservaDirectaV2Content() {
           {filtered.length > 0 && (
             <>
               <p className="text-[22px] text-[#5f5f5f] mb-3 font-light">
-                <strong className="text-[#2d2d2d] font-bold">
-                  {filtered.length}
+                <strong className="inline-flex min-w-[28px] items-center justify-center text-[#2d2d2d] font-bold">
+                  {showingInitialPlaceholders ? (
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
+                  ) : (
+                    filtered.length
+                  )}
                 </strong>{" "}
                 alojamientos en Calpe
                 {(loading || loadingDetails) && (
@@ -624,6 +811,7 @@ export default function ReservaDirectaV2Content() {
                   <PropertyCard
                     key={prop.id}
                     prop={prop}
+                    onRetry={retryProperty}
                     bookingUrl={buildBookingUrl(prop.id, {
                       guests: guestFilter !== "0" ? guestFilter : undefined,
                     })}
@@ -634,7 +822,6 @@ export default function ReservaDirectaV2Content() {
           )}
         </div>
       </div>
-
     </div>
   );
 }
