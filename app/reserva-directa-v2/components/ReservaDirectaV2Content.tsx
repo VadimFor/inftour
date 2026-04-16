@@ -527,6 +527,10 @@ function PropertyCard({
       onClick={() => onOpen(bookingUrl)}
       role="button"
       tabIndex={0}
+      onFocus={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (canRetry) onRetry(prop.id);
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

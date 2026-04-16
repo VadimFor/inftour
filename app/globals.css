@@ -78,3 +78,135 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), sans-serif;
 }
+
+/* ElevenLabs booking cards */
+#el-booking-links {
+  position: fixed;
+  right: 420px;
+  bottom: 20px;
+  z-index: 10000;
+  display: flex;
+  width: 300px;
+  max-width: 300px;
+  max-height: calc(100vh - 40px);
+  flex-direction: column-reverse;
+  gap: 8px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  pointer-events: none;
+}
+
+#el-booking-links::-webkit-scrollbar {
+  width: 4px;
+}
+
+#el-booking-links::-webkit-scrollbar-thumb {
+  background: #c5a85f;
+  border-radius: 2px;
+}
+
+.el-bk-card {
+  position: relative;
+  display: block;
+  padding: 14px 16px;
+  border: 1.5px solid #c5a85f;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  color: #1a1a1a;
+  font-family: var(--font-manrope), -apple-system, sans-serif;
+  text-decoration: none;
+  pointer-events: all;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.25s;
+  animation: el-slide-in 0.25s ease-out both;
+}
+
+.el-bk-card:hover {
+  transform: translateY(-2px);
+  border-color: #a8903f;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
+}
+
+@keyframes el-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.el-bk-name {
+  margin-bottom: 6px;
+  padding-right: 18px;
+  color: #1a1a1a;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.el-bk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.el-bk-price {
+  color: #c5a85f;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.el-bk-btn {
+  padding: 5px 13px;
+  border-radius: 4px;
+  background: #c5a85f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.el-bk-card:hover .el-bk-btn {
+  background: #a8903f;
+}
+
+.el-bk-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.el-bk-close:hover {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  #el-booking-links {
+    right: 12px;
+    bottom: 90px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+    max-height: 40vh;
+    flex-direction: column;
+  }
+}
