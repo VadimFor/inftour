@@ -11,7 +11,7 @@ type FooterRaicvModalProps = {
 };
 
 export default function FooterRaicvModal({ isOpen, onClose }: FooterRaicvModalProps) {
-  const { t } = useLangStore(useShallow((s) => ({ t: s.t })));
+  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -36,6 +36,7 @@ export default function FooterRaicvModal({ isOpen, onClose }: FooterRaicvModalPr
   return createPortal(
     <div
       className="fixed inset-0 z-9999 overflow-y-auto bg-black/60 backdrop-blur-sm"
+      data-lang={lang}
       role="dialog"
       aria-modal="true"
       aria-labelledby="footer-raicv-modal-title"

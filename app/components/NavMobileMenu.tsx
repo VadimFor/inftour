@@ -15,7 +15,10 @@ export default function NavMobileMenu() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [panelTopPx, setPanelTopPx] = useState(0);
-  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
+  const { lang, t } = useLangStore(
+    useShallow((s) => ({ lang: s.lang, t: s.t })),
+  );
+  const aiLabel = lang === "esp" ? "Asistente IA" : t("aiAgent");
 
   useEffect(() => {
     const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`);
@@ -50,20 +53,20 @@ export default function NavMobileMenu() {
   }, [open]);
 
   return (
-    <div className="lg:hidden shrink-0">
+    <div className="shrink-0 lg:hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="p-2 rounded-lg text-gray-600 hover:text-brand-black hover:bg-gray-100 transition"
+        className="rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-brand-black"
         aria-expanded={open}
         aria-label={open ? t("closeMenu") : t("openMenu")}
       >
         {open ? (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         )}
@@ -76,19 +79,21 @@ export default function NavMobileMenu() {
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed left-0 right-0 z-50 py-4 px-6 bg-gradient-to-b from-gray-50 to-brand-stone border-b border-gray-200 shadow-lg"
+            className="fixed left-0 right-0 z-50 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-brand-stone px-6 py-4 shadow-lg"
             style={{ top: panelTopPx > 0 ? `${panelTopPx}px` : "5rem" }}
           >
             <ul className="flex flex-col items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">
               {navItems.map(({ href, labelKey }) => {
                 const isActive = pathname === href;
                 return (
-                  <li key={href} className="w-full flex justify-center">
+                  <li key={href} className="flex w-full justify-center">
                     <Link
                       href={href}
                       onClick={() => setOpen(false)}
-                      className={`py-3 px-2 rounded-lg hover:text-brand-black hover:bg-white/60 transition relative after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-brand-gold after:transition-all ${
-                        isActive ? "text-brand-black after:w-3/4 after:bottom-0" : "after:w-0 after:bottom-0"
+                      className={`relative rounded-lg px-2 py-3 transition after:absolute after:left-1/2 after:h-0.5 after:-translate-x-1/2 after:bg-brand-gold after:transition-all after:content-[''] hover:bg-white/60 hover:text-brand-black ${
+                        isActive
+                          ? "text-brand-black after:bottom-0 after:w-3/4"
+                          : "after:bottom-0 after:w-0"
                       }`}
                     >
                       {t(labelKey)}
@@ -97,14 +102,15 @@ export default function NavMobileMenu() {
                 );
               })}
             </ul>
-            <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
+            <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
               <div className="flex items-center justify-center gap-4">
                 <Link
                   href="/lobby#ai-guide"
                   onClick={() => setOpen(false)}
-                  className="bg-brand-darkgray text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider hover:bg-gray-600 transition shadow-sm rounded-sm"
+                  className="inline-flex items-center gap-1 whitespace-nowrap rounded-sm bg-brand-darkgray px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-sm transition hover:bg-gray-600"
                 >
-                  AI Asistente →
+                  <span>{aiLabel}</span>
+                  <span aria-hidden>&rarr;</span>
                 </Link>
               </div>
               <div className="flex justify-center">
@@ -113,7 +119,7 @@ export default function NavMobileMenu() {
             </div>
           </div>
         </>,
-        document.body
+        document.body,
       )}
     </div>
   );

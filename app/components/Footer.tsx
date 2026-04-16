@@ -7,7 +7,7 @@ import { useLangStore } from "../lib/langStore";
 import FooterRaicvModal from "./FooterRaicvModal";
 
 export default function Footer() {
-  const { t } = useLangStore(useShallow((s) => ({ t: s.t })));
+  const { lang, t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   const [raicvModalOpen, setRaicvModalOpen] = useState(false);
   return (
     <footer className="bg-brand-footer pt-16 border-t border-gray-200 mt-auto text-gray-800">
@@ -28,6 +28,7 @@ export default function Footer() {
                   onClick={() => setRaicvModalOpen(true)}
                   aria-expanded={raicvModalOpen}
                   aria-haspopup="dialog"
+                  data-lang={lang}
                   className="inline-flex items-center justify-center px-4 py-2.5 text-xs font-semibold rounded-sm bg-brand-darkgray text-white shadow-sm border border-transparent hover:bg-gray-600 hover:border-gray-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-link"
                 >
                   {t("footerRaicvViewInfo")}

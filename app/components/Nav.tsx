@@ -13,30 +13,32 @@ export default function Nav() {
   const { lang, t } = useLangStore(
     useShallow((s) => ({ lang: s.lang, t: s.t })),
   );
+  const aiLabel = lang === "esp" ? "Asistente IA" : t("aiAgent");
+
   return (
     <nav
-      className="sticky top-0 z-50 bg-white border-b border-gray-200 min-w-0"
+      className="sticky top-0 z-50 min-w-0 border-b border-gray-200 bg-white"
       data-lang={lang}
       data-site-nav
     >
-      <div className="container mx-auto px-6 h-20 flex justify-between items-center min-w-0">
-        <Link href="/" className="flex flex-col items-start mt-1 shrink-0">
-          <span className="font-serif text-3xl font-bold tracking-wider text-gray-800 leading-none">
+      <div className="container mx-auto flex h-20 min-w-0 items-center justify-between px-6">
+        <Link href="/" className="mt-1 flex shrink-0 flex-col items-start">
+          <span className="font-serif text-3xl font-bold leading-none tracking-wider text-gray-800">
             INFTOUR
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-gold mt-1">
+          <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-gold">
             {t("calpeCollection")}
           </span>
         </Link>
 
-        <div className="hidden lg:flex flex-1 justify-center items-center gap-6 xl:gap-10 text-xs font-bold uppercase tracking-widest">
+        <div className="hidden flex-1 items-center justify-center gap-6 text-xs font-bold uppercase tracking-widest lg:flex xl:gap-10">
           {navItems.map(({ href, labelKey }) => {
             const isActive = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`transition relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:bg-brand-gold after:transition-all hover:after:w-full hover:text-brand-black ${
+                className={`relative transition after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:bg-brand-gold after:transition-all after:content-[''] hover:text-brand-black hover:after:w-full ${
                   isActive
                     ? "text-brand-black after:w-full"
                     : "text-gray-600 after:w-0"
@@ -49,16 +51,17 @@ export default function Nav() {
           <LanguageSwitcher compact />
           <Link
             href="/lobby#ai-guide"
-            className="bg-brand-darkgray text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider hover:bg-gray-600 transition shadow-sm rounded-sm"
+            className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-sm bg-brand-darkgray px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-sm transition hover:bg-gray-600 xl:px-5"
           >
-            AI Asistente →
+            <span>{aiLabel}</span>
+            <span aria-hidden>&rarr;</span>
           </Link>
         </div>
         <div className="shrink-0">
           <NavMobileMenu />
         </div>
       </div>
-      <div className="h-px w-full bg-gray-300 min-w-0" aria-hidden />
+      <div className="h-px w-full min-w-0 bg-gray-300" aria-hidden />
     </nav>
   );
 }
