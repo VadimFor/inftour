@@ -241,6 +241,7 @@ interface Property {
   introduction: string;
   description: string;
   license: string;
+  loadError?: string | null;
 }
 
 type AccommodationListItem = {
@@ -250,7 +251,11 @@ type AccommodationListItem = {
 };
 
 function getAccommodationListName(item: AccommodationListItem): string {
-  return item.tradeName?.es || item.name || "";
+  return stripInftourSuffix(item.tradeName?.es || item.name || "");
+}
+
+function stripInftourSuffix(name: string): string {
+  return name.replace(/\binftour\b/gi, "").replace(/\s{2,}/g, " ").trim();
 }
 
 function createPlaceholderProperty(item: AccommodationListItem): Property {
@@ -270,6 +275,7 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
     introduction: "",
     description: "",
     license: "",
+    loadError: null,
   };
 }
 
@@ -290,13 +296,14 @@ function createInitialGridPlaceholders(count: number): Property[] {
     introduction: "",
     description: "",
     license: "",
+    loadError: null,
   }));
 }
 
 function normalize(a: RawProperty): Property {
   return {
     id: a.id,
-    name: a.tradeName?.es || a.name || "",
+    name: stripInftourSuffix(a.tradeName?.es || a.name || ""),
     type: a.accommodationType || "",
     city: a.location?.city || "Calp",
     region: a.location?.region || "Alicante",
@@ -314,6 +321,7 @@ function normalize(a: RawProperty): Property {
     introduction: a.introduction?.es || "",
     description: a.description?.es || "",
     license: a.license || "",
+    loadError: null,
   };
 }
 
@@ -519,7 +527,11 @@ function PropertyCard({
     !prop.beds &&
     !prop.bathrooms &&
     !prop.sqm;
-  const canRetry = isPending && prop.id > 0;
+  const canRetry =
+    isPending &&
+    prop.id > 0 &&
+    typeof prop.loadError === "string" &&
+    prop.loadError.includes("429");
   const showStatsLoading = isPending;
 
   return (
@@ -552,9 +564,10 @@ function PropertyCard({
               e.stopPropagation();
               onRetry(prop.id);
             }}
-            className="absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-2 rounded-full bg-red-600/80 px-5 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-sm hover:bg-red-600/90 active:bg-red-700/90"
+            aria-label="Reintentar"
+            className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d97c66]/88 text-white shadow-lg backdrop-blur-sm hover:bg-[#cf6d56]/92 active:bg-[#c86149]/92"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
                 d="M3 8a5 5 0 1 1 1.46 3.54"
                 stroke="currentColor"
@@ -570,7 +583,6 @@ function PropertyCard({
                 strokeLinejoin="round"
               />
             </svg>
-            Reintentar
           </button>
         )}
       </div>
@@ -843,8 +855,22 @@ export default function ReservaDirectaV2Content() {
 
           if (cancelled) return;
 
-          results.forEach((result) => {
-            if (result.status !== "fulfilled" || !result.value) return;
+          results.forEach((result, index) => {
+            if (result.status !== "fulfilled") {
+              const message =
+                result.reason instanceof Error
+                  ? result.reason.message
+                  : "Error cargando alojamiento";
+              const failedId = chunk[index]?.id;
+              if (!failedId) return;
+              setProperties((prev) =>
+                prev.map((prop) =>
+                  prop.id === failedId ? { ...prop, loadError: message } : prop,
+                ),
+              );
+              return;
+            }
+            if (!result.value) return;
             const normalized = normalize(result.value as RawProperty);
             setProperties((prev) =>
               prev.map((prop) =>
@@ -890,8 +916,14 @@ export default function ReservaDirectaV2Content() {
         setProperties((prev) =>
           prev.map((prop) => (prop.id === normalized.id ? normalized : prop)),
         );
-      } catch {
-        // Leave the placeholder and allow another manual retry.
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Error cargando alojamiento";
+        setProperties((prev) =>
+          prev.map((prop) =>
+            prop.id === id ? { ...prop, loadError: message } : prop,
+          ),
+        );
       }
     })();
   }
