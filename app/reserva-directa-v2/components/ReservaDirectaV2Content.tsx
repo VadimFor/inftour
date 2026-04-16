@@ -463,6 +463,8 @@ const bookingResultsTranslations = {
   },
 } as const;
 
+const LOAD_ERROR_FALLBACK_MESSAGE = "Error loading stay";
+
 const propertyCardTranslations = {
   propertyFallback: {
     eng: "Property",
@@ -1084,7 +1086,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.sqm > 0) && (
             <StatItem
-              text={`${prop.sqm} mÂ²`}
+              text={`${prop.sqm} m²`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -1209,7 +1211,7 @@ export default function ReservaDirectaV2Content() {
     createInitialGridPlaceholders(9),
   );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [guestFilter, setGuestFilter] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -1249,7 +1251,7 @@ export default function ReservaDirectaV2Content() {
               const message =
                 result.reason instanceof Error
                   ? result.reason.message
-                  : loadErrorLabel;
+                  : LOAD_ERROR_FALLBACK_MESSAGE;
               const failedId = chunk[index]?.id;
               if (!failedId) return;
               setProperties((prev) =>
@@ -1273,7 +1275,7 @@ export default function ReservaDirectaV2Content() {
           }
         }
       } catch {
-        if (!cancelled) setError(loadErrorLabel);
+        if (!cancelled) setError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -1283,7 +1285,7 @@ export default function ReservaDirectaV2Content() {
     return () => {
       cancelled = true;
     };
-  }, [loadErrorLabel]);
+  }, []);
 
   const filtered = properties.filter((p) => {
     if (guestFilter !== "0" && p.capacity < parseInt(guestFilter)) return false;
@@ -1410,7 +1412,7 @@ export default function ReservaDirectaV2Content() {
             </div>
           )}
           {error && (
-            <p className="text-center text-sm text-red-500 py-20">{error}</p>
+            <p className="text-center text-sm text-red-500 py-20">{loadErrorLabel}</p>
           )}
           {filtered.length > 0 && (
             <>

@@ -1,8 +1,98 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLangStore } from "@/app/lib/langStore";
+import type { Lang } from "@/app/lib/langStore";
 
 const EL_AGENT_ID = "agent_7901kn00tj76ef0b6t7e7ebv8s22";
+
+const WIDGET_LANG_TO_CODE: Record<Lang, string> = {
+  eng: "en",
+  esp: "es",
+  ru: "ru",
+  fr: "fr",
+  it: "it",
+  de: "de",
+  uk: "uk",
+  pl: "pl",
+};
+
+const widgetTextTranslations: Record<
+  Lang,
+  {
+    actionText: string;
+    startCallText: string;
+    endCallText: string;
+    listeningText: string;
+    speakingText: string;
+    bookingLinksAriaLabel: string;
+  }
+> = {
+  eng: {
+    actionText: "Need help?",
+    startCallText: "Start a call",
+    endCallText: "End call",
+    listeningText: "Listening...",
+    speakingText: "Assistant speaking",
+    bookingLinksAriaLabel: "Booking links",
+  },
+  esp: {
+    actionText: "Necesitas ayuda?",
+    startCallText: "Iniciar llamada",
+    endCallText: "Finalizar llamada",
+    listeningText: "Escuchando...",
+    speakingText: "Asistente hablando",
+    bookingLinksAriaLabel: "Enlaces de reserva",
+  },
+  ru: {
+    actionText: "Нужна помощь?",
+    startCallText: "Начать звонок",
+    endCallText: "Завершить звонок",
+    listeningText: "Слушаю...",
+    speakingText: "Ассистент говорит",
+    bookingLinksAriaLabel: "Ссылки для бронирования",
+  },
+  fr: {
+    actionText: "Besoin d'aide ?",
+    startCallText: "Demarrer l'appel",
+    endCallText: "Terminer l'appel",
+    listeningText: "Ecoute...",
+    speakingText: "Assistant en train de parler",
+    bookingLinksAriaLabel: "Liens de reservation",
+  },
+  it: {
+    actionText: "Hai bisogno di aiuto?",
+    startCallText: "Avvia chiamata",
+    endCallText: "Termina chiamata",
+    listeningText: "In ascolto...",
+    speakingText: "Assistente in conversazione",
+    bookingLinksAriaLabel: "Link di prenotazione",
+  },
+  de: {
+    actionText: "Brauchst du Hilfe?",
+    startCallText: "Anruf starten",
+    endCallText: "Anruf beenden",
+    listeningText: "Ich hore zu...",
+    speakingText: "Assistent spricht",
+    bookingLinksAriaLabel: "Buchungslinks",
+  },
+  uk: {
+    actionText: "Потрібна допомога?",
+    startCallText: "Почати дзвінок",
+    endCallText: "Завершити дзвінок",
+    listeningText: "Слухаю...",
+    speakingText: "Асистент говорить",
+    bookingLinksAriaLabel: "Посилання для бронювання",
+  },
+  pl: {
+    actionText: "Potrzebujesz pomocy?",
+    startCallText: "Rozpocznij rozmowe",
+    endCallText: "Zakoncz rozmowe",
+    listeningText: "Slucham...",
+    speakingText: "Asystent mowi",
+    bookingLinksAriaLabel: "Linki rezerwacyjne",
+  },
+};
 
 type BookingLink = {
   name?: string;
@@ -133,6 +223,7 @@ function getFirstArgObject(args: unknown[]): Record<string, unknown> {
 }
 
 export default function ElevenLabsWidget() {
+  const lang = useLangStore((s) => s.lang);
   const ref = useRef<HTMLElement>(null);
   const mounted = useRef(false);
 
@@ -197,9 +288,29 @@ export default function ElevenLabsWidget() {
     };
   }, []);
 
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const widgetText = widgetTextTranslations[lang];
+    const languageCode = WIDGET_LANG_TO_CODE[lang] ?? "es";
+
+    el.setAttribute("override-language", languageCode);
+    el.setAttribute("action-text", widgetText.actionText);
+    el.setAttribute("start-call-text", widgetText.startCallText);
+    el.setAttribute("end-call-text", widgetText.endCallText);
+    el.setAttribute("listening-text", widgetText.listeningText);
+    el.setAttribute("speaking-text", widgetText.speakingText);
+
+    const linksContainer = document.getElementById("el-booking-links");
+    if (linksContainer) {
+      linksContainer.setAttribute("aria-label", widgetText.bookingLinksAriaLabel);
+    }
+  }, [lang]);
+
   return (
     <>
-      <div id="el-booking-links" aria-live="polite" aria-label="Enlaces de reserva" />
+      <div id="el-booking-links" aria-live="polite" aria-label={widgetTextTranslations[lang].bookingLinksAriaLabel} />
       <elevenlabs-convai
         ref={(node) => {
           ref.current = node as HTMLElement | null;
