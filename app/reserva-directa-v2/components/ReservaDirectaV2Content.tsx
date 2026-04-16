@@ -1700,9 +1700,29 @@ export default function ReservaDirectaV2Content() {
       target === "checkOut"
         ? parsedCheckOut || parsedCheckIn || new Date()
         : parsedCheckIn || new Date();
+    setIsGuestMenuOpen(false);
     setVisibleMonth(startOfMonth(selectedDate || fallbackDate));
     setCheckoutPreviewDate(target === "checkOut" ? parsedCheckOut : null);
     setOpenDatePicker(target);
+  }
+
+  function toggleCalendar(target: "checkIn" | "checkOut") {
+    if (openDatePicker === target) {
+      setCheckoutPreviewDate(null);
+      setOpenDatePicker(null);
+      return;
+    }
+    openCalendar(target);
+  }
+
+  function toggleGuestMenu() {
+    if (isGuestMenuOpen) {
+      setIsGuestMenuOpen(false);
+      return;
+    }
+    setCheckoutPreviewDate(null);
+    setOpenDatePicker(null);
+    setIsGuestMenuOpen(true);
   }
 
   function handleDateSelection(target: "checkIn" | "checkOut", date: Date) {
@@ -1970,7 +1990,7 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={() => openCalendar("checkIn")}
+                onClick={() => toggleCalendar("checkIn")}
               >
                 {checkInLabel}
               </label>
@@ -1980,12 +2000,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkIn}
-                  onClick={() => openCalendar("checkIn")}
+                  onClick={() => toggleCalendar("checkIn")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => openCalendar("checkIn")}
+                  onClick={() => toggleCalendar("checkIn")}
                   className="text-[#2d2d2d]"
                   aria-label={checkInLabel}
                 >
@@ -2030,7 +2050,7 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={() => openCalendar("checkOut")}
+                onClick={() => toggleCalendar("checkOut")}
               >
                 {checkOutLabel}
               </label>
@@ -2040,12 +2060,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkOut}
-                  onClick={() => openCalendar("checkOut")}
+                  onClick={() => toggleCalendar("checkOut")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => openCalendar("checkOut")}
+                  onClick={() => toggleCalendar("checkOut")}
                   className="text-[#2d2d2d]"
                   aria-label={checkOutLabel}
                 >
@@ -2098,13 +2118,13 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={() => setIsGuestMenuOpen(true)}
+                onClick={toggleGuestMenu}
               >
                 {guestsLabel}
               </label>
               <button
                 type="button"
-                onClick={() => setIsGuestMenuOpen((prev) => !prev)}
+                onClick={toggleGuestMenu}
                 aria-haspopup="listbox"
                 aria-expanded={isGuestMenuOpen}
                 className="flex w-full items-center justify-between gap-2 border-0 bg-transparent text-left text-[15px] font-medium text-[#2d2d2d] outline-0"
