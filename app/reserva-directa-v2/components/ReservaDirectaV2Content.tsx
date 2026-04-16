@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useLangStore } from "@/app/lib/langStore";
@@ -904,7 +904,10 @@ function isDateInRange(date: Date, start: Date, end: Date): boolean {
   const value = startOfDay(date).getTime();
   const startValue = startOfDay(start).getTime();
   const endValue = startOfDay(end).getTime();
-  return value >= Math.min(startValue, endValue) && value <= Math.max(startValue, endValue);
+  return (
+    value >= Math.min(startValue, endValue) &&
+    value <= Math.max(startValue, endValue)
+  );
 }
 
 function parseDateInput(value: string): Date | null {
@@ -1609,7 +1612,9 @@ function DatePickerPopover({
       <div className="grid grid-cols-7 gap-1">
         {days.map(({ date, inCurrentMonth }) => {
           const normalizedDate = startOfDay(date);
-          const isSelected = selectedDate ? datesEqual(normalizedDate, selectedDate) : false;
+          const isSelected = selectedDate
+            ? datesEqual(normalizedDate, selectedDate)
+            : false;
           const isToday = datesEqual(normalizedDate, today);
           const isDisabled = min ? normalizedDate < min : false;
           const activeRangeEnd = previewRangeEnd || rangeEnd;
@@ -1617,8 +1622,12 @@ function DatePickerPopover({
             rangeStart && activeRangeEnd
               ? isDateInRange(normalizedDate, rangeStart, activeRangeEnd)
               : false;
-          const isRangeStart = rangeStart ? datesEqual(normalizedDate, rangeStart) : false;
-          const isRangeEnd = activeRangeEnd ? datesEqual(normalizedDate, activeRangeEnd) : false;
+          const isRangeStart = rangeStart
+            ? datesEqual(normalizedDate, rangeStart)
+            : false;
+          const isRangeEnd = activeRangeEnd
+            ? datesEqual(normalizedDate, activeRangeEnd)
+            : false;
 
           return (
             <button
@@ -1685,12 +1694,16 @@ export default function ReservaDirectaV2Content() {
   const [guestFilter, setGuestFilter] = useState("2");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [openDatePicker, setOpenDatePicker] = useState<"checkIn" | "checkOut" | null>(
+  const [openDatePicker, setOpenDatePicker] = useState<
+    "checkIn" | "checkOut" | null
+  >(null);
+  const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState<Date>(() =>
+    startOfMonth(new Date()),
+  );
+  const [checkoutPreviewDate, setCheckoutPreviewDate] = useState<Date | null>(
     null,
   );
-  const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
-  const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(new Date()));
-  const [checkoutPreviewDate, setCheckoutPreviewDate] = useState<Date | null>(null);
   const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(
     null,
   );
@@ -1707,10 +1720,32 @@ export default function ReservaDirectaV2Content() {
   function openCalendar(target: "checkIn" | "checkOut") {
     const selectedDate = target === "checkIn" ? parsedCheckIn : parsedCheckOut;
     const fallbackDate =
-      target === "checkOut" ? parsedCheckOut || parsedCheckIn || new Date() : parsedCheckIn || new Date();
+      target === "checkOut"
+        ? parsedCheckOut || parsedCheckIn || new Date()
+        : parsedCheckIn || new Date();
+    setIsGuestMenuOpen(false);
     setVisibleMonth(startOfMonth(selectedDate || fallbackDate));
     setCheckoutPreviewDate(target === "checkOut" ? parsedCheckOut : null);
     setOpenDatePicker(target);
+  }
+
+  function toggleCalendar(target: "checkIn" | "checkOut") {
+    if (openDatePicker === target) {
+      setCheckoutPreviewDate(null);
+      setOpenDatePicker(null);
+      return;
+    }
+    openCalendar(target);
+  }
+
+  function toggleGuestMenu() {
+    if (isGuestMenuOpen) {
+      setIsGuestMenuOpen(false);
+      return;
+    }
+    setCheckoutPreviewDate(null);
+    setOpenDatePicker(null);
+    setIsGuestMenuOpen(true);
   }
 
   function handleDateSelection(target: "checkIn" | "checkOut", date: Date) {
@@ -1719,7 +1754,7 @@ export default function ReservaDirectaV2Content() {
     if (target === "checkIn") {
       setCheckIn(formatted);
       if (!parsedCheckOut || date >= parsedCheckOut) {
-      setCheckOut(formatDateInput(addDays(date, 1), lang));
+        setCheckOut(formatDateInput(addDays(date, 1), lang));
       }
       setVisibleMonth(startOfMonth(addDays(date, 1)));
       setCheckoutPreviewDate(addDays(date, 1));
@@ -1965,7 +2000,10 @@ export default function ReservaDirectaV2Content() {
               ref={openDatePicker === "checkIn" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0"
             >
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+              <label
+                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
+                onClick={() => toggleCalendar("checkIn")}
+              >
                 {checkInLabel}
               </label>
               <div className="flex items-center justify-between gap-2">
@@ -1974,12 +2012,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkIn}
-                  onClick={() => openCalendar("checkIn")}
+                  onClick={() => toggleCalendar("checkIn")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => openCalendar("checkIn")}
+                  onClick={() => toggleCalendar("checkIn")}
                   className="text-[#2d2d2d]"
                   aria-label={checkInLabel}
                 >
@@ -2008,8 +2046,12 @@ export default function ReservaDirectaV2Content() {
                   visibleMonth={visibleMonth}
                   selectedDate={parsedCheckIn}
                   minDate={startOfDay(new Date())}
-                  onPrevMonth={() => setVisibleMonth((prev) => addMonths(prev, -1))}
-                  onNextMonth={() => setVisibleMonth((prev) => addMonths(prev, 1))}
+                  onPrevMonth={() =>
+                    setVisibleMonth((prev) => addMonths(prev, -1))
+                  }
+                  onNextMonth={() =>
+                    setVisibleMonth((prev) => addMonths(prev, 1))
+                  }
                   onSelectDate={(date) => handleDateSelection("checkIn", date)}
                 />
               )}
@@ -2018,7 +2060,10 @@ export default function ReservaDirectaV2Content() {
               ref={openDatePicker === "checkOut" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r"
             >
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+              <label
+                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
+                onClick={() => toggleCalendar("checkOut")}
+              >
                 {checkOutLabel}
               </label>
               <div className="flex items-center justify-between gap-2">
@@ -2027,12 +2072,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkOut}
-                  onClick={() => openCalendar("checkOut")}
+                  onClick={() => toggleCalendar("checkOut")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => openCalendar("checkOut")}
+                  onClick={() => toggleCalendar("checkOut")}
                   className="text-[#2d2d2d]"
                   aria-label={checkOutLabel}
                 >
@@ -2060,12 +2105,20 @@ export default function ReservaDirectaV2Content() {
                   lang={lang}
                   visibleMonth={visibleMonth}
                   selectedDate={parsedCheckOut}
-                  minDate={parsedCheckIn ? addDays(parsedCheckIn, 1) : startOfDay(new Date())}
+                  minDate={
+                    parsedCheckIn
+                      ? addDays(parsedCheckIn, 1)
+                      : startOfDay(new Date())
+                  }
                   rangeStart={parsedCheckIn}
                   rangeEnd={parsedCheckOut}
                   previewRangeEnd={checkoutPreviewDate}
-                  onPrevMonth={() => setVisibleMonth((prev) => addMonths(prev, -1))}
-                  onNextMonth={() => setVisibleMonth((prev) => addMonths(prev, 1))}
+                  onPrevMonth={() =>
+                    setVisibleMonth((prev) => addMonths(prev, -1))
+                  }
+                  onNextMonth={() =>
+                    setVisibleMonth((prev) => addMonths(prev, 1))
+                  }
                   onSelectDate={(date) => handleDateSelection("checkOut", date)}
                   onPreviewDate={setCheckoutPreviewDate}
                 />
@@ -2075,12 +2128,15 @@ export default function ReservaDirectaV2Content() {
               ref={guestMenuRef}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0"
             >
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+              <label
+                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
+                onClick={toggleGuestMenu}
+              >
                 {guestsLabel}
               </label>
               <button
                 type="button"
-                onClick={() => setIsGuestMenuOpen((prev) => !prev)}
+                onClick={toggleGuestMenu}
                 aria-haspopup="listbox"
                 aria-expanded={isGuestMenuOpen}
                 className="flex w-full items-center justify-between gap-2 border-0 bg-transparent text-left text-[15px] font-medium text-[#2d2d2d] outline-0"
@@ -2132,7 +2188,8 @@ export default function ReservaDirectaV2Content() {
                                 : "text-[#2d2d2d] hover:bg-[#f7f7f7]"
                           }`}
                         >
-                          {count} {count === 1 ? guestSingularLabel : guestPluralLabel}
+                          {count}{" "}
+                          {count === 1 ? guestSingularLabel : guestPluralLabel}
                         </button>
                       );
                     })}
