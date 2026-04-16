@@ -51,6 +51,146 @@ const FEAT_LABELS: Record<string, string> = {
   piscina_compartida: "Piscina compart.",
 };
 
+const AMENITY_CHIP_TRANSLATIONS: Record<
+  string,
+  Record<Lang, string>
+> = {
+  wifi: {
+    eng: "WiFi",
+    esp: "WiFi",
+    ru: "Wi-Fi",
+    fr: "Wi-Fi",
+    it: "Wi-Fi",
+    de: "WLAN",
+    uk: "Wi-Fi",
+    pl: "Wi-Fi",
+  },
+  ac: {
+    eng: "A/C",
+    esp: "A/C",
+    ru: "Кондиционер",
+    fr: "Climatisation",
+    it: "Aria cond.",
+    de: "Klimaanlage",
+    uk: "Кондиціонер",
+    pl: "Klimatyzacja",
+  },
+  tv: {
+    eng: "TV",
+    esp: "TV",
+    ru: "ТВ",
+    fr: "TV",
+    it: "TV",
+    de: "TV",
+    uk: "ТБ",
+    pl: "TV",
+  },
+  piscina: {
+    eng: "Pool",
+    esp: "Piscina",
+    ru: "Бассейн",
+    fr: "Piscine",
+    it: "Piscina",
+    de: "Pool",
+    uk: "Басейн",
+    pl: "Basen",
+  },
+  piscina_compartida: {
+    eng: "Shared pool",
+    esp: "Piscina compart.",
+    ru: "Общий бассейн",
+    fr: "Piscine partagee",
+    it: "Piscina condivisa",
+    de: "Gemeinschaftspool",
+    uk: "Спільний басейн",
+    pl: "Basen wspolny",
+  },
+  parking_pago_solicitud: {
+    eng: "Parking",
+    esp: "Parking",
+    ru: "Парковка",
+    fr: "Parking",
+    it: "Parcheggio",
+    de: "Parkplatz",
+    uk: "Паркування",
+    pl: "Parking",
+  },
+  lavadora: {
+    eng: "Washer",
+    esp: "Lavadora",
+    ru: "Стиральная машина",
+    fr: "Lave-linge",
+    it: "Lavatrice",
+    de: "Waschmaschine",
+    uk: "Пральна машина",
+    pl: "Pralka",
+  },
+  ascensor: {
+    eng: "Elevator",
+    esp: "Ascensor",
+    ru: "Лифт",
+    fr: "Ascenseur",
+    it: "Ascensore",
+    de: "Aufzug",
+    uk: "Ліфт",
+    pl: "Winda",
+  },
+  vistas: {
+    eng: "View",
+    esp: "Vistas",
+    ru: "Вид",
+    fr: "Vue",
+    it: "Vista",
+    de: "Aussicht",
+    uk: "Вид",
+    pl: "Widok",
+  },
+  playa: {
+    eng: "Beach",
+    esp: "Playa",
+    ru: "Пляж",
+    fr: "Plage",
+    it: "Spiaggia",
+    de: "Strand",
+    uk: "Пляж",
+    pl: "Plaza",
+  },
+  cerca_mar: {
+    eng: "Near the sea",
+    esp: "Cerca del mar",
+    ru: "Рядом с морем",
+    fr: "Pres de la mer",
+    it: "Vicino al mare",
+    de: "Nahe am Meer",
+    uk: "Біля моря",
+    pl: "Blisko morza",
+  },
+  centro_ciudad: {
+    eng: "City center",
+    esp: "Centro",
+    ru: "Центр",
+    fr: "Centre-ville",
+    it: "Centro",
+    de: "Stadtzentrum",
+    uk: "Центр",
+    pl: "Centrum",
+  },
+  lavavajillas: {
+    eng: "Dishwasher",
+    esp: "Lavavajillas",
+    ru: "Посудомоечная машина",
+    fr: "Lave-vaisselle",
+    it: "Lavastoviglie",
+    de: "Spulmaschine",
+    uk: "Посудомийна машина",
+    pl: "Zmywarka",
+  },
+};
+
+function getAmenityLabel(feature: string, lang: Lang): string {
+  return AMENITY_CHIP_TRANSLATIONS[feature]?.[lang] ?? FEAT_LABELS[feature] ?? feature;
+}
+
 function AmenityIcon({ feature }: { feature: string }) {
   const commonProps = {
     width: 12,
@@ -711,6 +851,7 @@ function PropertyCard({
   bookingUrl,
   onRetry,
   onOpen,
+  lang,
   propertyFallbackLabel,
   loadingDataLabel,
   retryLabel,
@@ -724,6 +865,7 @@ function PropertyCard({
   bookingUrl: string;
   onRetry: (id: number) => void;
   onOpen: (url: string) => void;
+  lang: Lang;
   propertyFallbackLabel: string;
   loadingDataLabel: string;
   retryLabel: string;
@@ -1010,7 +1152,7 @@ function PropertyCard({
                     }}
                   >
                     <AmenityIcon feature={f} />
-                    {FEAT_LABELS[f]}
+                    {getAmenityLabel(f, lang)}
                   </span>
                 ))}
             {!showStatsLoading && feats.length > 6 && (
@@ -1294,6 +1436,7 @@ export default function ReservaDirectaV2Content() {
                     prop={prop}
                     onRetry={retryProperty}
                     onOpen={setSelectedBookingUrl}
+                    lang={lang}
                     propertyFallbackLabel={propertyFallbackLabel}
                     loadingDataLabel={cardLoadingDataLabel}
                     retryLabel={retryLabel}
