@@ -225,12 +225,12 @@ function getFirstArgObject(args: unknown[]): Record<string, unknown> {
 export default function ElevenLabsWidget() {
   const lang = useLangStore((s) => s.lang);
   const ref = useRef<HTMLElement>(null);
-  const mounted = useRef(false);
+  const widgetText = widgetTextTranslations[lang];
+  const languageCode = WIDGET_LANG_TO_CODE[lang] ?? "es";
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || mounted.current) return;
-    mounted.current = true;
+    if (!el) return;
 
     let clientId: string;
 
@@ -286,14 +286,11 @@ export default function ElevenLabsWidget() {
         handleCall as EventListener,
       );
     };
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
-    const widgetText = widgetTextTranslations[lang];
-    const languageCode = WIDGET_LANG_TO_CODE[lang] ?? "es";
 
     el.setAttribute("override-language", languageCode);
     el.setAttribute("action-text", widgetText.actionText);
@@ -312,11 +309,18 @@ export default function ElevenLabsWidget() {
     <>
       <div id="el-booking-links" aria-live="polite" aria-label={widgetTextTranslations[lang].bookingLinksAriaLabel} />
       <elevenlabs-convai
+        key={lang}
         ref={(node) => {
           ref.current = node as HTMLElement | null;
         }}
         agent-id={EL_AGENT_ID}
         placement="bottom-right"
+        override-language={languageCode}
+        action-text={widgetText.actionText}
+        start-call-text={widgetText.startCallText}
+        end-call-text={widgetText.endCallText}
+        listening-text={widgetText.listeningText}
+        speaking-text={widgetText.speakingText}
       />
     </>
   );

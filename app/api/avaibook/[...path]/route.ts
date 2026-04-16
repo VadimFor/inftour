@@ -37,6 +37,9 @@ async function proxyAvaibook(request: NextRequest) {
       status: response.status,
       headers: {
         "Cache-Control": "no-store",
+        ...(response.headers.get("retry-after")
+          ? { "Retry-After": response.headers.get("retry-after") as string }
+          : {}),
       },
     });
   } catch {
@@ -45,6 +48,9 @@ async function proxyAvaibook(request: NextRequest) {
       headers: {
         "Content-Type": response.headers.get("content-type") ?? "text/plain; charset=utf-8",
         "Cache-Control": "no-store",
+        ...(response.headers.get("retry-after")
+          ? { "Retry-After": response.headers.get("retry-after") as string }
+          : {}),
       },
     });
   }

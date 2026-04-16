@@ -1,10 +1,11 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLangStore } from "@/app/lib/langStore";
 import type { Lang } from "@/app/lib/langStore";
 
 const API = "/api/avaibook";
+const DETAIL_BATCH_API = "/api/avaibook-batch";
 const BOOK = "https://inftour.bookonline.pro";
 const BOOK_LANG_TO_PATH: Record<Lang, string> = {
   eng: "en",
@@ -15,6 +16,17 @@ const BOOK_LANG_TO_PATH: Record<Lang, string> = {
   de: "de",
   uk: "uk",
   pl: "pl",
+};
+
+const LANG_TO_LOCALE: Record<Lang, string> = {
+  eng: "en-GB",
+  esp: "es-ES",
+  ru: "ru-RU",
+  fr: "fr-FR",
+  it: "it-IT",
+  de: "de-DE",
+  uk: "uk-UA",
+  pl: "pl-PL",
 };
 
 const FEAT_LABELS: Record<string, string> = {
@@ -51,10 +63,7 @@ const FEAT_LABELS: Record<string, string> = {
   piscina_compartida: "Piscina compart.",
 };
 
-const AMENITY_CHIP_TRANSLATIONS: Record<
-  string,
-  Record<Lang, string>
-> = {
+const AMENITY_CHIP_TRANSLATIONS: Record<string, Record<Lang, string>> = {
   wifi: {
     eng: "WiFi",
     esp: "WiFi",
@@ -188,7 +197,11 @@ const AMENITY_CHIP_TRANSLATIONS: Record<
 };
 
 function getAmenityLabel(feature: string, lang: Lang): string {
-  return AMENITY_CHIP_TRANSLATIONS[feature]?.[lang] ?? FEAT_LABELS[feature] ?? feature;
+  return (
+    AMENITY_CHIP_TRANSLATIONS[feature]?.[lang] ??
+    FEAT_LABELS[feature] ??
+    feature
+  );
 }
 
 function AmenityIcon({ feature }: { feature: string }) {
@@ -204,9 +217,24 @@ function AmenityIcon({ feature }: { feature: string }) {
     case "wifi":
       return (
         <svg {...commonProps}>
-          <path d="M2.5 6.5A8 8 0 0 1 13.5 6.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M4.75 9A5 5 0 0 1 11.25 9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M7 11.5a2 2 0 0 1 2 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path
+            d="M2.5 6.5A8 8 0 0 1 13.5 6.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M4.75 9A5 5 0 0 1 11.25 9"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M7 11.5a2 2 0 0 1 2 0"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
           <circle cx="8" cy="13" r="1" fill="currentColor" />
         </svg>
       );
@@ -214,31 +242,79 @@ function AmenityIcon({ feature }: { feature: string }) {
     case "aire_acondicionado_individual":
       return (
         <svg {...commonProps}>
-          <path d="M8 2.5v11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M4.5 4.5 11.5 11.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M11.5 4.5 4.5 11.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path
+            d="M8 2.5v11"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M4.5 4.5 11.5 11.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M11.5 4.5 4.5 11.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
         </svg>
       );
     case "tv":
     case "tv_pantalla_plana":
       return (
         <svg {...commonProps}>
-          <rect x="2.5" y="3" width="11" height="7.5" rx="1.2" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M6.5 13h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <rect
+            x="2.5"
+            y="3"
+            width="11"
+            height="7.5"
+            rx="1.2"
+            stroke="currentColor"
+            strokeWidth="1.3"
+          />
+          <path
+            d="M6.5 13h3"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
         </svg>
       );
     case "parking_pago_solicitud":
       return (
         <svg {...commonProps}>
-          <path d="M5 13V3h3.5a2.5 2.5 0 1 1 0 5H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M5 13V3h3.5a2.5 2.5 0 1 1 0 5H5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       );
     case "lavadora":
     case "lavavajillas":
       return (
         <svg {...commonProps}>
-          <rect x="3" y="2.5" width="10" height="11" rx="1.3" stroke="currentColor" strokeWidth="1.3" />
-          <circle cx="8" cy="8.5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+          <rect
+            x="3"
+            y="2.5"
+            width="10"
+            height="11"
+            rx="1.3"
+            stroke="currentColor"
+            strokeWidth="1.3"
+          />
+          <circle
+            cx="8"
+            cy="8.5"
+            r="2.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+          />
           <circle cx="5.2" cy="4.7" r=".6" fill="currentColor" />
           <circle cx="7.2" cy="4.7" r=".6" fill="currentColor" />
         </svg>
@@ -246,43 +322,114 @@ function AmenityIcon({ feature }: { feature: string }) {
     case "ascensor":
       return (
         <svg {...commonProps}>
-          <rect x="4" y="2.5" width="8" height="11" rx="1.3" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M8 5V11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="m6.5 6.5 1.5-1.5 1.5 1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="m6.5 9.5 1.5 1.5 1.5-1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <rect
+            x="4"
+            y="2.5"
+            width="8"
+            height="11"
+            rx="1.3"
+            stroke="currentColor"
+            strokeWidth="1.3"
+          />
+          <path
+            d="M8 5V11"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="m6.5 6.5 1.5-1.5 1.5 1.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="m6.5 9.5 1.5 1.5 1.5-1.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       );
     case "vistas":
     case "vistas_ciudad":
       return (
         <svg {...commonProps}>
-          <path d="M2.5 8s2-3 5.5-3 5.5 3 5.5 3-2 3-5.5 3-5.5-3-5.5-3Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-          <circle cx="8" cy="8" r="1.6" stroke="currentColor" strokeWidth="1.3" />
+          <path
+            d="M2.5 8s2-3 5.5-3 5.5 3 5.5 3-2 3-5.5 3-5.5-3-5.5-3Z"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
+          />
+          <circle
+            cx="8"
+            cy="8"
+            r="1.6"
+            stroke="currentColor"
+            strokeWidth="1.3"
+          />
         </svg>
       );
     case "playa":
     case "cerca_mar":
       return (
         <svg {...commonProps}>
-          <path d="M2.5 10.5c1 .8 2 .8 3 0s2-.8 3 0 2 .8 3 0 2-.8 2.5-.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M5 7.5c.7-.8 1.4-1.2 2.2-1.2S8.8 6.7 9.5 7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path
+            d="M2.5 10.5c1 .8 2 .8 3 0s2-.8 3 0 2 .8 3 0 2-.8 2.5-.4"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5 7.5c.7-.8 1.4-1.2 2.2-1.2S8.8 6.7 9.5 7.5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
         </svg>
       );
     case "piscina":
     case "piscina_compartida":
       return (
         <svg {...commonProps}>
-          <path d="M2.5 11c1 .7 2 .7 3 0s2-.7 3 0 2 .7 3 0 2-.7 2.5-.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M5 10V4.5a1 1 0 0 1 2 0V10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M5 6h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path
+            d="M2.5 11c1 .7 2 .7 3 0s2-.7 3 0 2 .7 3 0 2-.7 2.5-.3"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5 10V4.5a1 1 0 0 1 2 0V10"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5 6h2"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
         </svg>
       );
     default:
       return (
         <svg {...commonProps}>
           <circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M8 5.5v5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          <path d="M5.5 8h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          <path
+            d="M8 5.5v5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5.5 8h5"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+          />
         </svg>
       );
   }
@@ -596,7 +743,10 @@ function getAccommodationListName(item: AccommodationListItem): string {
 }
 
 function stripInftourSuffix(name: string): string {
-  return name.replace(/\binftour\b/gi, "").replace(/\s{2,}/g, " ").trim();
+  return name
+    .replace(/\binftour\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function createPlaceholderProperty(item: AccommodationListItem): Property {
@@ -683,8 +833,19 @@ async function apiFetch(path: string): Promise<unknown> {
     headers: { accept: "application/json" },
   });
   if (!r.ok) {
-    const error = new Error(`API ${r.status}`) as Error & { status?: number };
+    const retryAfterHeader = r.headers.get("retry-after");
+    const retryAfterSeconds = retryAfterHeader
+      ? Number.parseFloat(retryAfterHeader)
+      : Number.NaN;
+    const retryAfterMs = Number.isFinite(retryAfterSeconds)
+      ? Math.max(0, retryAfterSeconds * 1000)
+      : undefined;
+    const error = new Error(`API ${r.status}`) as Error & {
+      status?: number;
+      retryAfterMs?: number;
+    };
     error.status = r.status;
+    error.retryAfterMs = retryAfterMs;
     throw error;
   }
   return r.json();
@@ -713,7 +874,135 @@ function buildBookingUrl(
   return query ? `${baseUrl}?${query}` : baseUrl;
 }
 
-async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addDays(date: Date, amount: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+function addMonths(date: Date, amount: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function datesEqual(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function isDateInRange(date: Date, start: Date, end: Date): boolean {
+  const value = startOfDay(date).getTime();
+  const startValue = startOfDay(start).getTime();
+  const endValue = startOfDay(end).getTime();
+  return value >= Math.min(startValue, endValue) && value <= Math.max(startValue, endValue);
+}
+
+function parseDateInput(value: string): Date | null {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+
+  const day = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10) - 1;
+  const year = Number.parseInt(match[3], 10);
+  const parsed = new Date(year, month, day);
+
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function formatDateInput(date: Date, lang: Lang): string {
+  void lang;
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear());
+  return `${day}/${month}/${year}`;
+}
+
+function getMonthLabel(date: Date, lang: Lang): string {
+  return new Intl.DateTimeFormat(LANG_TO_LOCALE[lang], {
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function getWeekdayLabels(lang: Lang): string[] {
+  const baseMonday = new Date(Date.UTC(2024, 0, 1));
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(LANG_TO_LOCALE[lang], {
+      weekday: "short",
+    }).format(new Date(baseMonday.getTime() + index * 86400000)),
+  );
+}
+
+function buildCalendarDays(visibleMonth: Date): Array<{
+  date: Date;
+  inCurrentMonth: boolean;
+}> {
+  const monthStart = startOfMonth(visibleMonth);
+  const monthEnd = new Date(
+    visibleMonth.getFullYear(),
+    visibleMonth.getMonth() + 1,
+    0,
+  );
+  const startOffset = (monthStart.getDay() + 6) % 7;
+  const calendarStart = addDays(monthStart, -startOffset);
+  const days: Array<{ date: Date; inCurrentMonth: boolean }> = [];
+
+  for (let index = 0; index < 42; index += 1) {
+    const date = addDays(calendarStart, index);
+    days.push({
+      date,
+      inCurrentMonth:
+        date.getMonth() === visibleMonth.getMonth() &&
+        date.getFullYear() === visibleMonth.getFullYear(),
+    });
+    if (date > monthEnd && days.length >= 35 && date.getDay() === 0) {
+      break;
+    }
+  }
+
+  return days;
+}
+
+function getRetryDelayMs(err: unknown, attempt: number, baseMs = 1200): number {
+  const retryAfterMs =
+    err && typeof err === "object"
+      ? (err as { retryAfterMs?: number }).retryAfterMs
+      : undefined;
+  if (typeof retryAfterMs === "number" && retryAfterMs > 0) {
+    return retryAfterMs;
+  }
+
+  const status =
+    err && typeof err === "object"
+      ? (err as { status?: number }).status
+      : undefined;
+  if (status === 429) {
+    const jitter = Math.floor(Math.random() * 400);
+    return Math.min(12000, baseMs * 2 ** attempt) + jitter;
+  }
+
+  return 300 * (attempt + 1);
+}
+
+async function apiFetchWithRetry(path: string, retries = 3): Promise<unknown> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -725,14 +1014,80 @@ async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
           ? (err as { status?: number }).status
           : undefined;
       if (attempt < retries) {
-        await wait(status === 429 ? 2000 : 300 * (attempt + 1));
+        await wait(getRetryDelayMs(err, attempt));
+      } else if (status !== 429) {
+        break;
       }
     }
   }
   throw lastError;
 }
 
-// â”€â”€â”€ CardCarousel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function fetchAccommodationBatch(
+  ids: number[],
+): Promise<BatchDetailResponseItem[]> {
+  const params = new URLSearchParams();
+  ids.forEach((id) => {
+    params.append("id", String(id));
+  });
+
+  const response = await fetch(`${DETAIL_BATCH_API}?${params.toString()}`, {
+    headers: { accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    const error = new Error(`API ${response.status}`) as Error & {
+      status?: number;
+      retryAfterMs?: number;
+    };
+    error.status = response.status;
+
+    const retryAfterHeader = response.headers.get("retry-after");
+    const retryAfterSeconds = retryAfterHeader
+      ? Number.parseFloat(retryAfterHeader)
+      : Number.NaN;
+    if (Number.isFinite(retryAfterSeconds)) {
+      error.retryAfterMs = Math.max(0, retryAfterSeconds * 1000);
+    }
+
+    throw error;
+  }
+
+  const payload = (await response.json()) as {
+    results?: BatchDetailResponseItem[];
+  };
+
+  return Array.isArray(payload.results) ? payload.results : [];
+}
+
+type QueueItem = {
+  id: number;
+  attempt: number;
+  readyAt: number;
+};
+
+type BatchDetailResponseItem = {
+  id: number;
+  ok: boolean;
+  status: number;
+  data?: RawProperty;
+  error?: string;
+  retryAfterMs?: number;
+};
+
+const DETAIL_BATCH_SIZE = 3;
+const DETAIL_QUEUE_GAP_MS = 350;
+const DETAIL_MAX_RETRIES = 6;
+const DETAIL_429_BASE_COOLDOWN_MS = 2500;
+const DETAIL_429_MAX_COOLDOWN_MS = 12000;
+
+function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
+  if (!hitRateLimit) return DETAIL_QUEUE_GAP_MS;
+  return Math.min(
+    DETAIL_429_MAX_COOLDOWN_MS,
+    DETAIL_429_BASE_COOLDOWN_MS * 2 ** Math.max(0, streak - 1),
+  );
+}
 
 function CardCarousel({
   images,
@@ -746,8 +1101,7 @@ function CardCarousel({
   nextPhotoLabel: string;
 }) {
   const [idx, setIdx] = useState(0);
-  const gallery = (images ?? [])
-    .filter((img) => Boolean(img.SMALL));
+  const gallery = (images ?? []).filter((img) => Boolean(img.SMALL));
 
   if (!gallery.length) return <div className="w-full h-full bg-gray-100" />;
   const safeIdx = idx % gallery.length;
@@ -890,11 +1244,7 @@ function PropertyCard({
     !prop.beds &&
     !prop.bathrooms &&
     !prop.sqm;
-  const canRetry =
-    isPending &&
-    prop.id > 0 &&
-    typeof prop.loadError === "string" &&
-    prop.loadError.includes("429");
+  const canRetry = isPending && prop.id > 0;
   const showStatsLoading = isPending;
 
   return (
@@ -902,10 +1252,6 @@ function PropertyCard({
       onClick={() => onOpen(bookingUrl)}
       role="button"
       tabIndex={0}
-      onFocus={(e) => {
-        if (e.target !== e.currentTarget) return;
-        if (canRetry) onRetry(prop.id);
-      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -933,9 +1279,15 @@ function PropertyCard({
               onRetry(prop.id);
             }}
             aria-label={retryLabel}
-            className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#4f8ecf]/75 text-white shadow-lg backdrop-blur-sm hover:bg-[#3f7fbe]/82 active:bg-[#346fa9]/88"
+            className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#7f9cbe]/72 text-white shadow-lg backdrop-blur-sm hover:bg-[#738fb0]/80 active:bg-[#6883a4]/86"
           >
-            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
               <path
                 d="M3 8a5 5 0 1 1 1.46 3.54"
                 stroke="currentColor"
@@ -1180,6 +1532,108 @@ function PropertyCard({
   );
 }
 
+function DatePickerPopover({
+  lang,
+  visibleMonth,
+  selectedDate,
+  minDate,
+  rangeStart,
+  rangeEnd,
+  previewRangeEnd,
+  onPrevMonth,
+  onNextMonth,
+  onSelectDate,
+  onPreviewDate,
+}: {
+  lang: Lang;
+  visibleMonth: Date;
+  selectedDate: Date | null;
+  minDate?: Date | null;
+  rangeStart?: Date | null;
+  rangeEnd?: Date | null;
+  previewRangeEnd?: Date | null;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  onSelectDate: (date: Date) => void;
+  onPreviewDate?: (date: Date | null) => void;
+}) {
+  const days = buildCalendarDays(visibleMonth);
+  const today = startOfDay(new Date());
+  const weekdayLabels = getWeekdayLabels(lang);
+  const min = minDate ? startOfDay(minDate) : null;
+
+  return (
+    <div className="absolute left-0 top-[calc(100%+10px)] z-30 w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#e8e8e8] bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onPrevMonth}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#ececec] text-[#2d2d2d] transition hover:border-[#d2d2d2] hover:bg-[#f7f7f7]"
+          aria-label="Previous month"
+        >
+          <span aria-hidden>‹</span>
+        </button>
+        <div className="text-[15px] font-semibold capitalize text-[#2d2d2d]">
+          {getMonthLabel(visibleMonth, lang)}
+        </div>
+        <button
+          type="button"
+          onClick={onNextMonth}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#ececec] text-[#2d2d2d] transition hover:border-[#d2d2d2] hover:bg-[#f7f7f7]"
+          aria-label="Next month"
+        >
+          <span aria-hidden>›</span>
+        </button>
+      </div>
+      <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8e8e8e]">
+        {weekdayLabels.map((label) => (
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {days.map(({ date, inCurrentMonth }) => {
+          const normalizedDate = startOfDay(date);
+          const isSelected = selectedDate ? datesEqual(normalizedDate, selectedDate) : false;
+          const isToday = datesEqual(normalizedDate, today);
+          const isDisabled = min ? normalizedDate < min : false;
+          const activeRangeEnd = previewRangeEnd || rangeEnd;
+          const isInRange =
+            rangeStart && activeRangeEnd
+              ? isDateInRange(normalizedDate, rangeStart, activeRangeEnd)
+              : false;
+          const isRangeStart = rangeStart ? datesEqual(normalizedDate, rangeStart) : false;
+          const isRangeEnd = activeRangeEnd ? datesEqual(normalizedDate, activeRangeEnd) : false;
+
+          return (
+            <button
+              key={normalizedDate.toISOString()}
+              type="button"
+              onClick={() => onSelectDate(normalizedDate)}
+              onMouseEnter={() => onPreviewDate?.(normalizedDate)}
+              onFocus={() => onPreviewDate?.(normalizedDate)}
+              onMouseLeave={() => onPreviewDate?.(null)}
+              disabled={isDisabled}
+              className={`h-10 rounded-full text-[14px] font-medium transition ${
+                isSelected
+                  ? "bg-[#1f1f1f] text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+                  : isRangeStart || isRangeEnd
+                    ? "bg-[#82aee8] text-white"
+                    : isInRange
+                      ? "bg-[#dbe9ff] text-[#3f6ea8]"
+                      : isToday
+                        ? "bg-[#f2ead6] text-[#8f7130]"
+                        : "text-[#2d2d2d] hover:bg-[#f3f3f3]"
+              } ${inCurrentMonth ? "" : "text-[#c2c2c2]"} ${isDisabled ? "cursor-not-allowed opacity-35" : ""}`}
+            >
+              {normalizedDate.getDate()}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // â”€â”€â”€ GalleryModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ReservaDirectaV2Content() {
@@ -1215,8 +1669,70 @@ export default function ReservaDirectaV2Content() {
   const [guestFilter, setGuestFilter] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(null);
+  const [openDatePicker, setOpenDatePicker] = useState<"checkIn" | "checkOut" | null>(
+    null,
+  );
+  const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(new Date()));
+  const [checkoutPreviewDate, setCheckoutPreviewDate] = useState<Date | null>(null);
+  const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(
+    null,
+  );
   const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const parsedCheckIn = parseDateInput(checkIn);
+  const parsedCheckOut = parseDateInput(checkOut);
+
+  function openCalendar(target: "checkIn" | "checkOut") {
+    const selectedDate = target === "checkIn" ? parsedCheckIn : parsedCheckOut;
+    const fallbackDate =
+      target === "checkOut" ? parsedCheckOut || parsedCheckIn || new Date() : parsedCheckIn || new Date();
+    setVisibleMonth(startOfMonth(selectedDate || fallbackDate));
+    setCheckoutPreviewDate(target === "checkOut" ? parsedCheckOut : null);
+    setOpenDatePicker(target);
+  }
+
+  function handleDateSelection(target: "checkIn" | "checkOut", date: Date) {
+    const formatted = formatDateInput(date, lang);
+
+    if (target === "checkIn") {
+      setCheckIn(formatted);
+      if (!parsedCheckOut || date >= parsedCheckOut) {
+      setCheckOut(formatDateInput(addDays(date, 1), lang));
+      }
+      setVisibleMonth(startOfMonth(addDays(date, 1)));
+      setCheckoutPreviewDate(addDays(date, 1));
+      setOpenDatePicker("checkOut");
+      return;
+    }
+
+    if (parsedCheckIn && date <= parsedCheckIn) {
+      setCheckOut(formatDateInput(addDays(parsedCheckIn, 1), lang));
+    } else {
+      setCheckOut(formatted);
+    }
+    setCheckoutPreviewDate(null);
+    setOpenDatePicker(null);
+  }
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    if (!openDatePicker) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!calendarRef.current?.contains(event.target as Node)) {
+        setCheckoutPreviewDate(null);
+        setOpenDatePicker(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [openDatePicker]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1234,44 +1750,102 @@ export default function ReservaDirectaV2Content() {
         setProperties(placeholders);
         setLoading(false);
 
-        for (let i = 0; i < list.length; i += 3) {
+        const queue: QueueItem[] = list.map((item) => ({
+          id: item.id,
+          attempt: 0,
+          readyAt: Date.now(),
+        }));
+        let rateLimitStreak = 0;
+
+        while (queue.length > 0) {
           if (cancelled) return;
 
-          const chunk = list.slice(i, i + 3);
-          const results = await Promise.allSettled(
-            chunk.map((item) =>
-              apiFetchWithRetry(`/accommodations/${item.id}/`),
-            ),
-          );
+          queue.sort((a, b) => a.readyAt - b.readyAt);
+          const firstReadyAt = queue[0]?.readyAt;
+          if (typeof firstReadyAt !== "number") break;
+
+          const delayUntilReady = firstReadyAt - Date.now();
+          if (delayUntilReady > 0) {
+            await wait(delayUntilReady);
+            if (cancelled) return;
+          }
+
+          const readyItems = queue.splice(0, DETAIL_BATCH_SIZE);
+          let batchResults: BatchDetailResponseItem[] = [];
+
+          try {
+            batchResults = await fetchAccommodationBatch(
+              readyItems.map((item) => item.id),
+            );
+          } catch (err) {
+            const retryAfterMs = getRetryDelayMs(err, rateLimitStreak);
+            readyItems.forEach((current) => {
+              queue.push({
+                id: current.id,
+                attempt: current.attempt + 1,
+                readyAt: Date.now() + retryAfterMs,
+              });
+            });
+            rateLimitStreak += 1;
+            await wait(getBatchCooldownMs(true, rateLimitStreak));
+            continue;
+          }
 
           if (cancelled) return;
 
-          results.forEach((result, index) => {
-            if (result.status !== "fulfilled") {
-              const message =
-                result.reason instanceof Error
-                  ? result.reason.message
-                  : LOAD_ERROR_FALLBACK_MESSAGE;
-              const failedId = chunk[index]?.id;
-              if (!failedId) return;
+          let hitRateLimit = false;
+
+          readyItems.forEach((current, index) => {
+            const result = batchResults[index];
+            if (!result) {
               setProperties((prev) =>
                 prev.map((prop) =>
-                  prop.id === failedId ? { ...prop, loadError: message } : prop,
+                  prop.id === current.id
+                    ? { ...prop, loadError: LOAD_ERROR_FALLBACK_MESSAGE }
+                    : prop,
                 ),
               );
               return;
             }
-            if (!result.value) return;
-            const normalized = normalize(result.value as RawProperty);
+
+            if (result.ok && result.data) {
+              const normalized = normalize(result.data as RawProperty);
+              setProperties((prev) =>
+                prev.map((prop) =>
+                  prop.id === normalized.id ? normalized : prop,
+                ),
+              );
+              return;
+            }
+
+            const status = result.status;
+            const message = result.error || LOAD_ERROR_FALLBACK_MESSAGE;
+
             setProperties((prev) =>
               prev.map((prop) =>
-                prop.id === normalized.id ? normalized : prop,
+                prop.id === current.id ? { ...prop, loadError: message } : prop,
               ),
             );
+
+            if (status === 429) {
+              hitRateLimit = true;
+            }
+
+            if (status === 429 && current.attempt < DETAIL_MAX_RETRIES) {
+              queue.push({
+                id: current.id,
+                attempt: current.attempt + 1,
+                readyAt:
+                  Date.now() +
+                  (result.retryAfterMs ??
+                    getRetryDelayMs(result, current.attempt)),
+              });
+            }
           });
 
-          if (!cancelled) {
-            await wait(250);
+          if (!cancelled && queue.length > 0) {
+            rateLimitStreak = hitRateLimit ? rateLimitStreak + 1 : 0;
+            await wait(getBatchCooldownMs(hitRateLimit, rateLimitStreak));
           }
         }
       } catch {
@@ -1297,15 +1871,23 @@ export default function ReservaDirectaV2Content() {
 
   function retryProperty(id: number) {
     void (async () => {
+      setProperties((prev) =>
+        prev.map((prop) =>
+          prop.id === id ? { ...prop, loadError: null } : prop,
+        ),
+      );
+
       try {
-        const detail = await apiFetchWithRetry(`/accommodations/${id}/`);
-        const normalized = normalize(detail as RawProperty);
+        const [result] = await fetchAccommodationBatch([id]);
+        if (!result?.ok || !result.data) {
+          throw new Error(result?.error || loadErrorLabel);
+        }
+        const normalized = normalize(result.data as RawProperty);
         setProperties((prev) =>
           prev.map((prop) => (prop.id === normalized.id ? normalized : prop)),
         );
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : loadErrorLabel;
+        const message = err instanceof Error ? err.message : loadErrorLabel;
         setProperties((prev) =>
           prev.map((prop) =>
             prop.id === id ? { ...prop, loadError: message } : prop,
@@ -1341,47 +1923,121 @@ export default function ReservaDirectaV2Content() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
         <div className="pt-3 pb-2">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-1 overflow-hidden rounded-[8px] border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
-            <div className="border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{checkInLabel}</label>
+          <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
+            <div
+              ref={openDatePicker === "checkIn" ? calendarRef : null}
+              className="relative border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0"
+            >
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                {checkInLabel}
+              </label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
-                  inputMode="numeric"
+                  readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
+                  onClick={() => openCalendar("checkIn")}
+                  className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
-                <span className="text-[#2d2d2d]" aria-hidden>
+                <button
+                  type="button"
+                  onClick={() => openCalendar("checkIn")}
+                  className="text-[#2d2d2d]"
+                  aria-label={checkInLabel}
+                >
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                    <rect x="2.2" y="3.2" width="11.6" height="10.6" rx="1.6" stroke="currentColor" strokeWidth="1.2" />
-                    <path d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    <rect
+                      x="2.2"
+                      y="3.2"
+                      width="11.6"
+                      height="10.6"
+                      rx="1.6"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                    />
+                    <path
+                      d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                </span>
+                </button>
               </div>
+              {openDatePicker === "checkIn" && (
+                <DatePickerPopover
+                  lang={lang}
+                  visibleMonth={visibleMonth}
+                  selectedDate={parsedCheckIn}
+                  minDate={startOfDay(new Date())}
+                  onPrevMonth={() => setVisibleMonth((prev) => addMonths(prev, -1))}
+                  onNextMonth={() => setVisibleMonth((prev) => addMonths(prev, 1))}
+                  onSelectDate={(date) => handleDateSelection("checkIn", date)}
+                />
+              )}
             </div>
-            <div className="border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{checkOutLabel}</label>
+            <div
+              ref={openDatePicker === "checkOut" ? calendarRef : null}
+              className="relative border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r"
+            >
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                {checkOutLabel}
+              </label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
-                  inputMode="numeric"
+                  readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
+                  onClick={() => openCalendar("checkOut")}
+                  className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
-                <span className="text-[#2d2d2d]" aria-hidden>
+                <button
+                  type="button"
+                  onClick={() => openCalendar("checkOut")}
+                  className="text-[#2d2d2d]"
+                  aria-label={checkOutLabel}
+                >
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                    <rect x="2.2" y="3.2" width="11.6" height="10.6" rx="1.6" stroke="currentColor" strokeWidth="1.2" />
-                    <path d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    <rect
+                      x="2.2"
+                      y="3.2"
+                      width="11.6"
+                      height="10.6"
+                      rx="1.6"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                    />
+                    <path
+                      d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                </span>
+                </button>
               </div>
+              {openDatePicker === "checkOut" && (
+                <DatePickerPopover
+                  lang={lang}
+                  visibleMonth={visibleMonth}
+                  selectedDate={parsedCheckOut}
+                  minDate={parsedCheckIn ? addDays(parsedCheckIn, 1) : startOfDay(new Date())}
+                  rangeStart={parsedCheckIn}
+                  rangeEnd={parsedCheckOut}
+                  previewRangeEnd={checkoutPreviewDate}
+                  onPrevMonth={() => setVisibleMonth((prev) => addMonths(prev, -1))}
+                  onNextMonth={() => setVisibleMonth((prev) => addMonths(prev, 1))}
+                  onSelectDate={(date) => handleDateSelection("checkOut", date)}
+                  onPreviewDate={setCheckoutPreviewDate}
+                />
+              )}
             </div>
             <div className="border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{guestsLabel}</label>
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                {guestsLabel}
+              </label>
               <select
                 value={guestFilter}
                 onChange={(e) => setGuestFilter(e.target.value)}
@@ -1412,7 +2068,9 @@ export default function ReservaDirectaV2Content() {
             </div>
           )}
           {error && (
-            <p className="text-center text-sm text-red-500 py-20">{loadErrorLabel}</p>
+            <p className="text-center text-sm text-red-500 py-20">
+              {loadErrorLabel}
+            </p>
           )}
           {filtered.length > 0 && (
             <>
@@ -1470,7 +2128,9 @@ export default function ReservaDirectaV2Content() {
               <div className="absolute inset-x-0 top-0 bottom-[57px] z-10 flex items-center justify-center bg-white">
                 <div className="flex flex-col items-center gap-3 text-[#6b6b6b]">
                   <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
-                  <span className="text-sm font-medium">{loadingPageLabel}</span>
+                  <span className="text-sm font-medium">
+                    {loadingPageLabel}
+                  </span>
                 </div>
               </div>
             )}
@@ -1503,7 +2163,3 @@ export default function ReservaDirectaV2Content() {
     </div>
   );
 }
-
-
-
-

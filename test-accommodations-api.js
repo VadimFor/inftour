@@ -34,6 +34,7 @@ loadEnvLocalFile();
 const app = express();
 const PORT = 3001;
 const AVAIBOOK_API = "https://api.avaibook.com/api/owner";
+const NEXT_APP_BASE_URL = process.env.NEXT_APP_BASE_URL || "http://localhost:3000";
 let prefetchCount = null;
 
 function escapeHtml(value) {
@@ -77,6 +78,37 @@ async function avaibookFetch(path, token) {
   return data;
 }
 
+async function avaibookBatchFetch(ids) {
+  const params = new URLSearchParams();
+  ids.forEach((id) => {
+    params.append("id", String(id));
+  });
+
+  const response = await fetch(`${NEXT_APP_BASE_URL}/api/avaibook-batch?${params.toString()}`, {
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  const text = await response.text();
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+
+  if (!response.ok) {
+    const error = new Error(`Batch ${response.status}`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return Array.isArray(data?.results) ? data.results : [];
+}
+
 function getTokenOrFail(res) {
   const token = process.env.AVAIBOOK_TOKEN;
   if (!token) {
@@ -96,12 +128,54 @@ app.get("/", async (req, res) => {
 
     const data = await avaibookFetch("/accommodations/", token);
     const items = Array.isArray(data) ? data : [];
+    const ids = items
+      .map((item) => item?.id)
+      .filter((id) => Number.isFinite(id) && id > 0);
+    const batchResults = ids.length ? await avaibookBatchFetch(ids) : [];
 
-    const listHtml = items
-      .map((item) => {
-        const id = item?.id ?? "";
-        const name = item?.tradeName?.es || item?.name || `Alojamiento ${id}`;
-        return `<li><a href="/api/accommodations/${id}" target="_blank" rel="noopener noreferrer">${name} (ID: ${id})</a></li>`;
+    const cardsHtml = batchResults
+      .map((result) => {
+        const id = result?.id ?? "";
+        if (!result?.ok || !result?.data || typeof result.data !== "object") {
+          return `<article class="card error-card">
+            <div class="content">
+              <h2>${escapeHtml(`Alojamiento ${id}`)}</h2>
+              <p>Error: ${escapeHtml(result?.error || "No se pudo cargar el detalle")}</p>
+              <p class="links"><a href="/api/accommodations/${escapeHtml(id)}" target="_blank" rel="noopener noreferrer">Abrir detalle directo</a></p>
+            </div>
+          </article>`;
+        }
+
+        const detail = result.data;
+        const location = detail?.location ?? {};
+        const unit = Array.isArray(detail?.units) ? detail.units[0] : null;
+        const image = Array.isArray(detail?.images)
+          ? detail.images.find((img) => img?.SMALL || img?.BIG || img?.ORIGINAL)
+          : null;
+        const imageSrc = image?.SMALL || image?.BIG || image?.ORIGINAL || "";
+        const featureCount =
+          detail?.features && typeof detail.features === "object"
+            ? Object.values(detail.features).filter((value) => value === "1" || value === 1 || value === true).length
+            : 0;
+
+        return `<article class="card">
+          ${imageSrc ? `<img class="hero" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(detail?.tradeName?.es || detail?.name || `Alojamiento ${id}`)}" loading="lazy" />` : ""}
+          <div class="content">
+            <h2>${escapeHtml(detail?.tradeName?.es || detail?.name || `Alojamiento ${id}`)}</h2>
+            <p class="muted">${escapeHtml(detail?.accommodationType || "Alojamiento")} · ${escapeHtml(location.city || "Calpe")} (${escapeHtml(location.region || "Alicante")})</p>
+            <div class="stats">
+              ${kv("ID", id)}
+              ${kv("Capacidad", unit?.capacity)}
+              ${kv("Licencia", detail?.license)}
+              ${kv("Caracteristicas", featureCount)}
+            </div>
+            <p>${escapeHtml(detail?.introduction?.es || detail?.description?.es || "Sin descripcion corta.")}</p>
+            <p class="links">
+              <a href="/api/accommodations/${escapeHtml(id)}" target="_blank" rel="noopener noreferrer">Detalle directo</a>
+              <a href="/api/accommodations/${escapeHtml(id)}?format=json" target="_blank" rel="noopener noreferrer">JSON</a>
+            </p>
+          </div>
+        </article>`;
       })
       .join("");
 
@@ -112,20 +186,29 @@ app.get("/", async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Alojamientos AvaiBook</title>
     <style>
-      body { font-family: Arial, sans-serif; margin: 24px; }
+      body { font-family: Arial, sans-serif; margin: 24px; background: #f4f4f4; color: #232323; }
       h1 { margin: 0 0 8px; }
       p { color: #555; }
-      ul { line-height: 1.7; padding-left: 20px; }
       a { color: #0b63ce; text-decoration: none; }
       a:hover { text-decoration: underline; }
       .meta { margin-top: 18px; font-size: 13px; color: #666; }
+      .source { font-size: 13px; color: #666; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 18px; }
+      .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+      .content { padding: 14px; }
+      .hero { width: 100%; height: 190px; object-fit: cover; display: block; background: #ececec; }
+      .muted { color: #666; margin-top: 4px; }
+      .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin: 14px 0; }
+      .links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+      .error-card { border-color: #f0c7c7; }
     </style>
   </head>
   <body>
     <h1>Alojamientos</h1>
     <p>Prefetch al iniciar: ${prefetchCount === null ? "en curso" : prefetchCount === -1 ? "error" : `${prefetchCount} alojamientos`}</p>
     <p>Total: ${items.length}</p>
-    <ul>${listHtml || "<li>No se recibieron alojamientos</li>"}</ul>
+    <p class="source">Detalles cargados a traves de <code>${escapeHtml(`${NEXT_APP_BASE_URL}/api/avaibook-batch`)}</code></p>
+    <section class="grid">${cardsHtml || "<article class=\"card error-card\"><div class=\"content\"><p>No se recibieron alojamientos</p></div></article>"}</section>
     <p class="meta">
       JSON completo:
       <a href="/api/accommodations" target="_blank" rel="noopener noreferrer">/api/accommodations</a>
