@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useLangStore } from "@/app/lib/langStore";
@@ -570,7 +570,7 @@ const bookingSearchTranslations = {
 const bookingResultsTranslations = {
   staysInCalpe: {
     eng: "stays in Calpe",
-    esp: "{staysInCalpeLabel}",
+    esp: "alojamientos en Calpe",
     ru: "вариантов размещения в Кальпе",
     fr: "hebergements a Calpe",
     it: "alloggi a Calpe",
@@ -1579,7 +1579,7 @@ function DatePickerPopover({
   const min = minDate ? startOfDay(minDate) : null;
 
   return (
-    <div className="absolute left-0 top-[calc(100%+10px)] z-30 w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#e8e8e8] bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+    <div className="absolute left-0 top-[calc(100%+10px)] z-60 w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#e8e8e8] bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
@@ -1682,12 +1682,13 @@ export default function ReservaDirectaV2Content() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [guestFilter, setGuestFilter] = useState("0");
+  const [guestFilter, setGuestFilter] = useState("2");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [openDatePicker, setOpenDatePicker] = useState<"checkIn" | "checkOut" | null>(
     null,
   );
+  const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(new Date()));
   const [checkoutPreviewDate, setCheckoutPreviewDate] = useState<Date | null>(null);
   const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(
@@ -1695,8 +1696,13 @@ export default function ReservaDirectaV2Content() {
   );
   const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const guestMenuRef = useRef<HTMLDivElement>(null);
   const parsedCheckIn = parseDateInput(checkIn);
   const parsedCheckOut = parseDateInput(checkOut);
+  const selectedGuestCount = Number.parseInt(guestFilter, 10) || 2;
+  const selectedGuestLabel = `${selectedGuestCount} ${
+    selectedGuestCount === 1 ? guestSingularLabel : guestPluralLabel
+  }`;
 
   function openCalendar(target: "checkIn" | "checkOut") {
     const selectedDate = target === "checkIn" ? parsedCheckIn : parsedCheckOut;
@@ -1749,6 +1755,21 @@ export default function ReservaDirectaV2Content() {
       document.removeEventListener("mousedown", handlePointerDown);
     };
   }, [openDatePicker]);
+
+  useEffect(() => {
+    if (!isGuestMenuOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!guestMenuRef.current?.contains(event.target as Node)) {
+        setIsGuestMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isGuestMenuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1878,7 +1899,7 @@ export default function ReservaDirectaV2Content() {
   }, []);
 
   const filtered = properties.filter((p) => {
-    if (guestFilter !== "0" && p.capacity < parseInt(guestFilter)) return false;
+    if (p.capacity < selectedGuestCount) return false;
     return true;
   });
   const loadingDetails = properties.some((prop) => !prop.name);
@@ -1939,7 +1960,7 @@ export default function ReservaDirectaV2Content() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
         <div className="pt-3 pb-2">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div
               ref={openDatePicker === "checkIn" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0"
@@ -2050,22 +2071,74 @@ export default function ReservaDirectaV2Content() {
                 />
               )}
             </div>
-            <div className="border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0">
+            <div
+              ref={guestMenuRef}
+              className="relative border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0"
+            >
               <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
                 {guestsLabel}
               </label>
-              <select
-                value={guestFilter}
-                onChange={(e) => setGuestFilter(e.target.value)}
-                className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0"
+              <button
+                type="button"
+                onClick={() => setIsGuestMenuOpen((prev) => !prev)}
+                aria-haspopup="listbox"
+                aria-expanded={isGuestMenuOpen}
+                className="flex w-full items-center justify-between gap-2 border-0 bg-transparent text-left text-[15px] font-medium text-[#2d2d2d] outline-0"
               >
-                <option value="0">2 {guestPluralLabel}</option>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                  <option key={n} value={n}>
-                    {n} {n === 1 ? guestSingularLabel : guestPluralLabel}
-                  </option>
-                ))}
-              </select>
+                <span>{selectedGuestLabel}</span>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className={`shrink-0 transition-transform duration-200 ${isGuestMenuOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 6.5L8 10.5L12 6.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {isGuestMenuOpen && (
+                <div className="absolute left-0 top-[calc(100%+8px)] z-40 w-full min-w-[220px] rounded-[12px] border border-[#e6e6e6] bg-white p-1 shadow-[0_14px_36px_rgba(15,23,42,0.16)]">
+                  <div className="max-h-[300px] overflow-y-auto py-1">
+                    {[
+                      { value: "2", count: 2 },
+                      ...[1, 2, 3, 4, 5, 6, 7, 8, 9]
+                        .filter((n) => n !== 2)
+                        .map((n) => ({ value: String(n), count: n })),
+                    ].map(({ value, count }, index) => {
+                      const isSelected = guestFilter === value;
+                      const isStripedRow = index % 2 === 0;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            setGuestFilter(value);
+                            setIsGuestMenuOpen(false);
+                          }}
+                          role="option"
+                          aria-selected={isSelected}
+                          className={`flex w-full items-center rounded-[8px] px-3 py-2 text-left text-[14px] transition-colors ${
+                            isSelected
+                              ? "bg-[#f2ead6] font-semibold text-[#8f7130]"
+                              : isStripedRow
+                                ? "bg-[#f7f7f7] text-[#2d2d2d] hover:bg-[#efefef]"
+                                : "text-[#2d2d2d] hover:bg-[#f7f7f7]"
+                          }`}
+                        >
+                          {count} {count === 1 ? guestSingularLabel : guestPluralLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <button className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f]">
               {searchLabel}
@@ -2122,7 +2195,7 @@ export default function ReservaDirectaV2Content() {
                     bedsLabel={bedsLabel}
                     bathroomsLabel={bathroomsLabel}
                     bookingUrl={buildBookingUrl(prop.id, {
-                      guests: guestFilter !== "0" ? guestFilter : undefined,
+                      guests: guestFilter,
                     })}
                   />
                 ))}

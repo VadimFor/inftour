@@ -4,7 +4,7 @@ const AVAIBOOK_API = "https://api.avaibook.com/api/owner";
 const AVAIBOOK_TOKEN = process.env.AVAIBOOK_TOKEN;
 
 const DETAIL_CACHE_TTL_MS = 10 * 60 * 1000;
-const UPSTREAM_GAP_MS = 200;
+const UPSTREAM_GAP_MS = 150;
 const UPSTREAM_429_BASE_MS = 2000;
 const UPSTREAM_429_MAX_MS = 15000;
 const UPSTREAM_MAX_RETRIES = 4;
