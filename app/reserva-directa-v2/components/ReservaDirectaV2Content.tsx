@@ -1246,6 +1246,22 @@ function PropertyCard({
     !prop.sqm;
   const canRetry = isPending && prop.id > 0;
   const showStatsLoading = isPending;
+  const [showRetryButton, setShowRetryButton] = useState(false);
+
+  useEffect(() => {
+    if (!canRetry) {
+      setShowRetryButton(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowRetryButton(true);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [canRetry, prop.id]);
 
   return (
     <div
@@ -1271,7 +1287,7 @@ function PropertyCard({
           previousPhotoLabel={previousPhotoLabel}
           nextPhotoLabel={nextPhotoLabel}
         />
-        {canRetry && (
+        {canRetry && showRetryButton && (
           <button
             type="button"
             onClick={(e) => {
