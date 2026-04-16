@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useLangStore } from "@/app/lib/langStore";
@@ -25,7 +25,7 @@ const FEAT_LABELS: Record<string, string> = {
   lavadora: "Lavadora",
   lavavajillas: "Lavavajillas",
   ascensor: "Ascensor",
-  calefaccion: "Calefacción",
+  calefaccion: "CalefacciÃ³n",
   secador_pelo: "Secador",
   plancha: "Plancha",
   microondas: "Microondas",
@@ -44,7 +44,7 @@ const FEAT_LABELS: Record<string, string> = {
   hervidor: "Hervidor",
   tostadora: "Tostadora",
   ventilador: "Ventilador",
-  sofa: "Sofá",
+  sofa: "SofÃ¡",
   sistema_antimosquitos: "Antimosquitos",
   cortinas_opacas: "Cortinas opacas",
   piscina: "Piscina",
@@ -168,42 +168,158 @@ const modalTranslations = {
   visitActualPage: {
     eng: "Visit page",
     esp: "Visitar pagina",
-    ru: "Открыть страницу",
+    ru: "ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ",
     fr: "Voir la page",
     it: "Visita pagina",
     de: "Seite offnen",
-    uk: "Вiдкрити сторiнку",
+    uk: "Ð’iÐ´ÐºÑ€Ð¸Ñ‚Ð¸ ÑÑ‚Ð¾Ñ€iÐ½ÐºÑƒ",
     pl: "Otworz strone",
   },
   closeModal: {
     eng: "Close",
     esp: "Cerrar",
-    ru: "Закрыть",
+    ru: "Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ",
     fr: "Fermer",
     it: "Chiudi",
     de: "Schliessen",
-    uk: "Закрити",
+    uk: "Ð—Ð°ÐºÑ€Ð¸Ñ‚Ð¸",
     pl: "Zamknij",
   },
   bookingProperty: {
     eng: "Booking property",
     esp: "Reserva de propiedad",
-    ru: "Бронирование объекта",
+    ru: "Ð‘Ñ€Ð¾Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¾Ð±ÑŠÐµÐºÑ‚Ð°",
     fr: "Reservation du logement",
     it: "Prenotazione proprieta",
     de: "Objektbuchung",
-    uk: "Бронювання об'єкта",
+    uk: "Ð‘Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ Ð¾Ð±'Ñ”ÐºÑ‚Ð°",
     pl: "Rezerwacja obiektu",
   },
   loadingPage: {
     eng: "Loading page...",
     esp: "Cargando pagina...",
-    ru: "Загрузка страницы...",
+    ru: "Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹...",
     fr: "Chargement de la page...",
     it: "Caricamento pagina...",
     de: "Seite wird geladen...",
-    uk: "Завантаження сторiнки...",
+    uk: "Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ ÑÑ‚Ð¾Ñ€iÐ½ÐºÐ¸...",
     pl: "Ladowanie strony...",
+  },
+} as const;
+
+const bookingSearchTranslations = {
+  checkIn: {
+    eng: "Check-in",
+    esp: "Llegada",
+    ru: "Ð—Ð°ÐµÐ·Ð´",
+    fr: "Arrivee",
+    it: "Arrivo",
+    de: "Anreise",
+    uk: "Ð—Ð°Ñ—Ð·Ð´",
+    pl: "Przyjazd",
+  },
+  checkOut: {
+    eng: "Check-out",
+    esp: "Salida",
+    ru: "Ð’Ñ‹ÐµÐ·Ð´",
+    fr: "Depart",
+    it: "Partenza",
+    de: "Abreise",
+    uk: "Ð’Ð¸Ñ—Ð·Ð´",
+    pl: "Wyjazd",
+  },
+  guests: {
+    eng: "Guests",
+    esp: "Huespedes",
+    ru: "Ð“Ð¾ÑÑ‚Ð¸",
+    fr: "Voyageurs",
+    it: "Ospiti",
+    de: "Gaste",
+    uk: "Ð“Ð¾ÑÑ‚Ñ–",
+    pl: "Goscie",
+  },
+  search: {
+    eng: "Search",
+    esp: "Buscar",
+    ru: "ÐÐ°Ð¹Ñ‚Ð¸",
+    fr: "Rechercher",
+    it: "Cerca",
+    de: "Suchen",
+    uk: "Ð¨ÑƒÐºÐ°Ñ‚Ð¸",
+    pl: "Szukaj",
+  },
+  datePlaceholder: {
+    eng: "dd/mm/yyyy",
+    esp: "dd/mm/aaaa",
+    ru: "Ð´Ð´/Ð¼Ð¼/Ð³Ð³Ð³Ð³",
+    fr: "jj/mm/aaaa",
+    it: "gg/mm/aaaa",
+    de: "tt/mm/jjjj",
+    uk: "Ð´Ð´/Ð¼Ð¼/Ñ€Ñ€Ñ€Ñ€",
+    pl: "dd/mm/rrrr",
+  },
+  guestSingular: {
+    eng: "guest",
+    esp: "huesped",
+    ru: "Ð³Ð¾ÑÑ‚ÑŒ",
+    fr: "voyageur",
+    it: "ospite",
+    de: "Gast",
+    uk: "Ð³Ñ–ÑÑ‚ÑŒ",
+    pl: "gosc",
+  },
+  guestPlural: {
+    eng: "guests",
+    esp: "huespedes",
+    ru: "Ð³Ð¾ÑÑ‚ÐµÐ¹",
+    fr: "voyageurs",
+    it: "ospiti",
+    de: "Gaste",
+    uk: "Ð³Ð¾ÑÑ‚ÐµÐ¹",
+    pl: "gosci",
+  },
+} as const;
+
+const bookingResultsTranslations = {
+  staysInCalpe: {
+    eng: "stays in Calpe",
+    esp: "{staysInCalpeLabel}",
+    ru: "Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ð¾Ð² Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ Ð² ÐšÐ°Ð»ÑŒÐ¿Ðµ",
+    fr: "hebergements a Calpe",
+    it: "alloggi a Calpe",
+    de: "Unterkunfte in Calpe",
+    uk: "Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ñ–Ð² Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ Ð² ÐšÐ°Ð»ÑŒÐ¿Ðµ",
+    pl: "noclegow w Calpe",
+  },
+  loadingListings: {
+    eng: "Loading stays...",
+    esp: "{loadingListingsLabel}",
+    ru: "Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ð¾Ð² Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ...",
+    fr: "Chargement des hebergements...",
+    it: "Caricamento alloggi...",
+    de: "Unterkunfte werden geladen...",
+    uk: "Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ñ–Ð² Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ...",
+    pl: "Ladowanie noclegow...",
+  },
+  loadingDetails: {
+    eng: "loading details...",
+    esp: "cargando detalles...",
+    ru: "Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð´ÐµÑ‚Ð°Ð»ÐµÐ¹...",
+    fr: "chargement des details...",
+    it: "caricamento dettagli...",
+    de: "lade Details...",
+    uk: "Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ð´ÐµÑ‚Ð°Ð»ÐµÐ¹...",
+    pl: "ladowanie szczegolow...",
+  },
+  loadError: {
+    eng: "Could not load stays.",
+    esp: "No se pudieron cargar los alojamientos.",
+    ru: "ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ñ‹ Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ.",
+    fr: "Impossible de charger les hebergements.",
+    it: "Impossibile caricare gli alloggi.",
+    de: "Unterkunfte konnten nicht geladen werden.",
+    uk: "ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶Ð¸Ñ‚Ð¸ Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ð¸ Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ.",
+    pl: "Nie udalo sie zaladowac noclegow.",
   },
 } as const;
 
@@ -391,7 +507,7 @@ async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
   throw lastError;
 }
 
-// ─── CardCarousel ────────────────────────────────────────────────────────────
+// â”€â”€â”€ CardCarousel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CardCarousel({
   images,
@@ -436,7 +552,7 @@ function CardCarousel({
           style={{ transform: "translateY(-50%)" }}
           aria-label="Foto anterior"
         >
-          ‹
+          &#8249;
         </button>
         <button
           onClick={next}
@@ -445,7 +561,7 @@ function CardCarousel({
           style={{ transform: "translateY(-50%)" }}
           aria-label="Foto siguiente"
         >
-          ›
+          &#8250;
         </button>
         {gallery.length > 1 && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
@@ -501,7 +617,7 @@ function StatItem({
   );
 }
 
-// ─── PropertyCard ────────────────────────────────────────────────────────────
+// â”€â”€â”€ PropertyCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PropertyCard({
   prop,
@@ -693,7 +809,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.bathrooms > 0) && (
             <StatItem
-              text={`${prop.bathrooms} baños`}
+              text={`${prop.bathrooms} baÃ±os`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -718,7 +834,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.sqm > 0) && (
             <StatItem
-              text={`${prop.sqm} m²`}
+              text={`${prop.sqm} mÂ²`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -812,10 +928,25 @@ function PropertyCard({
   );
 }
 
-// ─── GalleryModal ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ GalleryModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ReservaDirectaV2Content() {
   const lang = useLangStore((s) => s.lang);
+  const visitActualPageLabel = modalTranslations.visitActualPage[lang];
+  const closeModalLabel = modalTranslations.closeModal[lang];
+  const bookingPropertyLabel = modalTranslations.bookingProperty[lang];
+  const loadingPageLabel = modalTranslations.loadingPage[lang];
+  const checkInLabel = bookingSearchTranslations.checkIn[lang];
+  const checkOutLabel = bookingSearchTranslations.checkOut[lang];
+  const guestsLabel = bookingSearchTranslations.guests[lang];
+  const searchLabel = bookingSearchTranslations.search[lang];
+  const datePlaceholderLabel = bookingSearchTranslations.datePlaceholder[lang];
+  const guestSingularLabel = bookingSearchTranslations.guestSingular[lang];
+  const guestPluralLabel = bookingSearchTranslations.guestPlural[lang];
+  const staysInCalpeLabel = bookingResultsTranslations.staysInCalpe[lang];
+  const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
+  const loadingDetailsLabel = bookingResultsTranslations.loadingDetails[lang];
+  const loadErrorLabel = bookingResultsTranslations.loadError[lang];
   const [properties, setProperties] = useState<Property[]>(() =>
     createInitialGridPlaceholders(9),
   );
@@ -884,7 +1015,7 @@ export default function ReservaDirectaV2Content() {
           }
         }
       } catch {
-        if (!cancelled) setError("No se pudieron cargar los alojamientos.");
+        if (!cancelled) setError(loadErrorLabel);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -894,7 +1025,7 @@ export default function ReservaDirectaV2Content() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadErrorLabel]);
 
   const filtered = properties.filter((p) => {
     if (guestFilter !== "0" && p.capacity < parseInt(guestFilter)) return false;
@@ -903,10 +1034,6 @@ export default function ReservaDirectaV2Content() {
   const loadingDetails = properties.some((prop) => !prop.name);
   const showingInitialPlaceholders =
     loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
-  const visitActualPageLabel = modalTranslations.visitActualPage[lang];
-  const closeModalLabel = modalTranslations.closeModal[lang];
-  const bookingPropertyLabel = modalTranslations.bookingProperty[lang];
-  const loadingPageLabel = modalTranslations.loadingPage[lang];
 
   function retryProperty(id: number) {
     void (async () => {
@@ -956,54 +1083,54 @@ export default function ReservaDirectaV2Content() {
         <div className="pt-3 pb-2">
           <div className="mx-auto grid max-w-[1240px] grid-cols-1 overflow-hidden border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div className="border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Llegada</label>
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{checkInLabel}</label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="dd/mm/aaaa"
+                  placeholder={datePlaceholderLabel}
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
                   className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
-                  ◴
+                  â—´
                 </span>
               </div>
             </div>
             <div className="border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Salida</label>
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{checkOutLabel}</label>
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="dd/mm/aaaa"
+                  placeholder={datePlaceholderLabel}
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
                   className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
-                  ◴
+                  â—´
                 </span>
               </div>
             </div>
             <div className="border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0">
-              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">Huéspedes</label>
+              <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{guestsLabel}</label>
               <select
                 value={guestFilter}
                 onChange={(e) => setGuestFilter(e.target.value)}
                 className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0"
               >
-                <option value="0">2 huéspedes</option>
+                <option value="0">2 {guestPluralLabel}</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
                   <option key={n} value={n}>
-                    {n} {n === 1 ? "huésped" : "huéspedes"}
+                    {n} {n === 1 ? guestSingularLabel : guestPluralLabel}
                   </option>
                 ))}
               </select>
             </div>
             <button className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f]">
-              Buscar
+              {searchLabel}
             </button>
           </div>
         </div>
@@ -1014,7 +1141,7 @@ export default function ReservaDirectaV2Content() {
             <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
               <div className="w-6 h-6 border-2 border-gray-200 border-t-[#C5A85F] rounded-full animate-spin" />
               <span className="text-xs font-bold uppercase tracking-widest">
-                Cargando alojamientos...
+                {loadingListingsLabel}
               </span>
             </div>
           )}
@@ -1031,10 +1158,10 @@ export default function ReservaDirectaV2Content() {
                     filtered.length
                   )}
                 </strong>{" "}
-                alojamientos en Calpe
+                {staysInCalpeLabel}
                 {(loading || loadingDetails) && (
                   <span className="ml-2 text-[#c2a457] text-sm font-medium">
-                    · cargando detalles...
+                    · {loadingDetailsLabel}
                   </span>
                 )}
               </p>
@@ -1078,7 +1205,7 @@ export default function ReservaDirectaV2Content() {
               className="min-h-0 flex-1 border-0"
               onLoad={() => setIsBookingModalLoading(false)}
             />
-            <div className="flex items-center justify-between gap-3 border-t border-[#e7e7e7] bg-white px-4 py-3">
+            <div className="flex items-center justify-start gap-3 border-t border-[#e7e7e7] bg-white px-4 py-3 sm:justify-center">
               <a
                 href={selectedBookingUrl}
                 target="_blank"
@@ -1101,3 +1228,7 @@ export default function ReservaDirectaV2Content() {
     </div>
   );
 }
+
+
+
+

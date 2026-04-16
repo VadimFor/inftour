@@ -9,7 +9,7 @@ ${SITE_URL}
 
 ## Primary pages
 - Home: ${SITE_URL}/
-- Direct booking: ${SITE_URL}/reserva-directa-v2
+- Direct booking: ${SITE_URL}/
 - Experiences: ${SITE_URL}/experiencias
 - Services: ${SITE_URL}/services
 - Magazine: ${SITE_URL}/revista

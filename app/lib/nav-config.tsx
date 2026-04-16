@@ -43,7 +43,6 @@ function IconLobby({ className }: { className?: string }) {
 
 export type NavLabelKey =
   | "reservaDirecta"
-  | "reservaDirectaV2"
   | "experiencias"
   | "services"
   | "revista"
@@ -56,7 +55,6 @@ export const navItems: Array<{
   Icon: ComponentType<{ className?: string }>;
 }> = [
   { href: "/", labelKey: "reservaDirecta", first: true, Icon: IconCalendar },
-  { href: "/reserva-directa-v2", labelKey: "reservaDirectaV2", first: false, Icon: IconCalendar },
   { href: "/experiencias", labelKey: "experiencias", first: false, Icon: IconExperiencias },
   { href: "/services", labelKey: "services", first: false, Icon: IconServices },
   { href: "/revista", labelKey: "revista", first: false, Icon: IconRevista },

@@ -6,11 +6,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.inftour.com";
 const DEFAULT_LAST_MODIFIED = new Date("2026-04-13T00:00:00.000Z");
 const pages = [
   { path: "/", changeFrequency: "daily", priority: 1.0 },
-  {
-    path: "/reserva-directa-v2",
-    changeFrequency: "weekly",
-    priority: 0.9,
-  },
   { path: "/experiencias", changeFrequency: "weekly", priority: 0.9 },
   { path: "/services", changeFrequency: "weekly", priority: 0.8 },
   { path: "/revista", changeFrequency: "weekly", priority: 0.8 },
