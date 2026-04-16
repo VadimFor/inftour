@@ -789,7 +789,7 @@ function PropertyCard({
               onRetry(prop.id);
             }}
             aria-label={retryLabel}
-            className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d97c66]/88 text-white shadow-lg backdrop-blur-sm hover:bg-[#cf6d56]/92 active:bg-[#c86149]/92"
+            className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#4f8ecf]/75 text-white shadow-lg backdrop-blur-sm hover:bg-[#3f7fbe]/82 active:bg-[#346fa9]/88"
           >
             <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path

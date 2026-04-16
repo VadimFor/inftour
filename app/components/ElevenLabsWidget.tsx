@@ -126,6 +126,12 @@ function renderBookingCards(linksParam: unknown): string {
   return "ok";
 }
 
+function getFirstArgObject(args: unknown[]): Record<string, unknown> {
+  const first = args[0];
+  if (!first || typeof first !== "object") return {};
+  return first as Record<string, unknown>;
+}
+
 export default function ElevenLabsWidget() {
   const ref = useRef<HTMLElement>(null);
   const mounted = useRef(false);
@@ -166,10 +172,15 @@ export default function ElevenLabsWidget() {
 
       config.clientTools = {
         ...(config.clientTools ?? {}),
-        renderBookingCards: ({ links }: { links?: unknown } = {}) =>
-          renderBookingCards(links),
-        redirectToExternalURL: ({ url }: { url?: string } = {}) => {
-          if (!url || !isValidHttpUrl(url)) return "error:invalid-url";
+        renderBookingCards: (...args: unknown[]) => {
+          const { links } = getFirstArgObject(args);
+          return renderBookingCards(links);
+        },
+        redirectToExternalURL: (...args: unknown[]) => {
+          const { url } = getFirstArgObject(args);
+          if (typeof url !== "string" || !isValidHttpUrl(url)) {
+            return "error:invalid-url";
+          }
           window.open(url, "_blank", "noopener,noreferrer");
           return "ok";
         },
