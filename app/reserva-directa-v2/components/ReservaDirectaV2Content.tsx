@@ -770,27 +770,6 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
   };
 }
 
-function createInitialGridPlaceholders(count: number): Property[] {
-  return Array.from({ length: count }, (_, index) => ({
-    id: -(index + 1),
-    name: `Propiedad ${index + 1}`,
-    type: "",
-    city: "",
-    region: "",
-    capacity: 0,
-    bedrooms: 0,
-    beds: 0,
-    bathrooms: 0,
-    sqm: 0,
-    features: {},
-    images: [],
-    introduction: "",
-    description: "",
-    license: "",
-    loadError: null,
-  }));
-}
-
 function normalize(a: RawProperty): Property {
   return {
     id: a.id,
@@ -1686,9 +1665,7 @@ export default function ReservaDirectaV2Content() {
   const bedroomsShortLabel = propertyCardTranslations.bedroomsShort[lang];
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
-  const [properties, setProperties] = useState<Property[]>(() =>
-    createInitialGridPlaceholders(9),
-  );
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [guestFilter, setGuestFilter] = useState("2");
@@ -1723,29 +1700,9 @@ export default function ReservaDirectaV2Content() {
       target === "checkOut"
         ? parsedCheckOut || parsedCheckIn || new Date()
         : parsedCheckIn || new Date();
-    setIsGuestMenuOpen(false);
     setVisibleMonth(startOfMonth(selectedDate || fallbackDate));
     setCheckoutPreviewDate(target === "checkOut" ? parsedCheckOut : null);
     setOpenDatePicker(target);
-  }
-
-  function toggleCalendar(target: "checkIn" | "checkOut") {
-    if (openDatePicker === target) {
-      setCheckoutPreviewDate(null);
-      setOpenDatePicker(null);
-      return;
-    }
-    openCalendar(target);
-  }
-
-  function toggleGuestMenu() {
-    if (isGuestMenuOpen) {
-      setIsGuestMenuOpen(false);
-      return;
-    }
-    setCheckoutPreviewDate(null);
-    setOpenDatePicker(null);
-    setIsGuestMenuOpen(true);
   }
 
   function handleDateSelection(target: "checkIn" | "checkOut", date: Date) {
@@ -1934,6 +1891,17 @@ export default function ReservaDirectaV2Content() {
   }, []);
 
   const filtered = properties.filter((p) => {
+    const isDetailsPending =
+      p.id < 0 ||
+      (!p.images.length &&
+        !p.capacity &&
+        !p.bedrooms &&
+        !p.beds &&
+        !p.bathrooms &&
+        !p.sqm &&
+        !p.loadError);
+
+    if (isDetailsPending) return true;
     if (p.capacity < selectedGuestCount) return false;
     return true;
   });
@@ -2002,7 +1970,7 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={() => toggleCalendar("checkIn")}
+                onClick={() => openCalendar("checkIn")}
               >
                 {checkInLabel}
               </label>
@@ -2012,12 +1980,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkIn}
-                  onClick={() => toggleCalendar("checkIn")}
+                  onClick={() => openCalendar("checkIn")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => toggleCalendar("checkIn")}
+                  onClick={() => openCalendar("checkIn")}
                   className="text-[#2d2d2d]"
                   aria-label={checkInLabel}
                 >
@@ -2062,7 +2030,7 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={() => toggleCalendar("checkOut")}
+                onClick={() => openCalendar("checkOut")}
               >
                 {checkOutLabel}
               </label>
@@ -2072,12 +2040,12 @@ export default function ReservaDirectaV2Content() {
                   readOnly
                   placeholder={datePlaceholderLabel}
                   value={checkOut}
-                  onClick={() => toggleCalendar("checkOut")}
+                  onClick={() => openCalendar("checkOut")}
                   className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
                 <button
                   type="button"
-                  onClick={() => toggleCalendar("checkOut")}
+                  onClick={() => openCalendar("checkOut")}
                   className="text-[#2d2d2d]"
                   aria-label={checkOutLabel}
                 >
@@ -2130,13 +2098,13 @@ export default function ReservaDirectaV2Content() {
             >
               <label
                 className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={toggleGuestMenu}
+                onClick={() => setIsGuestMenuOpen(true)}
               >
                 {guestsLabel}
               </label>
               <button
                 type="button"
-                onClick={toggleGuestMenu}
+                onClick={() => setIsGuestMenuOpen((prev) => !prev)}
                 aria-haspopup="listbox"
                 aria-expanded={isGuestMenuOpen}
                 className="flex w-full items-center justify-between gap-2 border-0 bg-transparent text-left text-[15px] font-medium text-[#2d2d2d] outline-0"
