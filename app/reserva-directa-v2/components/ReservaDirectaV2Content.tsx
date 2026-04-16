@@ -168,41 +168,41 @@ const modalTranslations = {
   visitActualPage: {
     eng: "Visit page",
     esp: "Visitar pagina",
-    ru: "ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ",
+    ru: "Открыть страницу",
     fr: "Voir la page",
     it: "Visita pagina",
     de: "Seite offnen",
-    uk: "Ð’iÐ´ÐºÑ€Ð¸Ñ‚Ð¸ ÑÑ‚Ð¾Ñ€iÐ½ÐºÑƒ",
+    uk: "Відкрити сторінку",
     pl: "Otworz strone",
   },
   closeModal: {
     eng: "Close",
     esp: "Cerrar",
-    ru: "Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ",
+    ru: "Закрыть",
     fr: "Fermer",
     it: "Chiudi",
     de: "Schliessen",
-    uk: "Ð—Ð°ÐºÑ€Ð¸Ñ‚Ð¸",
+    uk: "Закрити",
     pl: "Zamknij",
   },
   bookingProperty: {
     eng: "Booking property",
     esp: "Reserva de propiedad",
-    ru: "Ð‘Ñ€Ð¾Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¾Ð±ÑŠÐµÐºÑ‚Ð°",
+    ru: "Бронирование объекта",
     fr: "Reservation du logement",
     it: "Prenotazione proprieta",
     de: "Objektbuchung",
-    uk: "Ð‘Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ Ð¾Ð±'Ñ”ÐºÑ‚Ð°",
+    uk: "Бронювання об'єкта",
     pl: "Rezerwacja obiektu",
   },
   loadingPage: {
     eng: "Loading page...",
     esp: "Cargando pagina...",
-    ru: "Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹...",
+    ru: "Загрузка страницы...",
     fr: "Chargement de la page...",
     it: "Caricamento pagina...",
     de: "Seite wird geladen...",
-    uk: "Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ ÑÑ‚Ð¾Ñ€iÐ½ÐºÐ¸...",
+    uk: "Завантаження сторінки...",
     pl: "Ladowanie strony...",
   },
 } as const;
@@ -211,71 +211,71 @@ const bookingSearchTranslations = {
   checkIn: {
     eng: "Check-in",
     esp: "Llegada",
-    ru: "Ð—Ð°ÐµÐ·Ð´",
+    ru: "Заезд",
     fr: "Arrivee",
     it: "Arrivo",
     de: "Anreise",
-    uk: "Ð—Ð°Ñ—Ð·Ð´",
+    uk: "Заїзд",
     pl: "Przyjazd",
   },
   checkOut: {
     eng: "Check-out",
     esp: "Salida",
-    ru: "Ð’Ñ‹ÐµÐ·Ð´",
+    ru: "Выезд",
     fr: "Depart",
     it: "Partenza",
     de: "Abreise",
-    uk: "Ð’Ð¸Ñ—Ð·Ð´",
+    uk: "Виїзд",
     pl: "Wyjazd",
   },
   guests: {
     eng: "Guests",
     esp: "Huespedes",
-    ru: "Ð“Ð¾ÑÑ‚Ð¸",
+    ru: "Гости",
     fr: "Voyageurs",
     it: "Ospiti",
     de: "Gaste",
-    uk: "Ð“Ð¾ÑÑ‚Ñ–",
+    uk: "Гості",
     pl: "Goscie",
   },
   search: {
     eng: "Search",
     esp: "Buscar",
-    ru: "ÐÐ°Ð¹Ñ‚Ð¸",
+    ru: "Найти",
     fr: "Rechercher",
     it: "Cerca",
     de: "Suchen",
-    uk: "Ð¨ÑƒÐºÐ°Ñ‚Ð¸",
+    uk: "Шукати",
     pl: "Szukaj",
   },
   datePlaceholder: {
     eng: "dd/mm/yyyy",
     esp: "dd/mm/aaaa",
-    ru: "Ð´Ð´/Ð¼Ð¼/Ð³Ð³Ð³Ð³",
+    ru: "дд/мм/гггг",
     fr: "jj/mm/aaaa",
     it: "gg/mm/aaaa",
     de: "tt/mm/jjjj",
-    uk: "Ð´Ð´/Ð¼Ð¼/Ñ€Ñ€Ñ€Ñ€",
+    uk: "дд/мм/рррр",
     pl: "dd/mm/rrrr",
   },
   guestSingular: {
     eng: "guest",
     esp: "huesped",
-    ru: "Ð³Ð¾ÑÑ‚ÑŒ",
+    ru: "гость",
     fr: "voyageur",
     it: "ospite",
     de: "Gast",
-    uk: "Ð³Ñ–ÑÑ‚ÑŒ",
+    uk: "гість",
     pl: "gosc",
   },
   guestPlural: {
     eng: "guests",
     esp: "huespedes",
-    ru: "Ð³Ð¾ÑÑ‚ÐµÐ¹",
+    ru: "гостей",
     fr: "voyageurs",
     it: "ospiti",
     de: "Gaste",
-    uk: "Ð³Ð¾ÑÑ‚ÐµÐ¹",
+    uk: "гостей",
     pl: "gosci",
   },
 } as const;
@@ -284,42 +284,125 @@ const bookingResultsTranslations = {
   staysInCalpe: {
     eng: "stays in Calpe",
     esp: "{staysInCalpeLabel}",
-    ru: "Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ð¾Ð² Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ Ð² ÐšÐ°Ð»ÑŒÐ¿Ðµ",
+    ru: "вариантов размещения в Кальпе",
     fr: "hebergements a Calpe",
     it: "alloggi a Calpe",
     de: "Unterkunfte in Calpe",
-    uk: "Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ñ–Ð² Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ Ð² ÐšÐ°Ð»ÑŒÐ¿Ðµ",
+    uk: "варіантів проживання в Кальпе",
     pl: "noclegow w Calpe",
   },
   loadingListings: {
     eng: "Loading stays...",
     esp: "{loadingListingsLabel}",
-    ru: "Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ð¾Ð² Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ...",
+    ru: "Загрузка вариантов размещения...",
     fr: "Chargement des hebergements...",
     it: "Caricamento alloggi...",
     de: "Unterkunfte werden geladen...",
-    uk: "Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ñ–Ð² Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ...",
+    uk: "Завантаження варіантів проживання...",
     pl: "Ladowanie noclegow...",
   },
   loadingDetails: {
     eng: "loading details...",
     esp: "cargando detalles...",
-    ru: "Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð´ÐµÑ‚Ð°Ð»ÐµÐ¹...",
+    ru: "загрузка деталей...",
     fr: "chargement des details...",
     it: "caricamento dettagli...",
     de: "lade Details...",
-    uk: "Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ð´ÐµÑ‚Ð°Ð»ÐµÐ¹...",
+    uk: "завантаження деталей...",
     pl: "ladowanie szczegolow...",
   },
   loadError: {
     eng: "Could not load stays.",
     esp: "No se pudieron cargar los alojamientos.",
-    ru: "ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ñ‹ Ñ€Ð°Ð·Ð¼ÐµÑ‰ÐµÐ½Ð¸Ñ.",
+    ru: "Не удалось загрузить варианты размещения.",
     fr: "Impossible de charger les hebergements.",
     it: "Impossibile caricare gli alloggi.",
     de: "Unterkunfte konnten nicht geladen werden.",
-    uk: "ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶Ð¸Ñ‚Ð¸ Ð²Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ð¸ Ð¿Ñ€Ð¾Ð¶Ð¸Ð²Ð°Ð½Ð½Ñ.",
+    uk: "Не вдалося завантажити варіанти проживання.",
     pl: "Nie udalo sie zaladowac noclegow.",
+  },
+} as const;
+
+const propertyCardTranslations = {
+  propertyFallback: {
+    eng: "Property",
+    esp: "Alojamiento",
+    ru: "Объект",
+    fr: "Logement",
+    it: "Alloggio",
+    de: "Unterkunft",
+    uk: "Об'єкт",
+    pl: "Obiekt",
+  },
+  loadingData: {
+    eng: "Loading data...",
+    esp: "Cargando datos...",
+    ru: "Загрузка данных...",
+    fr: "Chargement des donnees...",
+    it: "Caricamento dati...",
+    de: "Daten werden geladen...",
+    uk: "Завантаження даних...",
+    pl: "Ladowanie danych...",
+  },
+  retry: {
+    eng: "Retry",
+    esp: "Reintentar",
+    ru: "Повторить",
+    fr: "Reessayer",
+    it: "Riprova",
+    de: "Erneut versuchen",
+    uk: "Спробувати знову",
+    pl: "Sprobuj ponownie",
+  },
+  previousPhoto: {
+    eng: "Previous photo",
+    esp: "Foto anterior",
+    ru: "Предыдущее фото",
+    fr: "Photo precedente",
+    it: "Foto precedente",
+    de: "Vorheriges Foto",
+    uk: "Попереднє фото",
+    pl: "Poprzednie zdjecie",
+  },
+  nextPhoto: {
+    eng: "Next photo",
+    esp: "Foto siguiente",
+    ru: "Следующее фото",
+    fr: "Photo suivante",
+    it: "Foto successiva",
+    de: "Nachstes Foto",
+    uk: "Наступне фото",
+    pl: "Nastepne zdjecie",
+  },
+  bedroomsShort: {
+    eng: "bedr.",
+    esp: "hab.",
+    ru: "комн.",
+    fr: "ch.",
+    it: "cam.",
+    de: "Zi.",
+    uk: "кімн.",
+    pl: "pok.",
+  },
+  beds: {
+    eng: "beds",
+    esp: "camas",
+    ru: "кровати",
+    fr: "lits",
+    it: "letti",
+    de: "Betten",
+    uk: "ліжка",
+    pl: "lozka",
+  },
+  bathrooms: {
+    eng: "bathrooms",
+    esp: "banos",
+    ru: "ванные",
+    fr: "salles de bain",
+    it: "bagni",
+    de: "Badezimmer",
+    uk: "ванні",
+    pl: "lazienki",
   },
 } as const;
 
@@ -512,9 +595,13 @@ async function apiFetchWithRetry(path: string, retries = 1): Promise<unknown> {
 function CardCarousel({
   images,
   name,
+  previousPhotoLabel,
+  nextPhotoLabel,
 }: {
   images: Property["images"];
   name: string;
+  previousPhotoLabel: string;
+  nextPhotoLabel: string;
 }) {
   const [idx, setIdx] = useState(0);
   const gallery = (images ?? [])
@@ -550,7 +637,7 @@ function CardCarousel({
           disabled={gallery.length <= 1}
           className="absolute z-30 left-3 top-1/2 w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-md text-base font-bold text-gray-700 opacity-95 hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ transform: "translateY(-50%)" }}
-          aria-label="Foto anterior"
+          aria-label={previousPhotoLabel}
         >
           &#8249;
         </button>
@@ -559,7 +646,7 @@ function CardCarousel({
           disabled={gallery.length <= 1}
           className="absolute z-30 right-3 top-1/2 w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-md text-base font-bold text-gray-700 opacity-95 hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ transform: "translateY(-50%)" }}
-          aria-label="Foto siguiente"
+          aria-label={nextPhotoLabel}
         >
           &#8250;
         </button>
@@ -624,18 +711,34 @@ function PropertyCard({
   bookingUrl,
   onRetry,
   onOpen,
+  propertyFallbackLabel,
+  loadingDataLabel,
+  retryLabel,
+  previousPhotoLabel,
+  nextPhotoLabel,
+  bedroomsShortLabel,
+  bedsLabel,
+  bathroomsLabel,
 }: {
   prop: Property;
   bookingUrl: string;
   onRetry: (id: number) => void;
   onOpen: (url: string) => void;
+  propertyFallbackLabel: string;
+  loadingDataLabel: string;
+  retryLabel: string;
+  previousPhotoLabel: string;
+  nextPhotoLabel: string;
+  bedroomsShortLabel: string;
+  bedsLabel: string;
+  bathroomsLabel: string;
 }) {
   const feats = getTopFeats(prop.features);
-  const title = prop.name || `Alojamiento #${prop.id}`;
+  const title = prop.name || `${propertyFallbackLabel} #${prop.id}`;
   const location =
     prop.city && prop.region
       ? `${prop.city} (${prop.region})`
-      : "Cargando datos...";
+      : loadingDataLabel;
   const isPending =
     !prop.images.length &&
     !prop.capacity &&
@@ -672,7 +775,12 @@ function PropertyCard({
         className="relative overflow-hidden bg-gray-100"
         style={{ height: "180px" }}
       >
-        <CardCarousel images={prop.images} name={prop.name} />
+        <CardCarousel
+          images={prop.images}
+          name={prop.name}
+          previousPhotoLabel={previousPhotoLabel}
+          nextPhotoLabel={nextPhotoLabel}
+        />
         {canRetry && (
           <button
             type="button"
@@ -680,7 +788,7 @@ function PropertyCard({
               e.stopPropagation();
               onRetry(prop.id);
             }}
-            aria-label="Reintentar"
+            aria-label={retryLabel}
             className="absolute left-1/2 top-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#d97c66]/88 text-white shadow-lg backdrop-blur-sm hover:bg-[#cf6d56]/92 active:bg-[#c86149]/92"
           >
             <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -761,7 +869,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.bedrooms > 0) && (
             <StatItem
-              text={`${prop.bedrooms} hab.`}
+              text={`${prop.bedrooms} ${bedroomsShortLabel}`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -785,7 +893,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.beds > 0) && (
             <StatItem
-              text={`${prop.beds} camas`}
+              text={`${prop.beds} ${bedsLabel}`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -809,7 +917,7 @@ function PropertyCard({
           )}
           {(showStatsLoading || prop.bathrooms > 0) && (
             <StatItem
-              text={`${prop.bathrooms} baÃ±os`}
+              text={`${prop.bathrooms} ${bathroomsLabel}`}
               loading={showStatsLoading}
               icon={
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -947,6 +1055,14 @@ export default function ReservaDirectaV2Content() {
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
   const loadingDetailsLabel = bookingResultsTranslations.loadingDetails[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
+  const propertyFallbackLabel = propertyCardTranslations.propertyFallback[lang];
+  const cardLoadingDataLabel = propertyCardTranslations.loadingData[lang];
+  const retryLabel = propertyCardTranslations.retry[lang];
+  const previousPhotoLabel = propertyCardTranslations.previousPhoto[lang];
+  const nextPhotoLabel = propertyCardTranslations.nextPhoto[lang];
+  const bedroomsShortLabel = propertyCardTranslations.bedroomsShort[lang];
+  const bedsLabel = propertyCardTranslations.beds[lang];
+  const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
   const [properties, setProperties] = useState<Property[]>(() =>
     createInitialGridPlaceholders(9),
   );
@@ -991,7 +1107,7 @@ export default function ReservaDirectaV2Content() {
               const message =
                 result.reason instanceof Error
                   ? result.reason.message
-                  : "Error cargando alojamiento";
+                  : loadErrorLabel;
               const failedId = chunk[index]?.id;
               if (!failedId) return;
               setProperties((prev) =>
@@ -1045,7 +1161,7 @@ export default function ReservaDirectaV2Content() {
         );
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Error cargando alojamiento";
+          err instanceof Error ? err.message : loadErrorLabel;
         setProperties((prev) =>
           prev.map((prop) =>
             prop.id === id ? { ...prop, loadError: message } : prop,
@@ -1081,7 +1197,7 @@ export default function ReservaDirectaV2Content() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
         <div className="pt-3 pb-2">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-1 overflow-hidden border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-1 overflow-hidden rounded-[8px] border border-[#d9d9d9] bg-white sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div className="border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0">
               <label className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">{checkInLabel}</label>
               <div className="flex items-center justify-between gap-2">
@@ -1093,8 +1209,11 @@ export default function ReservaDirectaV2Content() {
                   onChange={(e) => setCheckIn(e.target.value)}
                   className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
-                <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
-                  â—´
+                <span className="text-[#2d2d2d]" aria-hidden>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <rect x="2.2" y="3.2" width="11.6" height="10.6" rx="1.6" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
                 </span>
               </div>
             </div>
@@ -1109,8 +1228,11 @@ export default function ReservaDirectaV2Content() {
                   onChange={(e) => setCheckOut(e.target.value)}
                   className="w-full border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
                 />
-                <span className="text-[12px] text-[#2d2d2d]" aria-hidden>
-                  â—´
+                <span className="text-[#2d2d2d]" aria-hidden>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <rect x="2.2" y="3.2" width="11.6" height="10.6" rx="1.6" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
                 </span>
               </div>
             </div>
@@ -1172,6 +1294,14 @@ export default function ReservaDirectaV2Content() {
                     prop={prop}
                     onRetry={retryProperty}
                     onOpen={setSelectedBookingUrl}
+                    propertyFallbackLabel={propertyFallbackLabel}
+                    loadingDataLabel={cardLoadingDataLabel}
+                    retryLabel={retryLabel}
+                    previousPhotoLabel={previousPhotoLabel}
+                    nextPhotoLabel={nextPhotoLabel}
+                    bedroomsShortLabel={bedroomsShortLabel}
+                    bedsLabel={bedsLabel}
+                    bathroomsLabel={bathroomsLabel}
                     bookingUrl={buildBookingUrl(prop.id, {
                       guests: guestFilter !== "0" ? guestFilter : undefined,
                     })}
