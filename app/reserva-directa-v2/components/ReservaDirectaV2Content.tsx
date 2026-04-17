@@ -713,6 +713,16 @@ const propertyCardTranslations = {
     uk: "кімн.",
     pl: "pok.",
   },
+  bathroomsShort: {
+    eng: "bath",
+    esp: "bano",
+    ru: "ванн.",
+    fr: "sdb",
+    it: "bagno",
+    de: "bad",
+    uk: "ванн.",
+    pl: "laz.",
+  },
   beds: {
     eng: "beds",
     esp: "camas",
@@ -886,12 +896,24 @@ function buildGoogleMapsUrl(property: MappedProperty): string {
   );
 }
 
+function buildMarkerHtml(index: number, isVisited: boolean): string {
+  return (
+    `<div style="display:flex;height:18px;width:18px;align-items:center;justify-content:center;` +
+    `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;` +
+    `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">${index + 1}</div>`
+  );
+}
+
 function PropertyMap({
   properties,
   title,
   hint,
   openInGoogleMapsLabel,
   moreInfoLabel,
+  guestSingularLabel,
+  guestPluralLabel,
+  bedroomsShortLabel,
+  bathroomsShortLabel,
   lang,
   guestFilter,
   onOpen,
@@ -901,6 +923,10 @@ function PropertyMap({
   hint: string;
   openInGoogleMapsLabel: string;
   moreInfoLabel: string;
+  guestSingularLabel: string;
+  guestPluralLabel: string;
+  bedroomsShortLabel: string;
+  bathroomsShortLabel: string;
   lang: Lang;
   guestFilter: string;
   onOpen: (url: string) => void;
@@ -912,22 +938,6 @@ function PropertyMap({
   const autoFittingRef = useRef(false);
   const clickedPropertyIdsRef = useRef<Set<number>>(new Set());
   const [isExpanded, setIsExpanded] = useState(true);
-  const [, forceMarkerRefresh] = useState(0);
-
-  useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem(
-        "inftour_clicked_map_properties",
-      );
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as unknown;
-      if (!Array.isArray(parsed)) return;
-      clickedPropertyIdsRef.current = new Set(
-        parsed.filter((value): value is number => Number.isInteger(value)),
-      );
-      forceMarkerRefresh((value) => value + 1);
-    } catch {}
-  }, []);
 
   useEffect(() => {
     if (properties.length === 0 || !mapNodeRef.current) return;
@@ -991,10 +1001,7 @@ function PropertyMap({
         const marker = L.marker(latLng, {
           icon: L.divIcon({
             className: "inftour-map-marker",
-            html:
-              `<div style="display:flex;height:18px;width:18px;align-items:center;justify-content:center;` +
-              `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;` +
-              `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">${index + 1}</div>`,
+            html: buildMarkerHtml(index, isVisited),
             iconSize: [18, 18],
             iconAnchor: [9, 9],
           }),
@@ -1018,13 +1025,21 @@ function PropertyMap({
             property.images[0]?.ORIGINAL ||
             "",
         );
+        const capacityLabel =
+          property.capacity > 0
+            ? `${property.capacity} ${property.capacity === 1 ? guestSingularLabel : guestPluralLabel}`
+            : "";
         const safeCapacity = escapeHtml(
-          property.capacity > 0 ? `${property.capacity} guests` : "",
+          capacityLabel,
         );
         const safeMeta = escapeHtml(
           [
-            property.bedrooms > 0 ? `${property.bedrooms} bedr.` : "",
-            property.bathrooms > 0 ? `${property.bathrooms} bath` : "",
+            property.bedrooms > 0
+              ? `${property.bedrooms} ${bedroomsShortLabel}`
+              : "",
+            property.bathrooms > 0
+              ? `${property.bathrooms} ${bathroomsShortLabel}`
+              : "",
             property.sqm > 0 ? `${property.sqm} m²` : "",
           ]
             .filter(Boolean)
@@ -1070,13 +1085,14 @@ function PropertyMap({
         marker.on("popupopen", (event: any) => {
           if (!clickedPropertyIdsRef.current.has(property.id)) {
             clickedPropertyIdsRef.current.add(property.id);
-            try {
-              window.sessionStorage.setItem(
-                "inftour_clicked_map_properties",
-                JSON.stringify(Array.from(clickedPropertyIdsRef.current)),
-              );
-            } catch {}
-            forceMarkerRefresh((value) => value + 1);
+            marker.setIcon(
+              L.divIcon({
+                className: "inftour-map-marker",
+                html: buildMarkerHtml(index, true),
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+              }),
+            );
           }
 
           const popupElement = event.popup?.getElement() as HTMLElement | null;
@@ -1110,7 +1126,18 @@ function PropertyMap({
     return () => {
       cancelled = true;
     };
-  }, [guestFilter, lang, moreInfoLabel, onOpen, openInGoogleMapsLabel, properties]);
+  }, [
+    guestFilter,
+    lang,
+    moreInfoLabel,
+    guestPluralLabel,
+    guestSingularLabel,
+    bedroomsShortLabel,
+    bathroomsShortLabel,
+    onOpen,
+    openInGoogleMapsLabel,
+    properties,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -2057,6 +2084,7 @@ export default function ReservaDirectaV2Content() {
   const previousPhotoLabel = propertyCardTranslations.previousPhoto[lang];
   const nextPhotoLabel = propertyCardTranslations.nextPhoto[lang];
   const bedroomsShortLabel = propertyCardTranslations.bedroomsShort[lang];
+  const bathroomsShortLabel = propertyCardTranslations.bathroomsShort[lang];
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
   const [propertiesState, setPropertiesState] = useState<Property[]>(() => [
@@ -2648,6 +2676,10 @@ export default function ReservaDirectaV2Content() {
                 hint={mapHintLabel}
                 openInGoogleMapsLabel={openInGoogleMapsLabel}
                 moreInfoLabel={mapMoreInfoLabel}
+                guestSingularLabel={guestSingularLabel}
+                guestPluralLabel={guestPluralLabel}
+                bedroomsShortLabel={bedroomsShortLabel}
+                bathroomsShortLabel={bathroomsShortLabel}
                 lang={lang}
                 guestFilter={guestFilter}
                 onOpen={setSelectedBookingUrl}
