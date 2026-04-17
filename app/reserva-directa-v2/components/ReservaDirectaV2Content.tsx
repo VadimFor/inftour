@@ -535,6 +535,16 @@ const bookingSearchTranslations = {
     uk: "Шукати",
     pl: "Szukaj",
   },
+  reset: {
+    eng: "Reset",
+    esp: "Reset",
+    ru: "Сброс",
+    fr: "Reinitialiser",
+    it: "Reimposta",
+    de: "Reset",
+    uk: "Скинути",
+    pl: "Reset",
+  },
   missingDate: {
     eng: "Missing date",
     esp: "Falta fecha",
@@ -2168,6 +2178,7 @@ export default function ReservaDirectaV2Content() {
   const checkOutLabel = bookingSearchTranslations.checkOut[lang];
   const guestsLabel = bookingSearchTranslations.guests[lang];
   const searchLabel = bookingSearchTranslations.search[lang];
+  const resetLabel = bookingSearchTranslations.reset[lang];
   const missingDateLabel = bookingSearchTranslations.missingDate[lang];
   const datePlaceholderLabel = bookingSearchTranslations.datePlaceholder[lang];
   const guestSingularLabel = bookingSearchTranslations.guestSingular[lang];
@@ -2175,7 +2186,6 @@ export default function ReservaDirectaV2Content() {
   const staysInCalpeLabel = bookingResultsTranslations.staysInCalpe[lang];
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
   const loadingPropertiesLabel = bookingResultsTranslations.loadingProperties[lang];
-  const loadingDetailsLabel = bookingResultsTranslations.loadingDetails[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
@@ -2224,6 +2234,8 @@ export default function ReservaDirectaV2Content() {
     endDate: string;
   } | null>(null);
   const [isSearchRunning, setIsSearchRunning] = useState(false);
+  const [searchButtonErrorFlash, setSearchButtonErrorFlash] = useState(false);
+  const searchButtonErrorTimeoutRef = useRef<number | null>(null);
   const [showMissingCheckInError, setShowMissingCheckInError] = useState(false);
   const [showMissingCheckOutError, setShowMissingCheckOutError] = useState(false);
   const searchSequenceRef = useRef(0);
@@ -2313,6 +2325,14 @@ export default function ReservaDirectaV2Content() {
     setShowMissingCheckInError(isCheckInMissing);
     setShowMissingCheckOutError(isCheckOutMissing);
     if (isCheckInMissing || isCheckOutMissing) {
+      setSearchButtonErrorFlash(true);
+      if (searchButtonErrorTimeoutRef.current) {
+        window.clearTimeout(searchButtonErrorTimeoutRef.current);
+      }
+      searchButtonErrorTimeoutRef.current = window.setTimeout(() => {
+        setSearchButtonErrorFlash(false);
+        searchButtonErrorTimeoutRef.current = null;
+      }, 1000);
       return;
     }
 
@@ -2357,6 +2377,8 @@ export default function ReservaDirectaV2Content() {
     const startDateApi = formatApiDate(startDate);
     const endDateApi = formatApiDate(endDate);
     const availableIds = new Set<number>();
+    setSearchDateRange({ startDate: startDateApi, endDate: endDateApi });
+    setSearchAvailableIds(new Set<number>());
 
     try {
       await Promise.all(
@@ -2368,6 +2390,13 @@ export default function ReservaDirectaV2Content() {
             );
             if (isAvailabilityResponseAvailable(response)) {
               availableIds.add(id);
+              if (searchSequenceRef.current === sequence) {
+                setSearchAvailableIds((prev) => {
+                  const next = new Set(prev ?? []);
+                  next.add(id);
+                  return next;
+                });
+              }
             }
           } catch {
             // Ignore property when availability cannot be validated.
@@ -2382,8 +2411,29 @@ export default function ReservaDirectaV2Content() {
 
     if (searchSequenceRef.current !== sequence) return;
 
-    setSearchDateRange({ startDate: startDateApi, endDate: endDateApi });
     setSearchAvailableIds(availableIds);
+  }
+
+  function resetSearchResults() {
+    searchSequenceRef.current += 1;
+    setIsSearchRunning(false);
+    setSearchGuestCount(null);
+    setSearchAvailableIds(null);
+    setSearchDateRange(null);
+    setCheckIn("");
+    setCheckOut("");
+    setGuestFilter("2");
+    setCheckoutPreviewDate(null);
+    setOpenDatePicker(null);
+    setIsGuestMenuOpen(false);
+    setVisibleMonth(startOfMonth(new Date()));
+    setShowMissingCheckInError(false);
+    setShowMissingCheckOutError(false);
+    setSearchButtonErrorFlash(false);
+    if (searchButtonErrorTimeoutRef.current) {
+      window.clearTimeout(searchButtonErrorTimeoutRef.current);
+      searchButtonErrorTimeoutRef.current = null;
+    }
   }
 
   useEffect(() => {
@@ -2610,6 +2660,14 @@ export default function ReservaDirectaV2Content() {
   }
 
   useEffect(() => {
+    return () => {
+      if (searchButtonErrorTimeoutRef.current) {
+        window.clearTimeout(searchButtonErrorTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!selectedBookingUrl) return;
 
     setIsBookingModalLoading(true);
@@ -2635,7 +2693,7 @@ export default function ReservaDirectaV2Content() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
         <div className="relative z-[900] pt-3 pb-2">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px_96px]">
             <div
               ref={openDatePicker === "checkIn" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0"
@@ -2685,11 +2743,6 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
-              {showMissingCheckInError && (
-                <p className="mt-1 text-[11px] font-medium text-[#dc2626]">
-                  {missingDateLabel}
-                </p>
-              )}
               {openDatePicker === "checkIn" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2751,11 +2804,6 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
-              {showMissingCheckOutError && (
-                <p className="mt-1 text-[11px] font-medium text-[#dc2626]">
-                  {missingDateLabel}
-                </p>
-              )}
               {openDatePicker === "checkOut" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2854,15 +2902,48 @@ export default function ReservaDirectaV2Content() {
             </div>
             <button
               type="button"
+              onClick={resetSearchResults}
+              className="min-h-[50px] w-full border-l border-[#d9d9d9] bg-[#eef4fb] px-3 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-[#4c6785] transition-colors hover:bg-[#e3edf8] disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={isSearchRunning}
+            >
+              {resetLabel}
+            </button>
+            <button
+              type="button"
               onClick={() => {
                 void runSearch();
               }}
-              className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f] disabled:cursor-not-allowed disabled:opacity-70"
+              className={`min-h-[50px] w-full px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
+                searchButtonErrorFlash
+                  ? "bg-[#dc2626] hover:bg-[#dc2626]"
+                  : "bg-[#c2a457] hover:bg-[#af944f]"
+              }`}
               disabled={isSearchRunning}
             >
               {searchLabel}
             </button>
           </div>
+          {(showMissingCheckInError || showMissingCheckOutError) && (
+            <div className="mx-auto grid max-w-[1240px] grid-cols-1 px-1 pt-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px_96px]">
+              <div className="px-3">
+                {showMissingCheckInError && (
+                  <p className="text-[11px] font-medium text-[#dc2626]">
+                    {missingDateLabel}
+                  </p>
+                )}
+              </div>
+              <div className="px-3">
+                {showMissingCheckOutError && (
+                  <p className="text-[11px] font-medium text-[#dc2626]">
+                    {missingDateLabel}
+                  </p>
+                )}
+              </div>
+              <div />
+              <div />
+              <div />
+            </div>
+          )}
         </div>
 
         {/* Grid */}
@@ -2891,9 +2972,13 @@ export default function ReservaDirectaV2Content() {
                   )}
                 </strong>{" "}
                 {staysInCalpeLabel}
-                {(loading || loadingDetails) && (
-                  <span className="ml-2 text-[#c2a457] text-sm font-medium">
-                    · {loadingDetailsLabel}
+                {(loading || loadingDetails || isSearchRunning) && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-[#c2a457] text-sm font-medium">
+                    <span
+                      className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
+                      aria-hidden="true"
+                    />
+                    {loadingPropertiesLabel}
                   </span>
                 )}
               </p>
