@@ -580,7 +580,7 @@ const bookingResultsTranslations = {
   },
   loadingListings: {
     eng: "Loading stays...",
-    esp: "{loadingListingsLabel}",
+    esp: "Cargando alojamientos...",
     ru: "Загрузка вариантов размещения...",
     fr: "Chargement des hebergements...",
     it: "Caricamento alloggi...",
@@ -607,6 +607,46 @@ const bookingResultsTranslations = {
     de: "Unterkunfte konnten nicht geladen werden.",
     uk: "Не вдалося завантажити варіанти проживання.",
     pl: "Nie udalo sie zaladowac noclegow.",
+  },
+  mapTitle: {
+    eng: "Property map",
+    esp: "Mapa de propiedades",
+    ru: "Карта объектов",
+    fr: "Carte des logements",
+    it: "Mappa delle proprieta",
+    de: "Karte der Unterkunfte",
+    uk: "Карта об'єктів",
+    pl: "Mapa obiektow",
+  },
+  mapHint: {
+    eng: "Tap a marker to see the stay title and location.",
+    esp: "Pulsa un marcador para ver el titulo y la ubicacion.",
+    ru: "Нажмите на маркер, чтобы увидеть название и расположение.",
+    fr: "Appuyez sur un marqueur pour voir le titre et l'emplacement.",
+    it: "Tocca un indicatore per vedere titolo e posizione.",
+    de: "Tippen Sie auf eine Markierung, um Titel und Lage zu sehen.",
+    uk: "Натисніть на маркер, щоб побачити назву та розташування.",
+    pl: "Kliknij znacznik, aby zobaczyc tytul i lokalizacje.",
+  },
+  openInGoogleMaps: {
+    eng: "Open in Google Maps",
+    esp: "Abrir en Google Maps",
+    ru: "Открыть в Google Maps",
+    fr: "Ouvrir dans Google Maps",
+    it: "Apri in Google Maps",
+    de: "In Google Maps offnen",
+    uk: "Відкрити у Google Maps",
+    pl: "Otworz w Google Maps",
+  },
+  moreInfo: {
+    eng: "More info",
+    esp: "Mas info",
+    ru: "Подробнее",
+    fr: "Plus d'infos",
+    it: "Piu info",
+    de: "Mehr Infos",
+    uk: "Бiльше iнфо",
+    pl: "Wiecej info",
   },
 } as const;
 
@@ -701,7 +741,13 @@ interface RawProperty {
   name?: string;
   tradeName?: { es?: string; en?: string };
   accommodationType?: string;
-  location?: { city?: string; region?: string };
+  location?: {
+    city?: string;
+    region?: string;
+    latitude?: number | string;
+    longitude?: number | string;
+    address?: string;
+  };
   units?: Array<{ capacity?: number }>;
   features?: Record<string, string | boolean | number>;
   images?: Array<{ SMALL?: string; BIG?: string; ORIGINAL?: string }>;
@@ -719,6 +765,9 @@ interface Property {
   type: string;
   city: string;
   region: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string;
   capacity: number;
   bedrooms: number;
   beds: number;
@@ -756,6 +805,9 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
     type: "",
     city: "",
     region: "",
+    latitude: null,
+    longitude: null,
+    address: "",
     capacity: 0,
     bedrooms: 0,
     beds: 0,
@@ -777,6 +829,13 @@ function normalize(a: RawProperty): Property {
     type: a.accommodationType || "",
     city: a.location?.city || "Calp",
     region: a.location?.region || "Alicante",
+    latitude: Number.isFinite(Number(a.location?.latitude))
+      ? Number(a.location?.latitude)
+      : null,
+    longitude: Number.isFinite(Number(a.location?.longitude))
+      ? Number(a.location?.longitude)
+      : null,
+    address: a.location?.address || "",
     capacity: a.units?.[0]?.capacity ?? 0,
     bedrooms: Number(a.features?.n_hab) || 0,
     beds: Number(a.features?.n_camas) || 0,
@@ -803,6 +862,293 @@ function getTopFeats(
       features[k] === "1" ||
       features[k] === true ||
       (typeof features[k] === "number" && (features[k] as number) > 0),
+  );
+}
+
+type MappedProperty = Property & {
+  latitude: number;
+  longitude: number;
+};
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function buildGoogleMapsUrl(property: MappedProperty): string {
+  return (
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(`${property.latitude},${property.longitude}`)
+  );
+}
+
+function PropertyMap({
+  properties,
+  title,
+  hint,
+  openInGoogleMapsLabel,
+  moreInfoLabel,
+  lang,
+  guestFilter,
+  onOpen,
+}: {
+  properties: MappedProperty[];
+  title: string;
+  hint: string;
+  openInGoogleMapsLabel: string;
+  moreInfoLabel: string;
+  lang: Lang;
+  guestFilter: string;
+  onOpen: (url: string) => void;
+}) {
+  const mapRef = useRef<any>(null);
+  const layerRef = useRef<any>(null);
+  const mapNodeRef = useRef<HTMLDivElement>(null);
+  const userAdjustedViewRef = useRef(false);
+  const autoFittingRef = useRef(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  useEffect(() => {
+    if (properties.length === 0 || !mapNodeRef.current) return;
+
+    let cancelled = false;
+
+    async function mountMap() {
+      const leafletModule = await import("leaflet");
+      if (cancelled || !mapNodeRef.current) return;
+
+      const L = leafletModule.default;
+
+      const existingLeafletCss = document.querySelector(
+        'link[data-leaflet="inftour"]',
+      );
+      if (!existingLeafletCss) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+        link.dataset.leaflet = "inftour";
+        document.head.appendChild(link);
+      }
+
+      if (!mapRef.current) {
+        mapRef.current = L.map(mapNodeRef.current, {
+          zoomControl: true,
+          scrollWheelZoom: true,
+        });
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(mapRef.current);
+
+        layerRef.current = L.layerGroup().addTo(mapRef.current);
+
+        const markUserAdjustedView = () => {
+          if (autoFittingRef.current) return;
+          userAdjustedViewRef.current = true;
+        };
+
+        mapRef.current.on("movestart", markUserAdjustedView);
+        mapRef.current.on("zoomstart", markUserAdjustedView);
+      }
+
+      layerRef.current?.clearLayers();
+
+      const bounds = L.latLngBounds([]);
+
+      properties.forEach((property, index) => {
+        if (
+          typeof property.latitude !== "number" ||
+          typeof property.longitude !== "number"
+        ) {
+          return;
+        }
+
+        const latLng = L.latLng(property.latitude, property.longitude);
+        bounds.extend(latLng);
+
+        const marker = L.marker(latLng, {
+          icon: L.divIcon({
+            className: "inftour-map-marker",
+            html:
+              `<div style="display:flex;height:18px;width:18px;align-items:center;justify-content:center;` +
+              `border-radius:999px;background:#0f172a;color:#fff;font-size:10px;font-weight:700;` +
+              `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid #c2a457;">${index + 1}</div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          }),
+        });
+
+        const mapsUrl = buildGoogleMapsUrl(property);
+        const bookingUrl = buildBookingUrl(property.id, {
+          guests: guestFilter,
+          lang,
+        });
+        const location = property.address
+          ? `${property.address}, ${property.city} (${property.region})`
+          : `${property.city} (${property.region})`;
+        const safeTitle = escapeHtml(property.name);
+        const safeLocation = escapeHtml(location);
+        const safeLinkLabel = escapeHtml(openInGoogleMapsLabel);
+        const safeMoreInfoLabel = escapeHtml(moreInfoLabel);
+        const safeImageUrl = escapeHtml(
+          property.images[0]?.SMALL ||
+            property.images[0]?.BIG ||
+            property.images[0]?.ORIGINAL ||
+            "",
+        );
+        const safeCapacity = escapeHtml(
+          property.capacity > 0 ? `${property.capacity} guests` : "",
+        );
+        const safeMeta = escapeHtml(
+          [
+            property.bedrooms > 0 ? `${property.bedrooms} bedr.` : "",
+            property.bathrooms > 0 ? `${property.bathrooms} bath` : "",
+            property.sqm > 0 ? `${property.sqm} m²` : "",
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        );
+
+        marker.bindPopup(
+          `<div style="min-width:190px;max-width:230px;font-family:Arial,sans-serif;">` +
+            (safeImageUrl
+              ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" />`
+              : "") +
+            `<div style="margin-bottom:4px;font-size:14px;font-weight:700;color:#222;">${safeTitle}</div>` +
+            (safeCapacity
+              ? `<div style="margin-bottom:4px;font-size:12px;font-weight:600;color:#8f7130;">${safeCapacity}</div>`
+              : "") +
+            (safeMeta
+              ? `<div style="margin-bottom:6px;font-size:12px;line-height:1.45;color:#555;">${safeMeta}</div>`
+              : "") +
+            `<div style="margin-bottom:8px;font-size:12px;line-height:1.45;color:#666;">${safeLocation}</div>` +
+            `<div style="display:flex;gap:10px;flex-wrap:wrap;">` +
+              `<button type="button" data-booking-url="${escapeHtml(bookingUrl)}" style="cursor:pointer;border:0;display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#2563eb;padding:9px 12px;border-radius:999px;">` +
+                `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
+                  `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
+                    `<path d="M3 8a5 5 0 1 1 1.46 3.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+                    `<path d="M8 5.2v2.9l1.9 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+                  `</svg>` +
+                `</span>` +
+                `${safeMoreInfoLabel}` +
+              `</button>` +
+              `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#8f7130;text-decoration:none;padding-top:2px;">` +
+                `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
+                  `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
+                    `<path d="M8 14s4-4.03 4-7.2A4 4 0 1 0 4 6.8C4 9.97 8 14 8 14Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>` +
+                    `<circle cx="8" cy="6.8" r="1.6" stroke="currentColor" stroke-width="1.4"/>` +
+                  `</svg>` +
+                `</span>` +
+                `${safeLinkLabel}` +
+              `</a>` +
+            `</div>` +
+          `</div>`,
+        );
+
+        marker.on("popupopen", (event: any) => {
+          const popupElement = event.popup?.getElement() as HTMLElement | null;
+          const button = popupElement?.querySelector(
+            "[data-booking-url]",
+          ) as HTMLButtonElement | null;
+          if (!button) return;
+
+          button.onclick = (clickEvent) => {
+            clickEvent.preventDefault();
+            clickEvent.stopPropagation();
+            onOpen(bookingUrl);
+            marker.closePopup();
+          };
+        });
+
+        marker.addTo(layerRef.current);
+      });
+
+      if (bounds.isValid() && !userAdjustedViewRef.current) {
+        autoFittingRef.current = true;
+        mapRef.current.fitBounds(bounds, { padding: [30, 30] });
+        window.setTimeout(() => {
+          autoFittingRef.current = false;
+        }, 250);
+      }
+    }
+
+    void mountMap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [guestFilter, lang, moreInfoLabel, onOpen, openInGoogleMapsLabel, properties]);
+
+  useEffect(() => {
+    return () => {
+      layerRef.current?.clearLayers();
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isExpanded || !mapRef.current) return;
+
+    const timeoutId = window.setTimeout(() => {
+      mapRef.current?.invalidateSize();
+    }, 520);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isExpanded]);
+
+  if (properties.length === 0) return null;
+
+  return (
+    <section className="mb-5 overflow-hidden rounded-[18px] border border-[#e3e0d7] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
+      <button
+        type="button"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        className="flex w-full items-center justify-between border-b border-[#efe9db] px-5 py-4 text-left transition-colors hover:bg-[#fcfbf7]"
+        aria-expanded={isExpanded}
+        aria-label={title}
+      >
+        <div>
+          <h2 className="text-[18px] font-semibold text-[#2d2d2d]">{title}</h2>
+        </div>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#e7dcc0] bg-[#faf6eb] text-[#8f7130] transition-transform duration-500 ${isExpanded ? "rotate-180" : "rotate-0"}`}
+          aria-hidden="true"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M4 6.5L8 10.5L12 6.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
+      <div
+        className={`origin-top overflow-hidden transition-[max-height,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] scale-y-100" : "max-h-0 scale-y-100"}`}
+      >
+        <div
+          ref={mapNodeRef}
+          className="h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]"
+        />
+      </div>
+    </section>
   );
 }
 
@@ -1672,6 +2018,10 @@ export default function ReservaDirectaV2Content() {
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
   const loadingDetailsLabel = bookingResultsTranslations.loadingDetails[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
+  const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
+  const mapHintLabel = bookingResultsTranslations.mapHint[lang];
+  const openInGoogleMapsLabel = bookingResultsTranslations.openInGoogleMaps[lang];
+  const mapMoreInfoLabel = bookingResultsTranslations.moreInfo[lang];
   const propertyFallbackLabel = propertyCardTranslations.propertyFallback[lang];
   const cardLoadingDataLabel = propertyCardTranslations.loadingData[lang];
   const retryLabel = propertyCardTranslations.retry[lang];
@@ -1961,6 +2311,10 @@ export default function ReservaDirectaV2Content() {
     if (p.capacity < selectedGuestCount) return false;
     return true;
   });
+  const mappedProperties = filtered.filter(
+    (prop): prop is MappedProperty =>
+      typeof prop.latitude === "number" && typeof prop.longitude === "number",
+  );
   const loadingDetails = properties.some((prop) => !prop.name);
   const showingInitialPlaceholders =
     loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
@@ -2018,7 +2372,7 @@ export default function ReservaDirectaV2Content() {
     <div className="min-h-screen bg-[#efefef]">
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
-        <div className="pt-3 pb-2">
+        <div className="relative z-[900] pt-3 pb-2">
           <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div
               ref={openDatePicker === "checkIn" ? calendarRef : null}
@@ -2259,6 +2613,16 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 )}
               </p>
+              <PropertyMap
+                properties={mappedProperties}
+                title={mapTitleLabel}
+                hint={mapHintLabel}
+                openInGoogleMapsLabel={openInGoogleMapsLabel}
+                moreInfoLabel={mapMoreInfoLabel}
+                lang={lang}
+                guestFilter={guestFilter}
+                onOpen={setSelectedBookingUrl}
+              />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {filtered.map((prop) => (
                   <PropertyCard

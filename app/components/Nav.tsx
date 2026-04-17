@@ -17,7 +17,7 @@ export default function Nav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 min-w-0 border-b border-gray-200 bg-white"
+      className="sticky top-0 z-[1200] min-w-0 border-b border-gray-200 bg-white"
       data-lang={lang}
       data-site-nav
     >

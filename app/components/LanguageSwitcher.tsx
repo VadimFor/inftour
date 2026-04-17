@@ -204,7 +204,7 @@ export default function LanguageSwitcher({
   if (compact) {
     const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
     return (
-      <div className="relative overflow-visible" ref={containerRef}>
+      <div className="relative z-[1100] overflow-visible" ref={containerRef}>
         <button
           type="button"
           onMouseDown={(e) => {
@@ -237,7 +237,7 @@ export default function LanguageSwitcher({
         </button>
         {open && (
           <div
-            className="absolute right-0 top-full mt-2 py-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-8 z-100"
+            className="absolute right-0 top-full z-[1150] mt-2 min-w-8 rounded-lg border border-gray-200 bg-white py-2 shadow-lg"
             role="listbox"
             aria-label="Select language"
           >

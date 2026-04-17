@@ -210,3 +210,14 @@ body {
     flex-direction: column;
   }
 }
+
+/* Leaflet tile seam fix */
+.leaflet-container {
+  background: #d9edf5;
+}
+
+.leaflet-tile {
+  outline: 1px solid transparent;
+  width: 256.5px !important;
+  height: 256.5px !important;
+}

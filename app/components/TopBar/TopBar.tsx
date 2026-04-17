@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLangStore } from "@/app/lib/langStore";
 
@@ -20,15 +21,42 @@ type TopBarProps = {
 };
 
 export default function TopBar({ weather, seaTemp }: TopBarProps) {
-  useLangStore((s) => s.lang);
+  const lang = useLangStore((s) => s.lang);
   const t = useLangStore((s) => s.t);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const nowInCalpeLabel = mounted
+    ? t("nowInCalpe")
+    : lang === "esp"
+      ? "Ahora en Calpe"
+      : "Now in Calpe";
+  const aguaLabel = mounted
+    ? t("agua")
+    : lang === "esp"
+      ? "Agua"
+      : "Water";
+  const seaLabel = mounted
+    ? t("sea")
+    : lang === "esp"
+      ? "Mar"
+      : "Sea";
+  const webcam1Label = mounted ? t("webcam1") : "WebCam 1";
+  const webcam2Label = mounted ? t("webcam2") : "WebCam 2";
+  const webcam3Label = mounted ? t("webcam3") : "WebCam 3";
+  const cam1Label = mounted ? t("cam1") : "Cam 1";
+  const cam2Label = mounted ? t("cam2") : "Cam 2";
+  const cam3Label = mounted ? t("cam3") : "Cam 3";
   return (
     <div
       className="bg-brand-darkgray text-white text-[11px] md:text-xs py-2 px-4 md:px-6 flex justify-between items-center tracking-wide font-bold"
     >
       <div className="flex items-center gap-1.5">
         <span className="hidden sm:inline text-white/70">
-          {t("nowInCalpe")}
+          {nowInCalpeLabel}
         </span>
         <span className="sm:hidden text-white/70">Calpe:</span>
         <span className="font-medium">
@@ -48,8 +76,8 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
           )}
         </span>
         <span className="flex items-center gap-1">
-          <span className="hidden sm:inline text-white/70">{t("agua")}:</span>
-          <span className="sm:hidden text-white/70">{t("sea")}:</span>
+          <span className="hidden sm:inline text-white/70">{aguaLabel}:</span>
+          <span className="sm:hidden text-white/70">{seaLabel}:</span>
           <span className="font-medium">
             {seaTemp != null ? `${seaTemp}°C` : "—°C"}
           </span>
@@ -66,8 +94,8 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             className="w-2 h-2 rounded-full bg-red-500 shrink-0"
             aria-hidden
           />
-          <span className="hidden sm:inline">{t("webcam1")}</span>
-          <span className="sm:hidden">{t("cam1")}</span>
+          <span className="hidden sm:inline">{webcam1Label}</span>
+          <span className="sm:hidden">{cam1Label}</span>
         </Link>
 
         <Link
@@ -80,8 +108,8 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             className="w-2 h-2 rounded-full bg-brand-gold shrink-0"
             aria-hidden
           />
-          <span className="hidden sm:inline">{t("webcam2")}</span>
-          <span className="sm:hidden">{t("cam2")}</span>
+          <span className="hidden sm:inline">{webcam2Label}</span>
+          <span className="sm:hidden">{cam2Label}</span>
         </Link>
 
         <Link
@@ -94,8 +122,8 @@ export default function TopBar({ weather, seaTemp }: TopBarProps) {
             className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"
             aria-hidden
           />
-          <span className="hidden sm:inline">{t("webcam3")}</span>
-          <span className="sm:hidden">{t("cam3")}</span>
+          <span className="hidden sm:inline">{webcam3Label}</span>
+          <span className="sm:hidden">{cam3Label}</span>
         </Link>
       </div>
     </div>
