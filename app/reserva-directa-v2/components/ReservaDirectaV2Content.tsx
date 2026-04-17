@@ -1640,6 +1640,21 @@ function DatePickerPopover({
 
 // â”€â”€â”€ GalleryModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+const reservationPropertiesCache: Property[] = [];
+
+function isPropertyDetailsPending(prop: Property): boolean {
+  return (
+    prop.id < 0 ||
+    (!prop.images.length &&
+      !prop.capacity &&
+      !prop.bedrooms &&
+      !prop.beds &&
+      !prop.bathrooms &&
+      !prop.sqm &&
+      !prop.loadError)
+  );
+}
+
 export default function ReservaDirectaV2Content() {
   const lang = useLangStore((s) => s.lang);
   const visitActualPageLabel = modalTranslations.visitActualPage[lang];
@@ -1665,8 +1680,12 @@ export default function ReservaDirectaV2Content() {
   const bedroomsShortLabel = propertyCardTranslations.bedroomsShort[lang];
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [propertiesState, setPropertiesState] = useState<Property[]>(() => [
+    ...reservationPropertiesCache,
+  ]);
+  const [loading, setLoading] = useState(
+    () => reservationPropertiesCache.length === 0,
+  );
   const [error, setError] = useState(false);
   const [guestFilter, setGuestFilter] = useState("2");
   const [checkIn, setCheckIn] = useState("");
@@ -1687,12 +1706,27 @@ export default function ReservaDirectaV2Content() {
   const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
   const guestMenuRef = useRef<HTMLDivElement>(null);
+  const properties = propertiesState;
   const parsedCheckIn = parseDateInput(checkIn);
   const parsedCheckOut = parseDateInput(checkOut);
   const selectedGuestCount = Number.parseInt(guestFilter, 10) || 2;
   const selectedGuestLabel = `${selectedGuestCount} ${
     selectedGuestCount === 1 ? guestSingularLabel : guestPluralLabel
   }`;
+
+  function setProperties(
+    value: Property[] | ((prev: Property[]) => Property[]),
+  ) {
+    setPropertiesState((prev) => {
+      const next = typeof value === "function" ? value(prev) : value;
+      reservationPropertiesCache.splice(
+        0,
+        reservationPropertiesCache.length,
+        ...next,
+      );
+      return next;
+    });
+  }
 
   function openCalendar(target: "checkIn" | "checkOut") {
     const selectedDate = target === "checkIn" ? parsedCheckIn : parsedCheckOut;
@@ -1788,19 +1822,31 @@ export default function ReservaDirectaV2Content() {
 
     async function load() {
       try {
-        const list = (await apiFetchWithRetry(
-          "/accommodations/",
-        )) as AccommodationListItem[];
-        if (cancelled) return;
+        let pendingIds: number[] = [];
 
-        const placeholders = list.map((item) =>
-          createPlaceholderProperty(item),
-        );
-        setProperties(placeholders);
-        setLoading(false);
+        if (reservationPropertiesCache.length > 0) {
+          pendingIds = reservationPropertiesCache
+            .filter((prop) => prop.id > 0 && isPropertyDetailsPending(prop))
+            .map((prop) => prop.id);
+          setLoading(false);
+        } else {
+          const list = (await apiFetchWithRetry(
+            "/accommodations/",
+          )) as AccommodationListItem[];
+          if (cancelled) return;
 
-        const queue: QueueItem[] = list.map((item) => ({
-          id: item.id,
+          const placeholders = list.map((item) =>
+            createPlaceholderProperty(item),
+          );
+          setProperties(placeholders);
+          setLoading(false);
+          pendingIds = list.map((item) => item.id);
+        }
+
+        if (pendingIds.length === 0) return;
+
+        const queue: QueueItem[] = pendingIds.map((id) => ({
+          id,
           attempt: 0,
           readyAt: Date.now(),
         }));
@@ -1911,17 +1957,7 @@ export default function ReservaDirectaV2Content() {
   }, []);
 
   const filtered = properties.filter((p) => {
-    const isDetailsPending =
-      p.id < 0 ||
-      (!p.images.length &&
-        !p.capacity &&
-        !p.bedrooms &&
-        !p.beds &&
-        !p.bathrooms &&
-        !p.sqm &&
-        !p.loadError);
-
-    if (isDetailsPending) return true;
+    if (isPropertyDetailsPending(p)) return true;
     if (p.capacity < selectedGuestCount) return false;
     return true;
   });
