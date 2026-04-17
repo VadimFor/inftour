@@ -964,6 +964,9 @@ function buildMarkerHtml(index: number, isVisited: boolean): string {
   );
 }
 
+const CALPE_MAP_CENTER: [number, number] = [38.644, 0.044];
+const CALPE_MAP_ZOOM = 12;
+
 function PropertyMap({
   properties,
   title,
@@ -1008,8 +1011,6 @@ function PropertyMap({
   const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
-    if (properties.length === 0 || !mapNodeRef.current) return;
-
     let cancelled = false;
 
     async function mountMap() {
@@ -1027,17 +1028,6 @@ function PropertyMap({
         link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
         link.dataset.leaflet = "inftour";
         document.head.appendChild(link);
-      }
-
-      const mapDomWasCleared =
-        mapRef.current &&
-        mapNodeRef.current &&
-        !mapNodeRef.current.querySelector(".leaflet-pane");
-
-      if (mapDomWasCleared) {
-        mapRef.current.remove();
-        mapRef.current = null;
-        layerRef.current = null;
       }
 
       if (!mapRef.current) {
@@ -1059,9 +1049,31 @@ function PropertyMap({
 
         mapRef.current.on("movestart", markUserAdjustedView);
         mapRef.current.on("zoomstart", markUserAdjustedView);
+        mapRef.current.setView(CALPE_MAP_CENTER, CALPE_MAP_ZOOM);
+        window.setTimeout(() => {
+          mapRef.current?.invalidateSize();
+        }, 50);
       }
+    }
 
-      layerRef.current?.clearLayers();
+    void mountMap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !layerRef.current) return;
+
+    let cancelled = false;
+
+    async function syncMarkers() {
+      const leafletModule = await import("leaflet");
+      if (cancelled || !mapRef.current || !layerRef.current) return;
+
+      const L = leafletModule.default;
+      layerRef.current.clearLayers();
 
       const bounds = L.latLngBounds([]);
 
@@ -1196,17 +1208,20 @@ function PropertyMap({
         if (bounds.isValid()) {
           mapRef.current.fitBounds(bounds, { padding: [30, 30] });
         } else {
-          // Keep tiles visible if search results momentarily lack valid bounds.
-          mapRef.current.setView([38.644, 0.044], 12);
+          mapRef.current.setView(CALPE_MAP_CENTER, CALPE_MAP_ZOOM);
         }
+      }
+
+      window.requestAnimationFrame(() => {
+        mapRef.current?.invalidateSize();
         window.setTimeout(() => {
           autoFittingRef.current = false;
           mapRef.current?.invalidateSize();
         }, 250);
-      }
+      });
     }
 
-    void mountMap();
+    void syncMarkers();
 
     return () => {
       cancelled = true;
@@ -1248,8 +1263,6 @@ function PropertyMap({
     };
   }, [isExpanded]);
 
-  if (properties.length === 0 && !isLoadingProperties) return null;
-
   return (
     <section className="mb-5 overflow-hidden rounded-[18px] border border-[#e3e0d7] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
       <button
@@ -1266,15 +1279,6 @@ function PropertyMap({
               <p className="mt-0.5 text-[12px] text-[#8c8576]">{hint}</p>
             )}
           </div>
-          {isLoadingProperties && (
-            <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#8f7130]">
-              <span
-                className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
-                aria-hidden="true"
-              />
-              {loadingPropertiesLabel}
-            </span>
-          )}
         </div>
         <span
           className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#e7dcc0] bg-[#faf6eb] text-[#8f7130] transition-transform duration-500 ${isExpanded ? "rotate-180" : "rotate-0"}`}
@@ -1300,27 +1304,28 @@ function PropertyMap({
       <div
         className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px]" : "max-h-0"}`}
       >
-        {properties.length > 0 ? (
+        <div className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]">
           <div
             ref={mapNodeRef}
-            className="h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]"
+            className="h-full w-full bg-[#f3f1eb]"
           />
-        ) : (
-          <div className="flex h-[340px] w-full flex-col items-center justify-center gap-3 bg-[#f3f1eb] px-6 text-center text-[#8f7130] sm:h-[400px]">
-            <span
-              className="h-6 w-6 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]"
-              aria-hidden="true"
-            />
-            <span className="text-[13px] font-semibold">
-              {loadingPropertiesLabel}
-            </span>
-            {hint && (
-              <p className="max-w-[360px] text-[12px] text-[#8c8576]">
-                {hint}
-              </p>
-            )}
-          </div>
-        )}
+          {isLoadingProperties && (
+            <div className="pointer-events-none absolute inset-x-4 top-4 z-[500] flex items-center justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#e7dcc0] bg-white/95 px-3 py-1.5 text-[12px] font-medium text-[#8f7130] shadow-sm">
+                <span
+                  className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
+                  aria-hidden="true"
+                />
+                {loadingPropertiesLabel}
+              </span>
+            </div>
+          )}
+          {properties.length === 0 && hint && (
+            <div className="pointer-events-none absolute inset-x-6 bottom-5 z-[500] rounded-[12px] bg-white/92 px-4 py-3 text-center text-[12px] text-[#8c8576] shadow-sm">
+              {hint}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
