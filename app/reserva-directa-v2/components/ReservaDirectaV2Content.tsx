@@ -638,6 +638,26 @@ const bookingResultsTranslations = {
     uk: "Не вдалося завантажити варіанти проживання.",
     pl: "Nie udalo sie zaladowac noclegow.",
   },
+  showingSearchResults: {
+    eng: "Showing search results",
+    esp: "Mostrando resultados de busqueda",
+    ru: "Показаны результаты поиска",
+    fr: "Affichage des resultats de recherche",
+    it: "Visualizzazione dei risultati di ricerca",
+    de: "Suchergebnisse werden angezeigt",
+    uk: "Показані результати пошуку",
+    pl: "Pokazywanie wynikow wyszukiwania",
+  },
+  viewAll: {
+    eng: "View all",
+    esp: "Ver todo",
+    ru: "Показать все",
+    fr: "Voir tout",
+    it: "Vedi tutto",
+    de: "Alle anzeigen",
+    uk: "Показати все",
+    pl: "Zobacz wszystko",
+  },
   mapTitle: {
     eng: "Property map",
     esp: "Mapa de propiedades",
@@ -999,6 +1019,17 @@ function PropertyMap({
         document.head.appendChild(link);
       }
 
+      const mapDomWasCleared =
+        mapRef.current &&
+        mapNodeRef.current &&
+        !mapNodeRef.current.querySelector(".leaflet-pane");
+
+      if (mapDomWasCleared) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        layerRef.current = null;
+      }
+
       if (!mapRef.current) {
         mapRef.current = L.map(mapNodeRef.current, {
           zoomControl: true,
@@ -1150,11 +1181,17 @@ function PropertyMap({
         marker.addTo(layerRef.current);
       });
 
-      if (bounds.isValid() && !userAdjustedViewRef.current) {
+      if (!userAdjustedViewRef.current) {
         autoFittingRef.current = true;
-        mapRef.current.fitBounds(bounds, { padding: [30, 30] });
+        if (bounds.isValid()) {
+          mapRef.current.fitBounds(bounds, { padding: [30, 30] });
+        } else {
+          // Keep tiles visible if search results momentarily lack valid bounds.
+          mapRef.current.setView([38.644, 0.044], 12);
+        }
         window.setTimeout(() => {
           autoFittingRef.current = false;
+          mapRef.current?.invalidateSize();
         }, 250);
       }
     }
@@ -1168,9 +1205,7 @@ function PropertyMap({
     guestFilter,
     bookingEndDate,
     bookingStartDate,
-    isLoadingProperties,
     lang,
-    loadingPropertiesLabel,
     moreInfoLabel,
     guestPluralLabel,
     guestSingularLabel,
@@ -1531,57 +1566,117 @@ function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
   );
 }
 
-function isAvailabilityResponseAvailable(payload: unknown): boolean {
-  if (typeof payload === "number") {
-    return payload === 0;
-  }
+function isIsoDateKey(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
 
-  if (typeof payload === "boolean") {
-    return payload;
-  }
-
-  if (typeof payload === "string") {
-    const numeric = Number.parseFloat(payload);
-    if (Number.isFinite(numeric)) {
-      return numeric === 0;
-    }
-    const normalized = payload.trim().toLowerCase();
+function looksUnavailable(value: unknown): boolean {
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "boolean") return !value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
     if (!normalized) return false;
-    if (
-      normalized.includes("available") ||
-      normalized.includes("disponible") ||
-      normalized === "free"
-    ) {
-      return true;
-    }
-    if (
+    const parsed = Number.parseFloat(normalized);
+    if (Number.isFinite(parsed)) return parsed !== 0;
+    return (
       normalized.includes("unavailable") ||
       normalized.includes("occupied") ||
       normalized.includes("booked") ||
-      normalized.includes("reserved")
-    ) {
+      normalized.includes("reserved") ||
+      normalized.includes("no disponible")
+    );
+  }
+  if (!value || typeof value !== "object") return false;
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.available === "boolean") return !record.available;
+  if (typeof record.isAvailable === "boolean") return !record.isAvailable;
+  if (typeof record.booked === "boolean") return record.booked;
+  if (typeof record.value === "number") return record.value !== 0;
+  return false;
+}
+
+function extractUnavailableDates(
+  payload: unknown,
+  unavailableDates: Set<string>,
+  depth = 0,
+): void {
+  if (!payload || depth > 6) return;
+
+  if (Array.isArray(payload)) {
+    payload.forEach((item) =>
+      extractUnavailableDates(item, unavailableDates, depth + 1),
+    );
+    return;
+  }
+
+  if (typeof payload !== "object") return;
+
+  const record = payload as Record<string, unknown>;
+  if (
+    typeof record.startDate === "string" &&
+    typeof record.endDate === "string" &&
+    isIsoDateKey(record.startDate) &&
+    isIsoDateKey(record.endDate)
+  ) {
+    const type =
+      typeof record.type === "string" ? record.type.trim().toUpperCase() : "";
+    const isBlockedRange =
+      type.includes("BLOCKED") ||
+      type.includes("BOOKED") ||
+      type.includes("RESERVED");
+
+    if (isBlockedRange) {
+      let cursor = new Date(record.startDate);
+      const end = new Date(record.endDate);
+      while (cursor <= end) {
+        unavailableDates.add(formatApiDate(cursor));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+  }
+
+  const dateCandidate =
+    typeof record.date === "string"
+      ? record.date
+      : typeof record.day === "string"
+        ? record.day
+        : typeof record.dt === "string"
+          ? record.dt
+          : null;
+
+  if (dateCandidate && isIsoDateKey(dateCandidate) && looksUnavailable(record)) {
+    unavailableDates.add(dateCandidate);
+  }
+
+  Object.entries(record).forEach(([key, value]) => {
+    if (isIsoDateKey(key) && looksUnavailable(value)) {
+      unavailableDates.add(key);
+      return;
+    }
+    extractUnavailableDates(value, unavailableDates, depth + 1);
+  });
+}
+
+function isCalendarRangeAvailable(
+  payload: unknown,
+  startDate: Date,
+  endDate: Date,
+): boolean {
+  const unavailableDates = new Set<string>();
+  extractUnavailableDates(payload, unavailableDates);
+
+  let cursor = startOfDay(startDate);
+  const checkout = startOfDay(endDate);
+
+  while (cursor < checkout) {
+    if (unavailableDates.has(formatApiDate(cursor))) {
       return false;
     }
+    cursor = addDays(cursor, 1);
   }
 
-  if (payload && typeof payload === "object") {
-    const record = payload as Record<string, unknown>;
-
-    if (typeof record.available === "boolean") {
-      return record.available;
-    }
-    if (typeof record.isAvailable === "boolean") {
-      return record.isAvailable;
-    }
-    if (typeof record.booked === "boolean") {
-      return !record.booked;
-    }
-    if (typeof record.value === "number") {
-      return record.value === 0;
-    }
-  }
-
-  return false;
+  return true;
 }
 
 function CardCarousel({
@@ -2187,6 +2282,9 @@ export default function ReservaDirectaV2Content() {
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
   const loadingPropertiesLabel = bookingResultsTranslations.loadingProperties[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
+  const showingSearchResultsLabel =
+    bookingResultsTranslations.showingSearchResults[lang];
+  const viewAllLabel = bookingResultsTranslations.viewAll[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
   const openInGoogleMapsLabel =
@@ -2385,10 +2483,10 @@ export default function ReservaDirectaV2Content() {
         guestFilteredIds.map(async (id) => {
           try {
             const response = await apiFetchWithRetry(
-              `/accommodations/${id}/availability?startDate=${startDateApi}&endDate=${endDateApi}`,
+              `/accommodations/${id}/calendar?startDate=${startDateApi}&endDate=${endDateApi}`,
               2,
             );
-            if (isAvailabilityResponseAvailable(response)) {
+            if (isCalendarRangeAvailable(response, startDate, endDate)) {
               availableIds.add(id);
               if (searchSequenceRef.current === sequence) {
                 setSearchAvailableIds((prev) => {
@@ -2623,11 +2721,18 @@ export default function ReservaDirectaV2Content() {
       ? baseFiltered
       : baseFiltered.filter((prop) => searchAvailableIds.has(prop.id));
   const activeGuestFilter = String(effectiveGuestCount);
+  const isSearchApplied = searchGuestCount !== null;
+  const activeGuestCount = Number.parseInt(activeGuestFilter, 10) || 2;
+  const activeGuestLabel = `${activeGuestCount} ${
+    activeGuestCount === 1 ? guestSingularLabel : guestPluralLabel
+  }`;
+  const activeDateRangeLabel =
+    checkIn && checkOut ? `${checkIn} -> ${checkOut}` : null;
   const mappedProperties = filtered.filter(
     (prop): prop is MappedProperty =>
       typeof prop.latitude === "number" && typeof prop.longitude === "number",
   );
-  const loadingDetails = properties.some((prop) => !prop.name);
+  const loadingDetails = properties.some((prop) => isPropertyDetailsPending(prop));
   const showingInitialPlaceholders =
     loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
 
@@ -2963,6 +3068,24 @@ export default function ReservaDirectaV2Content() {
           )}
           {(filtered.length > 0 || searchGuestCount !== null) && (
             <>
+              {isSearchApplied && (
+                <div className="mb-2 flex flex-wrap items-center gap-2 rounded-[10px] border border-[#d9e6f7] bg-[#eef4fb] px-3 py-2">
+                  <span className="text-[12px] font-semibold text-[#3d5f86]">
+                    {showingSearchResultsLabel}
+                  </span>
+                  <span className="text-[12px] text-[#4f6781]">
+                    {activeGuestLabel}
+                    {activeDateRangeLabel ? ` · ${activeDateRangeLabel}` : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={resetSearchResults}
+                    className="ml-auto inline-flex items-center rounded-full border border-[#c8daef] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#496788] transition-colors hover:bg-[#f4f8fd]"
+                  >
+                    {viewAllLabel}
+                  </button>
+                </div>
+              )}
               <p className="text-[22px] text-[#5f5f5f] mb-3 font-light">
                 <strong className="inline-flex min-w-[28px] items-center justify-center text-[#2d2d2d] font-bold">
                   {showingInitialPlaceholders ? (

@@ -51,6 +51,138 @@ function kv(label, value) {
   return `<div class="kv"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
 }
 
+function formatApiDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function isIsoDateKey(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function looksUnavailable(value) {
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "boolean") return !value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    const parsed = Number.parseFloat(normalized);
+    if (Number.isFinite(parsed)) return parsed !== 0;
+    return (
+      normalized.includes("unavailable") ||
+      normalized.includes("occupied") ||
+      normalized.includes("booked") ||
+      normalized.includes("reserved") ||
+      normalized.includes("no disponible")
+    );
+  }
+  if (!value || typeof value !== "object") return false;
+  if (typeof value.available === "boolean") return !value.available;
+  if (typeof value.isAvailable === "boolean") return !value.isAvailable;
+  if (typeof value.booked === "boolean") return value.booked;
+  if (typeof value.value === "number") return value.value !== 0;
+  return false;
+}
+
+function extractUnavailableDates(payload, unavailableDates, depth = 0) {
+  if (!payload || depth > 6) return;
+  if (Array.isArray(payload)) {
+    payload.forEach((item) => extractUnavailableDates(item, unavailableDates, depth + 1));
+    return;
+  }
+  if (typeof payload !== "object") return;
+
+  const record = payload;
+  if (
+    typeof record.startDate === "string" &&
+    typeof record.endDate === "string" &&
+    isIsoDateKey(record.startDate) &&
+    isIsoDateKey(record.endDate)
+  ) {
+    const type = typeof record.type === "string" ? record.type.trim().toUpperCase() : "";
+    const isBlockedRange =
+      type.includes("BLOCKED") || type.includes("BOOKED") || type.includes("RESERVED");
+    if (isBlockedRange) {
+      let cursor = new Date(record.startDate);
+      const end = new Date(record.endDate);
+      while (cursor <= end) {
+        unavailableDates.add(formatApiDate(cursor));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+  }
+
+  const dateCandidate =
+    typeof record.date === "string"
+      ? record.date
+      : typeof record.day === "string"
+        ? record.day
+        : typeof record.dt === "string"
+          ? record.dt
+          : null;
+  if (dateCandidate && isIsoDateKey(dateCandidate) && looksUnavailable(record)) {
+    unavailableDates.add(dateCandidate);
+  }
+
+  Object.entries(record).forEach(([key, value]) => {
+    if (isIsoDateKey(key) && looksUnavailable(value)) {
+      unavailableDates.add(key);
+      return;
+    }
+    extractUnavailableDates(value, unavailableDates, depth + 1);
+  });
+}
+
+function buildAvailabilityCalendars(unavailableDates, startDate, monthsToRender = 3) {
+  const today = new Date();
+  const weekdays = ["L", "M", "X", "J", "V", "S", "D"];
+  const monthFormatter = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" });
+  const cards = [];
+  const todayIso = formatApiDate(today);
+  const unavailableSet = unavailableDates instanceof Set ? unavailableDates : new Set();
+
+  for (let monthOffset = 0; monthOffset < monthsToRender; monthOffset += 1) {
+    const monthAnchor = new Date(startDate.getFullYear(), startDate.getMonth() + monthOffset, 1);
+    const year = monthAnchor.getFullYear();
+    const month = monthAnchor.getMonth();
+    const firstWeekdayMonBased = (new Date(year, month, 1).getDay() + 6) % 7;
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+
+    for (let i = 0; i < firstWeekdayMonBased; i += 1) {
+      cells.push('<span class="cal-day cal-day--empty" aria-hidden="true"></span>');
+    }
+
+    for (let day = 1; day <= totalDays; day += 1) {
+      const isoDate = formatApiDate(new Date(year, month, day));
+      const isPast = isoDate < todayIso;
+      const unavailable = !isPast && unavailableSet.has(isoDate);
+      const isToday = isoDate === todayIso;
+      const classes = [
+        "cal-day",
+        isPast ? "cal-day--past" : "",
+        unavailable ? "cal-day--unavailable" : "",
+        isToday ? "cal-day--today" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      const title = unavailable
+        ? `${isoDate} · no disponible`
+        : `${isoDate} · disponible`;
+      cells.push(`<span class="${classes}" title="${escapeHtml(title)}">${day}</span>`);
+    }
+
+    cards.push(`
+      <article class="cal-card">
+        <h3>${escapeHtml(monthFormatter.format(monthAnchor))}</h3>
+        <div class="cal-weekdays">${weekdays.map((d) => `<span>${d}</span>`).join("")}</div>
+        <div class="cal-grid">${cells.join("")}</div>
+      </article>
+    `);
+  }
+
+  return cards.join("");
+}
+
 async function avaibookFetch(path, token) {
   const response = await fetch(`${AVAIBOOK_API}${path}`, {
     headers: {
@@ -120,62 +252,30 @@ function getTokenOrFail(res) {
   return token;
 }
 
-// Vista rápida en "/" que hace fetch a accommodations automáticamente
+// Vista rápida en "/" con lista simple (ID + título)
 app.get("/", async (req, res) => {
   try {
     const token = getTokenOrFail(res);
     if (!token) return;
 
     const data = await avaibookFetch("/accommodations/", token);
+    const listApiUrl = `${AVAIBOOK_API}/accommodations/`;
     const items = Array.isArray(data) ? data : [];
-    const ids = items
-      .map((item) => item?.id)
-      .filter((id) => Number.isFinite(id) && id > 0);
-    const batchResults = ids.length ? await avaibookBatchFetch(ids) : [];
-
-    const cardsHtml = batchResults
-      .map((result) => {
-        const id = result?.id ?? "";
-        if (!result?.ok || !result?.data || typeof result.data !== "object") {
-          return `<article class="card error-card">
-            <div class="content">
-              <h2>${escapeHtml(`Alojamiento ${id}`)}</h2>
-              <p>Error: ${escapeHtml(result?.error || "No se pudo cargar el detalle")}</p>
-              <p class="links"><a href="/api/accommodations/${escapeHtml(id)}" target="_blank" rel="noopener noreferrer">Abrir detalle directo</a></p>
-            </div>
-          </article>`;
+    const listHtml = items
+      .map((item) => {
+        const id = item?.id;
+        const title =
+          item?.tradeName?.es ||
+          item?.tradeName?.en ||
+          item?.name ||
+          (Number.isFinite(id) ? `Alojamiento ${id}` : "Alojamiento sin ID");
+        if (!Number.isFinite(id)) {
+          return `<li><span class="id">—</span><span>${escapeHtml(title)}</span></li>`;
         }
-
-        const detail = result.data;
-        const location = detail?.location ?? {};
-        const unit = Array.isArray(detail?.units) ? detail.units[0] : null;
-        const image = Array.isArray(detail?.images)
-          ? detail.images.find((img) => img?.SMALL || img?.BIG || img?.ORIGINAL)
-          : null;
-        const imageSrc = image?.SMALL || image?.BIG || image?.ORIGINAL || "";
-        const featureCount =
-          detail?.features && typeof detail.features === "object"
-            ? Object.values(detail.features).filter((value) => value === "1" || value === 1 || value === true).length
-            : 0;
-
-        return `<article class="card">
-          ${imageSrc ? `<img class="hero" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(detail?.tradeName?.es || detail?.name || `Alojamiento ${id}`)}" loading="lazy" />` : ""}
-          <div class="content">
-            <h2>${escapeHtml(detail?.tradeName?.es || detail?.name || `Alojamiento ${id}`)}</h2>
-            <p class="muted">${escapeHtml(detail?.accommodationType || "Alojamiento")} · ${escapeHtml(location.city || "Calpe")} (${escapeHtml(location.region || "Alicante")})</p>
-            <div class="stats">
-              ${kv("ID", id)}
-              ${kv("Capacidad", unit?.capacity)}
-              ${kv("Licencia", detail?.license)}
-              ${kv("Caracteristicas", featureCount)}
-            </div>
-            <p>${escapeHtml(detail?.introduction?.es || detail?.description?.es || "Sin descripcion corta.")}</p>
-            <p class="links">
-              <a href="/api/accommodations/${escapeHtml(id)}" target="_blank" rel="noopener noreferrer">Detalle directo</a>
-              <a href="/api/accommodations/${escapeHtml(id)}?format=json" target="_blank" rel="noopener noreferrer">JSON</a>
-            </p>
-          </div>
-        </article>`;
+        return `<li>
+          <span class="id">${escapeHtml(id)}</span>
+          <a href="/api/accommodations/${escapeHtml(id)}">${escapeHtml(title)}</a>
+        </li>`;
       })
       .join("");
 
@@ -192,23 +292,68 @@ app.get("/", async (req, res) => {
       a { color: #0b63ce; text-decoration: none; }
       a:hover { text-decoration: underline; }
       .meta { margin-top: 18px; font-size: 13px; color: #666; }
-      .source { font-size: 13px; color: #666; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 18px; }
-      .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
-      .content { padding: 14px; }
-      .hero { width: 100%; height: 190px; object-fit: cover; display: block; background: #ececec; }
-      .muted { color: #666; margin-top: 4px; }
-      .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin: 14px 0; }
-      .links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-      .error-card { border-color: #f0c7c7; }
+      .list-api {
+        margin: 10px 0 12px;
+        font-size: 12px;
+        color: #0f2a5a;
+        word-break: break-all;
+        background: linear-gradient(180deg, #dbeafe 0%, #cfe4ff 100%);
+        border: 1px solid #93c5fd;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .api-info-icon {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 700;
+        color: #ffffff;
+        background: #2563eb;
+        margin-top: 1px;
+      }
+      .api-call-content { min-width: 0; }
+      .api-call-label {
+        display: block;
+        font-weight: 700;
+        color: #1d4ed8;
+        margin-bottom: 2px;
+      }
+      .list-api code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        color: #0b1220;
+      }
+      .list { margin-top: 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 10px 14px; }
+      .list ul { list-style: none; margin: 0; padding: 0; }
+      .list li { display: flex; gap: 12px; align-items: baseline; padding: 8px 2px; border-bottom: 1px solid #f0f0f0; }
+      .list li:last-child { border-bottom: none; }
+      .id { min-width: 56px; font-weight: 700; color: #555; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     </style>
   </head>
   <body>
     <h1>Alojamientos</h1>
     <p>Prefetch al iniciar: ${prefetchCount === null ? "en curso" : prefetchCount === -1 ? "error" : `${prefetchCount} alojamientos`}</p>
     <p>Total: ${items.length}</p>
-    <p class="source">Detalles cargados a traves de <code>${escapeHtml(`${NEXT_APP_BASE_URL}/api/avaibook-batch`)}</code></p>
-    <section class="grid">${cardsHtml || "<article class=\"card error-card\"><div class=\"content\"><p>No se recibieron alojamientos</p></div></article>"}</section>
+    <p>Haz click en el título para abrir el detalle completo del alojamiento.</p>
+    <p class="list-api">
+      <span class="api-info-icon" aria-hidden="true">i</span>
+      <span class="api-call-content">
+        <span class="api-call-label">API listado</span>
+        <code>${escapeHtml(listApiUrl)}</code>
+      </span>
+    </p>
+    <section class="list">
+      <ul>${listHtml || "<li><span>No se recibieron alojamientos</span></li>"}</ul>
+    </section>
     <p class="meta">
       JSON completo:
       <a href="/api/accommodations" target="_blank" rel="noopener noreferrer">/api/accommodations</a>
@@ -258,7 +403,9 @@ app.get("/api/accommodations/:id", async (req, res) => {
     if (!token) return;
 
     const { id } = req.params;
-    const data = await avaibookFetch(`/accommodations/${id}/`, token);
+    const detailPath = `/accommodations/${id}/`;
+    const detailApiUrl = `${AVAIBOOK_API}${detailPath}`;
+    const data = await avaibookFetch(detailPath, token);
     if (req.query.format === "json") {
       return res.json(data);
     }
@@ -270,6 +417,26 @@ app.get("/api/accommodations/:id", async (req, res) => {
     const location = data?.location ?? {};
     const unit = Array.isArray(data?.units) ? data.units[0] : null;
     const unitSeasons = Array.isArray(unit?.unitSeasons) ? unit.unitSeasons : [];
+    const availabilityStartDate = new Date();
+    const availabilityEndDate = new Date(
+      availabilityStartDate.getFullYear(),
+      availabilityStartDate.getMonth() + 3,
+      0,
+    );
+    const availabilityPath = `/accommodations/${id}/calendar?startDate=${formatApiDate(availabilityStartDate)}&endDate=${formatApiDate(availabilityEndDate)}`;
+    const calendarApiUrl = `${AVAIBOOK_API}${availabilityPath}`;
+    const unavailableDates = new Set();
+    let availabilityError = "";
+
+    try {
+      const availabilityRaw = await avaibookFetch(availabilityPath, token);
+      extractUnavailableDates(availabilityRaw, unavailableDates);
+    } catch (availabilityErr) {
+      availabilityError =
+        availabilityErr instanceof Error
+          ? availabilityErr.message
+          : "No se pudo cargar disponibilidad";
+    }
 
     const imagesHtml = images.length
       ? images
@@ -295,6 +462,11 @@ app.get("/api/accommodations/:id", async (req, res) => {
           .map((s) => `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.dateIni)}</td><td>${escapeHtml(s.dateEnd)}</td><td>${escapeHtml(s.minimumStay)}</td><td>${escapeHtml(s.weekPrice)}</td></tr>`)
           .join("")
       : "<tr><td colspan=\"5\">Sin temporadas</td></tr>";
+    const availabilityCalendarHtml = buildAvailabilityCalendars(
+      unavailableDates,
+      new Date(availabilityStartDate.getFullYear(), availabilityStartDate.getMonth(), 1),
+      3,
+    );
 
     return res.send(`<!doctype html>
 <html lang="es">
@@ -303,11 +475,12 @@ app.get("/api/accommodations/:id", async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(data?.tradeName?.es || data?.name || `Alojamiento ${id}`)}</title>
     <style>
-      body { font-family: Inter, Arial, sans-serif; margin: 24px; color: #232323; background: #f5f5f5; }
+      body { font-family: Inter, Arial, sans-serif; margin: 24px; color: #232323; background: #f3f7ff; }
       .wrap { max-width: 1200px; margin: 0 auto; }
       .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
       .links a { margin-left: 10px; color: #0b63ce; text-decoration: none; }
       .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+      .card--calendar { background: #f6f9ff; }
       h1 { margin: 0 0 6px; font-size: 27px; }
       h2 { margin: 0 0 12px; font-size: 18px; }
       p { margin: 6px 0; line-height: 1.5; }
@@ -320,6 +493,119 @@ app.get("/api/accommodations/:id", async (req, res) => {
       table { width: 100%; border-collapse: collapse; font-size: 13px; }
       th, td { border-bottom: 1px solid #eee; text-align: left; padding: 8px 6px; }
       th { color: #666; font-weight: 600; }
+      .cal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+      .cal-title {
+        border-left: 4px solid #0071e3;
+        padding-left: 10px;
+      }
+      .cal-head p { margin: 0; color: #6a6a6a; font-size: 13px; }
+      .cal-api, .detail-api {
+        margin: 10px 0 12px;
+        font-size: 12px;
+        color: #0f2a5a;
+        word-break: break-all;
+        background: linear-gradient(180deg, #dbeafe 0%, #cfe4ff 100%);
+        border: 1px solid #93c5fd;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .detail-api { margin-top: 6px; }
+      .api-info-icon {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 700;
+        color: #ffffff;
+        background: #2563eb;
+        margin-top: 1px;
+      }
+      .api-call-content { min-width: 0; }
+      .api-call-label {
+        display: block;
+        font-weight: 700;
+        color: #1d4ed8;
+        margin-bottom: 2px;
+      }
+      .cal-api code, .detail-api code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        color: #0b1220;
+      }
+      .cal-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+      .cal-card {
+        background: linear-gradient(180deg, #ffffff, #fbfbfd);
+        border: 1px solid #ebebf0;
+        border-radius: 18px;
+        padding: 14px 14px 16px;
+        box-shadow: 0 14px 28px -22px rgba(0, 0, 0, 0.5);
+      }
+      .cal-card h3 {
+        margin: 0 0 10px;
+        font-size: 17px;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .cal-weekdays, .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .cal-weekdays { margin-bottom: 8px; }
+      .cal-weekdays span {
+        text-align: center;
+        font-size: 11px;
+        color: #8e8e93;
+        font-weight: 600;
+      }
+      .cal-day {
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        font-size: 13px;
+        color: #1d1d1f;
+        background: #f4f4f7;
+        border: 1px solid transparent;
+      }
+      .cal-day--empty { background: transparent; border-color: transparent; }
+      .cal-day--past {
+        background: #ececf1;
+        color: #9a9aa2;
+        border-color: transparent;
+      }
+      .cal-day--today {
+        border-color: #60a5fa;
+        box-shadow: inset 0 0 0 1px #bfdbfe;
+        font-weight: 700;
+      }
+      .cal-day--unavailable {
+        background: #ffe5e8;
+        color: #b00020;
+        border-color: #ffb8c4;
+        font-weight: 700;
+      }
+      .cal-day--today.cal-day--unavailable {
+        border-color: #60a5fa;
+        box-shadow: inset 0 0 0 1px #bfdbfe;
+      }
+      .cal-legend { margin-top: 10px; display: flex; gap: 14px; color: #555; font-size: 12px; }
+      .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+      .legend-dot--busy { background: #ff5a6f; }
+      .legend-dot--today { background: #0071e3; }
+      .cal-error {
+        margin-top: 8px;
+        color: #b00020;
+        font-size: 13px;
+      }
       @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
     </style>
   </head>
@@ -332,12 +618,39 @@ app.get("/api/accommodations/:id", async (req, res) => {
         </div>
       </div>
 
+      <section class="card card--calendar">
+        <div class="cal-head">
+          <h2 class="cal-title" style="margin-bottom:0;">Calendario de disponibilidad</h2>
+          <p>Días no disponibles en rojo</p>
+        </div>
+        <p class="cal-api">
+          <span class="api-info-icon" aria-hidden="true">i</span>
+          <span class="api-call-content">
+            <span class="api-call-label">API calendario</span>
+            <code>${escapeHtml(calendarApiUrl)}</code>
+          </span>
+        </p>
+        <div class="cal-wrap">
+          ${availabilityCalendarHtml}
+        </div>
+        <div class="cal-legend">
+          <span><i class="legend-dot legend-dot--busy"></i>No disponible</span>
+          <span><i class="legend-dot legend-dot--today"></i>Hoy</span>
+        </div>
+        ${availabilityError ? `<p class="cal-error">${escapeHtml(availabilityError)}</p>` : ""}
+      </section>
       <section class="card">
         <h1>${escapeHtml(data?.tradeName?.es || data?.name || `Alojamiento ${id}`)}</h1>
+        <p class="detail-api">
+          <span class="api-info-icon" aria-hidden="true">i</span>
+          <span class="api-call-content">
+            <span class="api-call-label">API detalle</span>
+            <code>${escapeHtml(detailApiUrl)}</code>
+          </span>
+        </p>
         <p>${escapeHtml(data?.accommodationType || "")} · ${escapeHtml(location.city || "")} (${escapeHtml(location.region || "")})</p>
         <p>${escapeHtml(data?.introduction?.es || "")}</p>
       </section>
-
       <section class="card">
         <h2>Datos principales</h2>
         <div class="grid">
