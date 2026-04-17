@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useLangStore } from "@/app/lib/langStore";
@@ -535,6 +535,16 @@ const bookingSearchTranslations = {
     uk: "Шукати",
     pl: "Szukaj",
   },
+  missingDate: {
+    eng: "Missing date",
+    esp: "Falta fecha",
+    ru: "Не выбрана дата",
+    fr: "Date manquante",
+    it: "Data mancante",
+    de: "Datum fehlt",
+    uk: "Дата не вибрана",
+    pl: "Brak daty",
+  },
   datePlaceholder: {
     eng: "dd/mm/yyyy",
     esp: "dd/mm/aaaa",
@@ -587,6 +597,16 @@ const bookingResultsTranslations = {
     de: "Unterkunfte werden geladen...",
     uk: "Завантаження варіантів проживання...",
     pl: "Ladowanie noclegow...",
+  },
+  loadingProperties: {
+    eng: "Loading properties...",
+    esp: "Cargando propiedades...",
+    ru: "Загрузка объектов...",
+    fr: "Chargement des logements...",
+    it: "Caricamento proprieta...",
+    de: "Unterkunfte werden geladen...",
+    uk: "Завантаження об'єктів...",
+    pl: "Ladowanie obiektow...",
   },
   loadingDetails: {
     eng: "loading details...",
@@ -916,6 +936,10 @@ function PropertyMap({
   bathroomsShortLabel,
   lang,
   guestFilter,
+  bookingStartDate,
+  bookingEndDate,
+  isLoadingProperties,
+  loadingPropertiesLabel,
   onOpen,
 }: {
   properties: MappedProperty[];
@@ -929,6 +953,10 @@ function PropertyMap({
   bathroomsShortLabel: string;
   lang: Lang;
   guestFilter: string;
+  bookingStartDate?: string;
+  bookingEndDate?: string;
+  isLoadingProperties: boolean;
+  loadingPropertiesLabel: string;
   onOpen: (url: string) => void;
 }) {
   const mapRef = useRef<any>(null);
@@ -1010,6 +1038,8 @@ function PropertyMap({
         const mapsUrl = buildGoogleMapsUrl(property);
         const bookingUrl = buildBookingUrl(property.id, {
           guests: guestFilter,
+          startDate: bookingStartDate,
+          endDate: bookingEndDate,
           lang,
         });
         const location = property.address
@@ -1029,9 +1059,7 @@ function PropertyMap({
           property.capacity > 0
             ? `${property.capacity} ${property.capacity === 1 ? guestSingularLabel : guestPluralLabel}`
             : "";
-        const safeCapacity = escapeHtml(
-          capacityLabel,
-        );
+        const safeCapacity = escapeHtml(capacityLabel);
         const safeMeta = escapeHtml(
           [
             property.bedrooms > 0
@@ -1060,26 +1088,26 @@ function PropertyMap({
               : "") +
             `<div style="margin-bottom:8px;font-size:12px;line-height:1.45;color:#666;">${safeLocation}</div>` +
             `<div style="display:flex;gap:10px;flex-wrap:wrap;">` +
-              `<button type="button" data-booking-url="${escapeHtml(bookingUrl)}" style="cursor:pointer;border:0;display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#2563eb;padding:9px 12px;border-radius:999px;">` +
-                `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
-                  `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
-                    `<path d="M3 8a5 5 0 1 1 1.46 3.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
-                    `<path d="M8 5.2v2.9l1.9 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
-                  `</svg>` +
-                `</span>` +
-                `${safeMoreInfoLabel}` +
-              `</button>` +
-              `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#8f7130;text-decoration:none;padding-top:2px;">` +
-                `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
-                  `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
-                    `<path d="M8 14s4-4.03 4-7.2A4 4 0 1 0 4 6.8C4 9.97 8 14 8 14Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>` +
-                    `<circle cx="8" cy="6.8" r="1.6" stroke="currentColor" stroke-width="1.4"/>` +
-                  `</svg>` +
-                `</span>` +
-                `${safeLinkLabel}` +
-              `</a>` +
+            `<button type="button" data-booking-url="${escapeHtml(bookingUrl)}" style="cursor:pointer;border:0;display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#2563eb;padding:9px 12px;border-radius:999px;">` +
+            `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
+            `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
+            `<path d="M3 8a5 5 0 1 1 1.46 3.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+            `<path d="M8 5.2v2.9l1.9 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+            `</svg>` +
+            `</span>` +
+            `${safeMoreInfoLabel}` +
+            `</button>` +
+            `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#8f7130;text-decoration:none;padding-top:2px;">` +
+            `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
+            `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">` +
+            `<path d="M8 14s4-4.03 4-7.2A4 4 0 1 0 4 6.8C4 9.97 8 14 8 14Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>` +
+            `<circle cx="8" cy="6.8" r="1.6" stroke="currentColor" stroke-width="1.4"/>` +
+            `</svg>` +
+            `</span>` +
+            `${safeLinkLabel}` +
+            `</a>` +
             `</div>` +
-          `</div>`,
+            `</div>`,
         );
 
         marker.on("popupopen", (event: any) => {
@@ -1128,7 +1156,11 @@ function PropertyMap({
     };
   }, [
     guestFilter,
+    bookingEndDate,
+    bookingStartDate,
+    isLoadingProperties,
     lang,
+    loadingPropertiesLabel,
     moreInfoLabel,
     guestPluralLabel,
     guestSingularLabel,
@@ -1172,8 +1204,17 @@ function PropertyMap({
         aria-expanded={isExpanded}
         aria-label={title}
       >
-        <div>
+        <div className="flex items-center gap-2">
           <h2 className="text-[18px] font-semibold text-[#2d2d2d]">{title}</h2>
+          {isLoadingProperties && (
+            <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#8f7130]">
+              <span
+                className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
+                aria-hidden="true"
+              />
+              {loadingPropertiesLabel}
+            </span>
+          )}
         </div>
         <span
           className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#e7dcc0] bg-[#faf6eb] text-[#8f7130] transition-transform duration-500 ${isExpanded ? "rotate-180" : "rotate-0"}`}
@@ -1253,6 +1294,13 @@ function buildBookingUrl(
   const bookLang = BOOK_LANG_TO_PATH[options?.lang ?? "esp"] ?? "es";
   const baseUrl = `${BOOK}/${bookLang}/property/${propertyId}`;
   return query ? `${baseUrl}?${query}` : baseUrl;
+}
+
+function formatApiDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function startOfDay(date: Date): Date {
@@ -1471,6 +1519,59 @@ function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
     DETAIL_429_MAX_COOLDOWN_MS,
     DETAIL_429_BASE_COOLDOWN_MS * 2 ** Math.max(0, streak - 1),
   );
+}
+
+function isAvailabilityResponseAvailable(payload: unknown): boolean {
+  if (typeof payload === "number") {
+    return payload === 0;
+  }
+
+  if (typeof payload === "boolean") {
+    return payload;
+  }
+
+  if (typeof payload === "string") {
+    const numeric = Number.parseFloat(payload);
+    if (Number.isFinite(numeric)) {
+      return numeric === 0;
+    }
+    const normalized = payload.trim().toLowerCase();
+    if (!normalized) return false;
+    if (
+      normalized.includes("available") ||
+      normalized.includes("disponible") ||
+      normalized === "free"
+    ) {
+      return true;
+    }
+    if (
+      normalized.includes("unavailable") ||
+      normalized.includes("occupied") ||
+      normalized.includes("booked") ||
+      normalized.includes("reserved")
+    ) {
+      return false;
+    }
+  }
+
+  if (payload && typeof payload === "object") {
+    const record = payload as Record<string, unknown>;
+
+    if (typeof record.available === "boolean") {
+      return record.available;
+    }
+    if (typeof record.isAvailable === "boolean") {
+      return record.isAvailable;
+    }
+    if (typeof record.booked === "boolean") {
+      return !record.booked;
+    }
+    if (typeof record.value === "number") {
+      return record.value === 0;
+    }
+  }
+
+  return false;
 }
 
 function CardCarousel({
@@ -1963,7 +2064,7 @@ function DatePickerPopover({
   const min = minDate ? startOfDay(minDate) : null;
 
   return (
-    <div className="absolute left-0 top-[calc(100%+10px)] z-60 w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#e8e8e8] bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+    <div className="absolute left-0 top-[calc(100%+10px)] z-[1200] w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#e8e8e8] bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
@@ -2067,16 +2168,19 @@ export default function ReservaDirectaV2Content() {
   const checkOutLabel = bookingSearchTranslations.checkOut[lang];
   const guestsLabel = bookingSearchTranslations.guests[lang];
   const searchLabel = bookingSearchTranslations.search[lang];
+  const missingDateLabel = bookingSearchTranslations.missingDate[lang];
   const datePlaceholderLabel = bookingSearchTranslations.datePlaceholder[lang];
   const guestSingularLabel = bookingSearchTranslations.guestSingular[lang];
   const guestPluralLabel = bookingSearchTranslations.guestPlural[lang];
   const staysInCalpeLabel = bookingResultsTranslations.staysInCalpe[lang];
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
+  const loadingPropertiesLabel = bookingResultsTranslations.loadingProperties[lang];
   const loadingDetailsLabel = bookingResultsTranslations.loadingDetails[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
-  const openInGoogleMapsLabel = bookingResultsTranslations.openInGoogleMaps[lang];
+  const openInGoogleMapsLabel =
+    bookingResultsTranslations.openInGoogleMaps[lang];
   const mapMoreInfoLabel = bookingResultsTranslations.moreInfo[lang];
   const propertyFallbackLabel = propertyCardTranslations.propertyFallback[lang];
   const cardLoadingDataLabel = propertyCardTranslations.loadingData[lang];
@@ -2111,6 +2215,18 @@ export default function ReservaDirectaV2Content() {
     null,
   );
   const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
+  const [searchGuestCount, setSearchGuestCount] = useState<number | null>(null);
+  const [searchAvailableIds, setSearchAvailableIds] = useState<Set<number> | null>(
+    null,
+  );
+  const [searchDateRange, setSearchDateRange] = useState<{
+    startDate: string;
+    endDate: string;
+  } | null>(null);
+  const [isSearchRunning, setIsSearchRunning] = useState(false);
+  const [showMissingCheckInError, setShowMissingCheckInError] = useState(false);
+  const [showMissingCheckOutError, setShowMissingCheckOutError] = useState(false);
+  const searchSequenceRef = useRef(0);
   const calendarRef = useRef<HTMLDivElement>(null);
   const guestMenuRef = useRef<HTMLDivElement>(null);
   const properties = propertiesState;
@@ -2170,6 +2286,7 @@ export default function ReservaDirectaV2Content() {
     const formatted = formatDateInput(date, lang);
 
     if (target === "checkIn") {
+      setShowMissingCheckInError(false);
       setCheckIn(formatted);
       if (!parsedCheckOut || date >= parsedCheckOut) {
         setCheckOut(formatDateInput(addDays(date, 1), lang));
@@ -2180,6 +2297,7 @@ export default function ReservaDirectaV2Content() {
       return;
     }
 
+    setShowMissingCheckOutError(false);
     if (parsedCheckIn && date <= parsedCheckIn) {
       setCheckOut(formatDateInput(addDays(parsedCheckIn, 1), lang));
     } else {
@@ -2187,6 +2305,85 @@ export default function ReservaDirectaV2Content() {
     }
     setCheckoutPreviewDate(null);
     setOpenDatePicker(null);
+  }
+
+  async function runSearch() {
+    const isCheckInMissing = !parsedCheckIn;
+    const isCheckOutMissing = !parsedCheckOut;
+    setShowMissingCheckInError(isCheckInMissing);
+    setShowMissingCheckOutError(isCheckOutMissing);
+    if (isCheckInMissing || isCheckOutMissing) {
+      return;
+    }
+
+    const sequence = searchSequenceRef.current + 1;
+    searchSequenceRef.current = sequence;
+    setIsSearchRunning(false);
+
+    const guestCount = Number.parseInt(guestFilter, 10) || 2;
+    const guestFilteredProperties = properties.filter((prop) => {
+      if (isPropertyDetailsPending(prop)) return false;
+      return prop.capacity >= guestCount;
+    });
+    const guestFilteredIds = guestFilteredProperties
+      .map((prop) => prop.id)
+      .filter((id) => id > 0);
+
+    setSearchGuestCount(guestCount);
+    setSearchDateRange(null);
+    setCheckoutPreviewDate(null);
+    setOpenDatePicker(null);
+    setIsGuestMenuOpen(false);
+
+    if (guestFilteredIds.length === 0) {
+      setSearchAvailableIds(new Set<number>());
+      return;
+    }
+
+    if (!parsedCheckIn || !parsedCheckOut) {
+      setSearchAvailableIds(new Set<number>(guestFilteredIds));
+      return;
+    }
+
+    const startDate = startOfDay(parsedCheckIn);
+    const endDate = startOfDay(parsedCheckOut);
+    if (endDate <= startDate) {
+      setSearchAvailableIds(new Set<number>());
+      return;
+    }
+
+    setIsSearchRunning(true);
+
+    const startDateApi = formatApiDate(startDate);
+    const endDateApi = formatApiDate(endDate);
+    const availableIds = new Set<number>();
+
+    try {
+      await Promise.all(
+        guestFilteredIds.map(async (id) => {
+          try {
+            const response = await apiFetchWithRetry(
+              `/accommodations/${id}/availability?startDate=${startDateApi}&endDate=${endDateApi}`,
+              2,
+            );
+            if (isAvailabilityResponseAvailable(response)) {
+              availableIds.add(id);
+            }
+          } catch {
+            // Ignore property when availability cannot be validated.
+          }
+        }),
+      );
+    } finally {
+      if (searchSequenceRef.current === sequence) {
+        setIsSearchRunning(false);
+      }
+    }
+
+    if (searchSequenceRef.current !== sequence) return;
+
+    setSearchDateRange({ startDate: startDateApi, endDate: endDateApi });
+    setSearchAvailableIds(availableIds);
   }
 
   useEffect(() => {
@@ -2363,11 +2560,19 @@ export default function ReservaDirectaV2Content() {
     };
   }, []);
 
-  const filtered = properties.filter((p) => {
-    if (isPropertyDetailsPending(p)) return true;
-    if (p.capacity < selectedGuestCount) return false;
+  const effectiveGuestCount = searchGuestCount ?? selectedGuestCount;
+  const baseFiltered = properties.filter((p) => {
+    if (isPropertyDetailsPending(p)) {
+      return searchGuestCount === null;
+    }
+    if (p.capacity < effectiveGuestCount) return false;
     return true;
   });
+  const filtered =
+    searchAvailableIds === null
+      ? baseFiltered
+      : baseFiltered.filter((prop) => searchAvailableIds.has(prop.id));
+  const activeGuestFilter = String(effectiveGuestCount);
   const mappedProperties = filtered.filter(
     (prop): prop is MappedProperty =>
       typeof prop.latitude === "number" && typeof prop.longitude === "number",
@@ -2429,7 +2634,7 @@ export default function ReservaDirectaV2Content() {
     <div className="min-h-screen bg-[#efefef]">
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
-        <div className="relative z-[900] pt-3 pb-2">
+        <div className="relative z-[1400] pt-3 pb-2">
           <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div
               ref={openDatePicker === "checkIn" ? calendarRef : null}
@@ -2437,8 +2642,15 @@ export default function ReservaDirectaV2Content() {
             >
               <button
                 type="button"
-                onClick={() => toggleCalendar("checkIn")}
-                className="block w-full text-left"
+                onClick={() => {
+                  setShowMissingCheckInError(false);
+                  toggleCalendar("checkIn");
+                }}
+                className={`block w-full rounded-[6px] border px-1 py-1 text-left transition-colors ${
+                  showMissingCheckInError
+                    ? "border-[#dc2626]"
+                    : "border-transparent"
+                }`}
                 aria-label={checkInLabel}
               >
                 <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
@@ -2473,6 +2685,11 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
+              {showMissingCheckInError && (
+                <p className="mt-1 text-[11px] font-medium text-[#dc2626]">
+                  {missingDateLabel}
+                </p>
+              )}
               {openDatePicker === "checkIn" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2495,8 +2712,15 @@ export default function ReservaDirectaV2Content() {
             >
               <button
                 type="button"
-                onClick={() => toggleCalendar("checkOut")}
-                className="block w-full text-left"
+                onClick={() => {
+                  setShowMissingCheckOutError(false);
+                  toggleCalendar("checkOut");
+                }}
+                className={`block w-full rounded-[6px] border px-1 py-1 text-left transition-colors ${
+                  showMissingCheckOutError
+                    ? "border-[#dc2626]"
+                    : "border-transparent"
+                }`}
                 aria-label={checkOutLabel}
               >
                 <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
@@ -2527,6 +2751,11 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
+              {showMissingCheckOutError && (
+                <p className="mt-1 text-[11px] font-medium text-[#dc2626]">
+                  {missingDateLabel}
+                </p>
+              )}
               {openDatePicker === "checkOut" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2623,7 +2852,14 @@ export default function ReservaDirectaV2Content() {
                 </div>
               )}
             </div>
-            <button className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f]">
+            <button
+              type="button"
+              onClick={() => {
+                void runSearch();
+              }}
+              className="min-h-[50px] w-full bg-[#c2a457] px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#af944f] disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={isSearchRunning}
+            >
               {searchLabel}
             </button>
           </div>
@@ -2644,7 +2880,7 @@ export default function ReservaDirectaV2Content() {
               {loadErrorLabel}
             </p>
           )}
-          {filtered.length > 0 && (
+          {(filtered.length > 0 || searchGuestCount !== null) && (
             <>
               <p className="text-[22px] text-[#5f5f5f] mb-3 font-light">
                 <strong className="inline-flex min-w-[28px] items-center justify-center text-[#2d2d2d] font-bold">
@@ -2672,7 +2908,11 @@ export default function ReservaDirectaV2Content() {
                 bedroomsShortLabel={bedroomsShortLabel}
                 bathroomsShortLabel={bathroomsShortLabel}
                 lang={lang}
-                guestFilter={guestFilter}
+                guestFilter={activeGuestFilter}
+                bookingStartDate={searchDateRange?.startDate}
+                bookingEndDate={searchDateRange?.endDate}
+                isLoadingProperties={loading || loadingDetails || isSearchRunning}
+                loadingPropertiesLabel={loadingPropertiesLabel}
                 onOpen={setSelectedBookingUrl}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -2692,7 +2932,9 @@ export default function ReservaDirectaV2Content() {
                     bedsLabel={bedsLabel}
                     bathroomsLabel={bathroomsLabel}
                     bookingUrl={buildBookingUrl(prop.id, {
-                      guests: guestFilter,
+                      guests: activeGuestFilter,
+                      startDate: searchDateRange?.startDate,
+                      endDate: searchDateRange?.endDate,
                     })}
                   />
                 ))}
