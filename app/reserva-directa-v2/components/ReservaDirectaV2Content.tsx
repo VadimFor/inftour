@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useLangStore } from "@/app/lib/langStore";
@@ -2435,46 +2435,44 @@ export default function ReservaDirectaV2Content() {
               ref={openDatePicker === "checkIn" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r lg:border-b-0"
             >
-              <label
-                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
+              <button
+                type="button"
                 onClick={() => toggleCalendar("checkIn")}
+                className="block w-full text-left"
+                aria-label={checkInLabel}
               >
-                {checkInLabel}
-              </label>
-              <div className="flex items-center justify-between gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  placeholder={datePlaceholderLabel}
-                  value={checkIn}
-                  onClick={() => toggleCalendar("checkIn")}
-                  className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleCalendar("checkIn")}
-                  className="text-[#2d2d2d]"
-                  aria-label={checkInLabel}
-                >
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                    <rect
-                      x="2.2"
-                      y="3.2"
-                      width="11.6"
-                      height="10.6"
-                      rx="1.6"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                    />
-                    <path
-                      d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+                <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                  {checkInLabel}
+                </span>
+                <span className="flex items-center justify-between gap-2">
+                  <span
+                    className={`text-[15px] font-medium ${
+                      checkIn ? "text-[#2d2d2d]" : "text-[#2d2d2d]"
+                    }`}
+                  >
+                    {checkIn || datePlaceholderLabel}
+                  </span>
+                  <span className="text-[#2d2d2d]" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                      <rect
+                        x="2.2"
+                        y="3.2"
+                        width="11.6"
+                        height="10.6"
+                        rx="1.6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </button>
               {openDatePicker === "checkIn" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2495,46 +2493,40 @@ export default function ReservaDirectaV2Content() {
               ref={openDatePicker === "checkOut" ? calendarRef : null}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-b sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:border-r"
             >
-              <label
-                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
+              <button
+                type="button"
                 onClick={() => toggleCalendar("checkOut")}
+                className="block w-full text-left"
+                aria-label={checkOutLabel}
               >
-                {checkOutLabel}
-              </label>
-              <div className="flex items-center justify-between gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  placeholder={datePlaceholderLabel}
-                  value={checkOut}
-                  onClick={() => toggleCalendar("checkOut")}
-                  className="w-full cursor-pointer border-0 bg-transparent text-[15px] font-medium text-[#2d2d2d] outline-0 placeholder:text-[#2d2d2d]"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleCalendar("checkOut")}
-                  className="text-[#2d2d2d]"
-                  aria-label={checkOutLabel}
-                >
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                    <rect
-                      x="2.2"
-                      y="3.2"
-                      width="11.6"
-                      height="10.6"
-                      rx="1.6"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                    />
-                    <path
-                      d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+                <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                  {checkOutLabel}
+                </span>
+                <span className="flex items-center justify-between gap-2">
+                  <span className="text-[15px] font-medium text-[#2d2d2d]">
+                    {checkOut || datePlaceholderLabel}
+                  </span>
+                  <span className="text-[#2d2d2d]" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                      <rect
+                        x="2.2"
+                        y="3.2"
+                        width="11.6"
+                        height="10.6"
+                        rx="1.6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M5 2.2v2.2M11 2.2v2.2M2.2 6.1h11.6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </button>
               {openDatePicker === "checkOut" && (
                 <DatePickerPopover
                   lang={lang}
@@ -2563,36 +2555,35 @@ export default function ReservaDirectaV2Content() {
               ref={guestMenuRef}
               className="relative border-b border-[#ececec] px-3 py-2 sm:border-r sm:border-b-0 lg:border-b-0"
             >
-              <label
-                className="mb-1 block cursor-pointer text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]"
-                onClick={toggleGuestMenu}
-              >
-                {guestsLabel}
-              </label>
               <button
                 type="button"
                 onClick={toggleGuestMenu}
                 aria-haspopup="listbox"
                 aria-expanded={isGuestMenuOpen}
-                className="flex w-full items-center justify-between gap-2 border-0 bg-transparent text-left text-[15px] font-medium text-[#2d2d2d] outline-0"
+                className="block w-full border-0 bg-transparent text-left outline-0"
               >
-                <span>{selectedGuestLabel}</span>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className={`shrink-0 transition-transform duration-200 ${isGuestMenuOpen ? "rotate-180" : ""}`}
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M4 6.5L8 10.5L12 6.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.12em] text-[#8e8e8e]">
+                  {guestsLabel}
+                </span>
+                <span className="flex items-center justify-between gap-2 text-[15px] font-medium text-[#2d2d2d]">
+                  <span>{selectedGuestLabel}</span>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className={`shrink-0 transition-transform duration-200 ${isGuestMenuOpen ? "rotate-180" : ""}`}
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 6.5L8 10.5L12 6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
               </button>
               {isGuestMenuOpen && (
                 <div className="absolute left-0 top-[calc(100%+8px)] z-40 w-full min-w-[220px] rounded-[12px] border border-[#e6e6e6] bg-white p-1 shadow-[0_14px_36px_rgba(15,23,42,0.16)]">
