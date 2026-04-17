@@ -658,6 +658,16 @@ const bookingResultsTranslations = {
     uk: "Показати все",
     pl: "Zobacz wszystko",
   },
+  noSearchResults: {
+    eng: "No stays available for {guests} on {dates}.",
+    esp: "No hay alojamientos disponibles para {guests} en {dates}.",
+    ru: "Нет доступных вариантов размещения для {guests} на даты {dates}.",
+    fr: "Aucun logement disponible pour {guests} aux dates {dates}.",
+    it: "Nessun alloggio disponibile per {guests} nelle date {dates}.",
+    de: "Keine verfugbaren Unterkunfte fur {guests} an den Daten {dates}.",
+    uk: "Немає доступних варіантів проживання для {guests} на дати {dates}.",
+    pl: "Brak dostepnych noclegow dla {guests} w terminie {dates}.",
+  },
   mapTitle: {
     eng: "Property map",
     esp: "Mapa de propiedades",
@@ -1238,7 +1248,7 @@ function PropertyMap({
     };
   }, [isExpanded]);
 
-  if (properties.length === 0) return null;
+  if (properties.length === 0 && !isLoadingProperties) return null;
 
   return (
     <section className="mb-5 overflow-hidden rounded-[18px] border border-[#e3e0d7] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
@@ -1249,8 +1259,13 @@ function PropertyMap({
         aria-expanded={isExpanded}
         aria-label={title}
       >
-        <div className="flex items-center gap-2">
-          <h2 className="text-[18px] font-semibold text-[#2d2d2d]">{title}</h2>
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[18px] font-semibold text-[#2d2d2d]">{title}</h2>
+            {hint && (
+              <p className="mt-0.5 text-[12px] text-[#8c8576]">{hint}</p>
+            )}
+          </div>
           {isLoadingProperties && (
             <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#8f7130]">
               <span
@@ -1285,10 +1300,27 @@ function PropertyMap({
       <div
         className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px]" : "max-h-0"}`}
       >
-        <div
-          ref={mapNodeRef}
-          className="h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]"
-        />
+        {properties.length > 0 ? (
+          <div
+            ref={mapNodeRef}
+            className="h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]"
+          />
+        ) : (
+          <div className="flex h-[340px] w-full flex-col items-center justify-center gap-3 bg-[#f3f1eb] px-6 text-center text-[#8f7130] sm:h-[400px]">
+            <span
+              className="h-6 w-6 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]"
+              aria-hidden="true"
+            />
+            <span className="text-[13px] font-semibold">
+              {loadingPropertiesLabel}
+            </span>
+            {hint && (
+              <p className="max-w-[360px] text-[12px] text-[#8c8576]">
+                {hint}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1557,12 +1589,25 @@ const DETAIL_QUEUE_GAP_MS = 100;
 const DETAIL_MAX_RETRIES = 6;
 const DETAIL_429_BASE_COOLDOWN_MS = 2500;
 const DETAIL_429_MAX_COOLDOWN_MS = 12000;
+const SEARCH_BATCH_SIZE = 4;
+const SEARCH_QUEUE_GAP_MS = 100;
+const SEARCH_MAX_RETRIES = 6;
+const SEARCH_429_BASE_COOLDOWN_MS = 2500;
+const SEARCH_429_MAX_COOLDOWN_MS = 12000;
 
 function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
   if (!hitRateLimit) return DETAIL_QUEUE_GAP_MS;
   return Math.min(
     DETAIL_429_MAX_COOLDOWN_MS,
     DETAIL_429_BASE_COOLDOWN_MS * 2 ** Math.max(0, streak - 1),
+  );
+}
+
+function getSearchCooldownMs(hitRateLimit: boolean, streak: number): number {
+  if (!hitRateLimit) return SEARCH_QUEUE_GAP_MS;
+  return Math.min(
+    SEARCH_429_MAX_COOLDOWN_MS,
+    SEARCH_429_BASE_COOLDOWN_MS * 2 ** Math.max(0, streak - 1),
   );
 }
 
@@ -1596,6 +1641,26 @@ function looksUnavailable(value: unknown): boolean {
   return false;
 }
 
+function isUnavailableCalendarRange(
+  record: Record<string, unknown>,
+  normalizedType: string,
+): boolean {
+  if (
+    normalizedType.includes("BLOCKED") ||
+    normalizedType.includes("BOOKED") ||
+    normalizedType.includes("RESERVED") ||
+    normalizedType.includes("PAID") ||
+    normalizedType.includes("UNAVAILABLE") ||
+    normalizedType.includes("OCCUPIED")
+  ) {
+    return true;
+  }
+
+  return (
+    typeof record.booking === "string" && record.booking.trim().length > 0
+  );
+}
+
 function extractUnavailableDates(
   payload: unknown,
   unavailableDates: Set<string>,
@@ -1621,13 +1686,10 @@ function extractUnavailableDates(
   ) {
     const type =
       typeof record.type === "string" ? record.type.trim().toUpperCase() : "";
-    const isBlockedRange =
-      type.includes("BLOCKED") ||
-      type.includes("BOOKED") ||
-      type.includes("RESERVED");
+    const isBlockedRange = isUnavailableCalendarRange(record, type);
 
     if (isBlockedRange) {
-      let cursor = new Date(record.startDate);
+      const cursor = new Date(record.startDate);
       const end = new Date(record.endDate);
       while (cursor <= end) {
         unavailableDates.add(formatApiDate(cursor));
@@ -2285,6 +2347,8 @@ export default function ReservaDirectaV2Content() {
   const showingSearchResultsLabel =
     bookingResultsTranslations.showingSearchResults[lang];
   const viewAllLabel = bookingResultsTranslations.viewAll[lang];
+  const noSearchResultsTemplate =
+    bookingResultsTranslations.noSearchResults[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
   const openInGoogleMapsLabel =
@@ -2479,28 +2543,107 @@ export default function ReservaDirectaV2Content() {
     setSearchAvailableIds(new Set<number>());
 
     try {
-      await Promise.all(
-        guestFilteredIds.map(async (id) => {
-          try {
-            const response = await apiFetchWithRetry(
-              `/accommodations/${id}/calendar?startDate=${startDateApi}&endDate=${endDateApi}`,
-              2,
-            );
-            if (isCalendarRangeAvailable(response, startDate, endDate)) {
-              availableIds.add(id);
-              if (searchSequenceRef.current === sequence) {
-                setSearchAvailableIds((prev) => {
-                  const next = new Set(prev ?? []);
-                  next.add(id);
-                  return next;
-                });
-              }
+      const queue: QueueItem[] = guestFilteredIds.map((id) => ({
+        id,
+        attempt: 0,
+        readyAt: Date.now(),
+      }));
+      let rateLimitStreak = 0;
+
+      while (queue.length > 0) {
+        if (searchSequenceRef.current !== sequence) return;
+
+        queue.sort((a, b) => a.readyAt - b.readyAt);
+        const firstReadyAt = queue[0]?.readyAt;
+        if (typeof firstReadyAt !== "number") break;
+
+        const delayUntilReady = firstReadyAt - Date.now();
+        if (delayUntilReady > 0) {
+          await wait(delayUntilReady);
+          if (searchSequenceRef.current !== sequence) return;
+        }
+
+        const readyItems: QueueItem[] = [];
+        const now = Date.now();
+        while (
+          queue.length > 0 &&
+          readyItems.length < SEARCH_BATCH_SIZE &&
+          queue[0] &&
+          queue[0].readyAt <= now
+        ) {
+          const nextItem = queue.shift();
+          if (nextItem) readyItems.push(nextItem);
+        }
+
+        if (readyItems.length === 0) {
+          continue;
+        }
+
+        const batchResults = await Promise.all(
+          readyItems.map(async (item) => {
+            try {
+              const response = await apiFetch(
+                `/accommodations/${item.id}/calendar?startDate=${startDateApi}&endDate=${endDateApi}`,
+              );
+
+              return {
+                item,
+                available: isCalendarRangeAvailable(response, startDate, endDate),
+              };
+            } catch (error) {
+              return {
+                item,
+                error,
+              };
             }
-          } catch {
-            // Ignore property when availability cannot be validated.
+          }),
+        );
+
+        if (searchSequenceRef.current !== sequence) return;
+
+        let hitRateLimit = false;
+
+        batchResults.forEach(({ item, available, error }) => {
+          if (!error) {
+            if (available) {
+              availableIds.add(item.id);
+              setSearchAvailableIds((prev) => {
+                if (searchSequenceRef.current !== sequence) {
+                  return prev ?? new Set<number>();
+                }
+
+                const next = new Set(prev ?? []);
+                next.add(item.id);
+                return next;
+              });
+            }
+            return;
           }
-        }),
-      );
+
+          const status =
+            error && typeof error === "object"
+              ? (error as { status?: number }).status
+              : undefined;
+
+          if (status === 429) {
+            hitRateLimit = true;
+          }
+
+          if (status === 429 && item.attempt < SEARCH_MAX_RETRIES) {
+            queue.push({
+              id: item.id,
+              attempt: item.attempt + 1,
+              readyAt:
+                Date.now() + getRetryDelayMs(error, item.attempt),
+            });
+          }
+        });
+
+        if (queue.length > 0) {
+          rateLimitStreak = hitRateLimit ? rateLimitStreak + 1 : 0;
+          await wait(getSearchCooldownMs(hitRateLimit, rateLimitStreak));
+        }
+      }
     } finally {
       if (searchSequenceRef.current === sequence) {
         setIsSearchRunning(false);
@@ -2728,6 +2871,12 @@ export default function ReservaDirectaV2Content() {
   }`;
   const activeDateRangeLabel =
     checkIn && checkOut ? `${checkIn} -> ${checkOut}` : null;
+  const noSearchResultsLabel =
+    isSearchApplied && activeDateRangeLabel
+      ? noSearchResultsTemplate
+          .replace("{guests}", activeGuestLabel)
+          .replace("{dates}", activeDateRangeLabel)
+      : null;
   const mappedProperties = filtered.filter(
     (prop): prop is MappedProperty =>
       typeof prop.latitude === "number" && typeof prop.longitude === "number",
@@ -3105,6 +3254,14 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 )}
               </p>
+              {isSearchApplied &&
+                !isSearchRunning &&
+                filtered.length === 0 &&
+                noSearchResultsLabel && (
+                  <div className="mb-4 rounded-[12px] border border-[#ecd9d9] bg-[#fff7f7] px-4 py-3 text-[14px] text-[#8f3d3d]">
+                    {noSearchResultsLabel}
+                  </div>
+                )}
               <PropertyMap
                 properties={mappedProperties}
                 title={mapTitleLabel}

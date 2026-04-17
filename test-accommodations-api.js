@@ -83,6 +83,21 @@ function looksUnavailable(value) {
   return false;
 }
 
+function isUnavailableCalendarRange(record, normalizedType) {
+  if (
+    normalizedType.includes("BLOCKED") ||
+    normalizedType.includes("BOOKED") ||
+    normalizedType.includes("RESERVED") ||
+    normalizedType.includes("PAID") ||
+    normalizedType.includes("UNAVAILABLE") ||
+    normalizedType.includes("OCCUPIED")
+  ) {
+    return true;
+  }
+
+  return typeof record.booking === "string" && record.booking.trim().length > 0;
+}
+
 function extractUnavailableDates(payload, unavailableDates, depth = 0) {
   if (!payload || depth > 6) return;
   if (Array.isArray(payload)) {
@@ -99,10 +114,9 @@ function extractUnavailableDates(payload, unavailableDates, depth = 0) {
     isIsoDateKey(record.endDate)
   ) {
     const type = typeof record.type === "string" ? record.type.trim().toUpperCase() : "";
-    const isBlockedRange =
-      type.includes("BLOCKED") || type.includes("BOOKED") || type.includes("RESERVED");
+    const isBlockedRange = isUnavailableCalendarRange(record, type);
     if (isBlockedRange) {
-      let cursor = new Date(record.startDate);
+      const cursor = new Date(record.startDate);
       const end = new Date(record.endDate);
       while (cursor <= end) {
         unavailableDates.add(formatApiDate(cursor));
