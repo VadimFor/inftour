@@ -2634,7 +2634,7 @@ export default function ReservaDirectaV2Content() {
     <div className="min-h-screen bg-[#efefef]">
       <div className="container mx-auto px-4 md:px-6">
         {/* Search bar */}
-        <div className="relative z-[1400] pt-3 pb-2">
+        <div className="relative z-[900] pt-3 pb-2">
           <div className="mx-auto grid max-w-[1240px] grid-cols-1 rounded-[8px] border border-[#d9d9d9] bg-white transition-colors duration-200 focus-within:border-[#c2a457] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px]">
             <div
               ref={openDatePicker === "checkIn" ? calendarRef : null}

@@ -222,7 +222,8 @@ body {
   height: 256.5px !important;
 }
 
-/* Keep map zoom controls above tiles but below high overlays */
-.leaflet-control {
-  z-index: 500 !important;
+/* Keep map controls above tiles but below search/calendar layer (z-900) */
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 850 !important;
 }
