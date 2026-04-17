@@ -910,7 +910,24 @@ function PropertyMap({
   const mapNodeRef = useRef<HTMLDivElement>(null);
   const userAdjustedViewRef = useRef(false);
   const autoFittingRef = useRef(false);
+  const clickedPropertyIdsRef = useRef<Set<number>>(new Set());
   const [isExpanded, setIsExpanded] = useState(true);
+  const [, forceMarkerRefresh] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(
+        "inftour_clicked_map_properties",
+      );
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) return;
+      clickedPropertyIdsRef.current = new Set(
+        parsed.filter((value): value is number => Number.isInteger(value)),
+      );
+      forceMarkerRefresh((value) => value + 1);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (properties.length === 0 || !mapNodeRef.current) return;
@@ -969,14 +986,15 @@ function PropertyMap({
 
         const latLng = L.latLng(property.latitude, property.longitude);
         bounds.extend(latLng);
+        const isVisited = clickedPropertyIdsRef.current.has(property.id);
 
         const marker = L.marker(latLng, {
           icon: L.divIcon({
             className: "inftour-map-marker",
             html:
               `<div style="display:flex;height:18px;width:18px;align-items:center;justify-content:center;` +
-              `border-radius:999px;background:#0f172a;color:#fff;font-size:10px;font-weight:700;` +
-              `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid #c2a457;">${index + 1}</div>`,
+              `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;` +
+              `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">${index + 1}</div>`,
             iconSize: [18, 18],
             iconAnchor: [9, 9],
           }),
@@ -1050,6 +1068,17 @@ function PropertyMap({
         );
 
         marker.on("popupopen", (event: any) => {
+          if (!clickedPropertyIdsRef.current.has(property.id)) {
+            clickedPropertyIdsRef.current.add(property.id);
+            try {
+              window.sessionStorage.setItem(
+                "inftour_clicked_map_properties",
+                JSON.stringify(Array.from(clickedPropertyIdsRef.current)),
+              );
+            } catch {}
+            forceMarkerRefresh((value) => value + 1);
+          }
+
           const popupElement = event.popup?.getElement() as HTMLElement | null;
           const button = popupElement?.querySelector(
             "[data-booking-url]",
@@ -1141,7 +1170,7 @@ function PropertyMap({
         </span>
       </button>
       <div
-        className={`origin-top overflow-hidden transition-[max-height,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] scale-y-100" : "max-h-0 scale-y-100"}`}
+        className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px]" : "max-h-0"}`}
       >
         <div
           ref={mapNodeRef}
@@ -2651,7 +2680,7 @@ export default function ReservaDirectaV2Content() {
       </div>
       {selectedBookingUrl && (
         <div
-          className="fixed inset-0 z-[100] bg-black/60 p-3 sm:p-5"
+          className="fixed inset-0 z-[2000] bg-black/60 p-3 sm:p-5"
           onClick={() => setSelectedBookingUrl(null)}
         >
           <div
