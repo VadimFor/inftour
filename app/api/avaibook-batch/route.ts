@@ -4,7 +4,8 @@ const AVAIBOOK_API = "https://api.avaibook.com/api/owner";
 const AVAIBOOK_TOKEN = process.env.AVAIBOOK_TOKEN;
 
 const DETAIL_CACHE_TTL_MS = 10 * 60 * 1000;
-const UPSTREAM_GAP_MS = 150;
+const UPSTREAM_GAP_MS = 100;
+const UPSTREAM_MAX_CONCURRENT = 4;
 const UPSTREAM_429_BASE_MS = 2000;
 const UPSTREAM_429_MAX_MS = 15000;
 const UPSTREAM_MAX_RETRIES = 4;
@@ -26,8 +27,10 @@ type BatchItemResult = {
 const detailCache = new Map<number, CachedDetail>();
 const inflightDetails = new Map<number, Promise<BatchItemResult>>();
 
-let upstreamQueue: Promise<void> = Promise.resolve();
+let upstreamStartQueue: Promise<void> = Promise.resolve();
 let upstreamNextAllowedAt = 0;
+let upstreamActiveCount = 0;
+const upstreamSlotWaiters: Array<() => void> = [];
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,16 +60,54 @@ function getCachedDetail(id: number): unknown | null {
   return cached.data;
 }
 
-function runInUpstreamQueue<T>(task: () => Promise<T>): Promise<T> {
-  const previous = upstreamQueue;
+function scheduleUpstreamStart(): Promise<void> {
+  const previous = upstreamStartQueue;
   let release = () => {};
-  upstreamQueue = new Promise<void>((resolve) => {
+  upstreamStartQueue = new Promise<void>((resolve) => {
     release = resolve;
   });
 
-  return previous.then(task).finally(() => {
-    release();
+  return previous
+    .then(async () => {
+      const waitMs = upstreamNextAllowedAt - Date.now();
+      if (waitMs > 0) {
+        await wait(waitMs);
+      }
+      upstreamNextAllowedAt = Date.now() + UPSTREAM_GAP_MS;
+    })
+    .finally(() => {
+      release();
+    });
+}
+
+async function acquireUpstreamSlot(): Promise<void> {
+  if (upstreamActiveCount < UPSTREAM_MAX_CONCURRENT) {
+    upstreamActiveCount += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    upstreamSlotWaiters.push(resolve);
   });
+  upstreamActiveCount += 1;
+}
+
+function releaseUpstreamSlot(): void {
+  upstreamActiveCount = Math.max(0, upstreamActiveCount - 1);
+  const next = upstreamSlotWaiters.shift();
+  if (next) {
+    next();
+  }
+}
+
+async function runInUpstreamQueue<T>(task: () => Promise<T>): Promise<T> {
+  await acquireUpstreamSlot();
+
+  return scheduleUpstreamStart()
+    .then(task)
+    .finally(() => {
+      releaseUpstreamSlot();
+    });
 }
 
 async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
@@ -80,11 +121,6 @@ async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
   }
 
   for (let attempt = 0; attempt <= UPSTREAM_MAX_RETRIES; attempt++) {
-    const waitMs = upstreamNextAllowedAt - Date.now();
-    if (waitMs > 0) {
-      await wait(waitMs);
-    }
-
     const response = await fetch(`${AVAIBOOK_API}/accommodations/${id}/`, {
       headers: {
         accept: "application/json",
@@ -100,9 +136,10 @@ async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
         retryAfterMs ?? 0,
         Math.min(UPSTREAM_429_MAX_MS, UPSTREAM_429_BASE_MS * 2 ** attempt),
       );
-      upstreamNextAllowedAt = Date.now() + cooldown;
+      upstreamNextAllowedAt = Math.max(upstreamNextAllowedAt, Date.now() + cooldown);
 
       if (attempt < UPSTREAM_MAX_RETRIES) {
+        await scheduleUpstreamStart();
         continue;
       }
 
@@ -114,8 +151,6 @@ async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
         retryAfterMs: cooldown,
       };
     }
-
-    upstreamNextAllowedAt = Date.now() + UPSTREAM_GAP_MS;
 
     const text = await response.text();
     let data: unknown = null;

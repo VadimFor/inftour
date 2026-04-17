@@ -1057,8 +1057,8 @@ type BatchDetailResponseItem = {
   retryAfterMs?: number;
 };
 
-const DETAIL_BATCH_SIZE = 3;
-const DETAIL_QUEUE_GAP_MS = 350;
+const DETAIL_BATCH_SIZE = 8;
+const DETAIL_QUEUE_GAP_MS = 100;
 const DETAIL_MAX_RETRIES = 6;
 const DETAIL_429_BASE_COOLDOWN_MS = 2500;
 const DETAIL_429_MAX_COOLDOWN_MS = 12000;
