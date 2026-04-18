@@ -74,12 +74,12 @@ export default function NavMobileMenu() {
       {open && typeof document !== "undefined" && createPortal(
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/20"
+            className="fixed inset-0 z-[1290] bg-black/20"
             aria-hidden
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed left-0 right-0 z-50 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-brand-stone px-6 py-4 shadow-lg"
+            className="fixed left-0 right-0 z-[1300] border-b border-gray-200 bg-gradient-to-b from-gray-50 to-brand-stone px-6 py-4 shadow-lg"
             style={{ top: panelTopPx > 0 ? `${panelTopPx}px` : "5rem" }}
           >
             <ul className="flex flex-col items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-600">

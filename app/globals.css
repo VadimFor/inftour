@@ -211,6 +211,11 @@ body {
   }
 }
 
+/* Leaflet: no on-map attribution (credits shown elsewhere on the site) */
+.leaflet-control-attribution {
+  display: none !important;
+}
+
 /* Leaflet tile seam fix */
 .leaflet-container {
   background: #d9edf5;

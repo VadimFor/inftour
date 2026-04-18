@@ -1034,11 +1034,12 @@ function PropertyMap({
         mapRef.current = L.map(mapNodeRef.current, {
           zoomControl: true,
           scrollWheelZoom: true,
+          attributionControl: false,
         });
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; OpenStreetMap contributors",
-        }).addTo(mapRef.current);
+        L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        ).addTo(mapRef.current);
 
         layerRef.current = L.layerGroup().addTo(mapRef.current);
 

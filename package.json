@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\"",
+    "dev:fresh": "npm run dev:clean && npm run dev",
     "dev:turbo": "next dev",
     "build": "next build",
     "start": "next start",

@@ -6,8 +6,13 @@ declare module "react" {
       "elevenlabs-convai": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         "agent-id"?: string;
         placement?: string;
+        variant?: string;
+        dismissible?: string;
+        "always-expanded"?: string;
+        "default-expanded"?: string;
         "override-language"?: string;
         "action-text"?: string;
+        "expand-text"?: string;
         "start-call-text"?: string;
         "end-call-text"?: string;
         "listening-text"?: string;
