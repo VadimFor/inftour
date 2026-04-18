@@ -1079,11 +1079,36 @@ function PropertyMap({
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
   const mapNodeRef = useRef<HTMLDivElement>(null);
-  const mapSurfaceRef = useRef<HTMLDivElement>(null);
   const userAdjustedViewRef = useRef(false);
   const autoFittingRef = useRef(false);
   const clickedPropertyIdsRef = useRef<Set<number>>(new Set());
   const [isExpanded, setIsExpanded] = useState(true);
+  const [mapVisibilityEpoch, setMapVisibilityEpoch] = useState(0);
+
+  useEffect(() => {
+    const bumpMapResync = () => {
+      setMapVisibilityEpoch((n) => n + 1);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        bumpMapResync();
+      }
+    };
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        bumpMapResync();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pageshow", onPageShow as EventListener);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pageshow", onPageShow as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1153,7 +1178,14 @@ function PropertyMap({
 
       const bounds = L.latLngBounds([]);
 
-      properties.forEach((property, index) => {
+      const source: MappedProperty[] =
+        properties.length > 0
+          ? properties
+          : reservationMapMarkersCache.length > 0
+            ? reservationMapMarkersCache
+            : [];
+
+      source.forEach((property, index) => {
         if (
           typeof property.latitude !== "number" ||
           typeof property.longitude !== "number"
@@ -1279,6 +1311,15 @@ function PropertyMap({
         marker.addTo(layerRef.current);
       });
 
+      if (source.length > 0) {
+        const snapshot = source.slice();
+        reservationMapMarkersCache.splice(
+          0,
+          reservationMapMarkersCache.length,
+          ...snapshot,
+        );
+      }
+
       if (!userAdjustedViewRef.current) {
         autoFittingRef.current = true;
         if (bounds.isValid()) {
@@ -1315,6 +1356,7 @@ function PropertyMap({
     onOpen,
     openInGoogleMapsLabel,
     properties,
+    mapVisibilityEpoch,
   ]);
 
   useEffect(() => {
@@ -1336,30 +1378,6 @@ function PropertyMap({
 
     return () => {
       window.clearTimeout(timeoutId);
-    };
-  }, [isExpanded]);
-
-  useEffect(() => {
-    const surface = mapSurfaceRef.current;
-    if (!surface || typeof ResizeObserver === "undefined") return;
-
-    let raf = 0;
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const map = mapRef.current;
-        if (!map) return;
-        const center = map.getCenter();
-        const zoom = map.getZoom();
-        map.invalidateSize({ animate: false });
-        map.setView(center, zoom, { animate: false });
-      });
-    });
-
-    ro.observe(surface);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
     };
   }, [isExpanded]);
 
@@ -1402,12 +1420,9 @@ function PropertyMap({
         </span>
       </button>
       <div
-        className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] md:max-h-[min(760px,92vh)]" : "max-h-0"}`}
+        className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] lg:max-h-[580px]" : "max-h-0"}`}
       >
-        <div
-          ref={mapSurfaceRef}
-          className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px] md:transition-[height] md:duration-300 md:ease-out md:hover:h-[640px]"
-        >
+        <div className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px] lg:h-[500px]">
           <div
             ref={mapNodeRef}
             className="h-full w-full bg-[#f3f1eb]"
@@ -2760,6 +2775,9 @@ function DatePickerPopover({
 // â”€â”€â”€ GalleryModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const reservationPropertiesCache: Property[] = [];
+
+/** Last map markers shown; survives tab backgrounding so we can redraw if Leaflet drops layers. */
+const reservationMapMarkersCache: MappedProperty[] = [];
 
 function isPropertyDetailsPending(prop: Property): boolean {
   return (
