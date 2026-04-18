@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useCallback, useState } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { ProgressiveNextImage } from "../../../components/ProgressiveNextImage";
 import { useLangStore } from "../../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../modalStyles";
@@ -23,6 +25,9 @@ type CyclingContentProps = {
   isModal?: boolean;
   onClose?: () => void;
 };
+
+const MODAL_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -58,21 +63,24 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="cycling-modal-title"
       onClick={onClose}
     >
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative flex min-h-0 w-full max-w-4xl max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] flex-col overflow-hidden rounded-sm bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            triggerLightTapHaptic();
+            onClose();
+          }}
           aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+          className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -91,17 +99,23 @@ export default function CyclingModal({ isOpen, onClose }: CyclingModalProps) {
         </button>
 
         <CyclingContent isModal onClose={onClose} />
-        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-          <a
+        <div className="border-t border-gray-200 px-3 py-2 flex items-center justify-between gap-3">
+          <Link
             href="/experiencias/ciclismo"
-            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+            }}
+            className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+              onClose();
+            }}
+            className={`bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold transition hover:opacity-90 ${MODAL_PRESS}`}
           >
             {t("close")}
           </button>
@@ -171,6 +185,7 @@ export function CyclingContent({
   }, []);
 
   const handleAdviceBoxClick = useCallback(() => {
+    triggerLightTapHaptic();
     onClose?.();
     openAIWidget();
   }, [onClose, openAIWidget]);
@@ -218,12 +233,12 @@ export function CyclingContent({
   ];
 
   return (
-    <div className={isModal ? "overflow-y-auto flex-1 px-8 py-6" : "container mx-auto px-4 py-12"}>
+    <div className={isModal ? "min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-4" : "container mx-auto px-4 py-12"}>
       <div
         className={
           isModal
-            ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14"
-            : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"
+            ? "bg-brand-bg border-b border-gray-200 -mx-3 px-3 pt-6 pb-6 mb-6 pr-11 sm:-mx-4 sm:px-4 sm:pr-12"
+            : "bg-brand-bg border border-gray-100 rounded-sm px-6 pt-6 pb-6 mb-6 sm:px-8"
         }
       >
         <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
@@ -260,7 +275,11 @@ export function CyclingContent({
         {introParagraphs.map((p, idx) => (
           <p
             key={`intro-${idx}`}
-            className={idx === 0 ? "border-l-2 border-brand-gold pl-4" : ""}
+            className={
+              idx === 0
+                ? `border-l-2 border-brand-gold ${isModal ? "pl-3" : "pl-4"}`
+                : ""
+            }
           >
             {renderTextWithBoldRoutes(p, routeNames)}
           </p>
@@ -297,7 +316,7 @@ export function CyclingContent({
             {routes.map((route, idx) => (
               <div
                 key={`route-${idx}`}
-                className="bg-brand-bg border border-gray-100 rounded-sm p-5 hover:border-brand-gold/40 transition-colors"
+                className={`bg-brand-bg border border-gray-100 rounded-sm hover:border-brand-gold/40 transition-colors ${isModal ? "p-4 sm:p-5" : "p-5"}`}
               >
                 <p className="text-xs leading-relaxed">
                   {renderTextWithBoldRoutes(route, routeNames)}
@@ -336,7 +355,7 @@ export function CyclingContent({
       </div>
 
       <div
-        className="mt-6 bg-brand-darkgray text-white rounded-sm px-6 py-5 flex gap-4 items-start cursor-pointer"
+        className={`mt-6 bg-brand-darkgray text-white rounded-sm py-5 flex gap-4 items-start cursor-pointer ${isModal ? "px-3 sm:px-4" : "px-4 sm:px-5"} ${MODAL_PRESS}`}
         role="button"
         tabIndex={0}
         onClick={handleAdviceBoxClick}

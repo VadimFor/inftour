@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useShallow } from "zustand/react/shallow";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { navItems } from "../lib/nav-config";
 import { useLangStore } from "../lib/langStore";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -56,7 +57,10 @@ export default function NavMobileMenu() {
     <div className="shrink-0 lg:hidden">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          triggerLightTapHaptic();
+          setOpen((o) => !o);
+        }}
         className="rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-brand-black"
         aria-expanded={open}
         aria-label={open ? t("closeMenu") : t("openMenu")}
@@ -76,7 +80,10 @@ export default function NavMobileMenu() {
           <div
             className="fixed inset-0 z-[1290] bg-black/20"
             aria-hidden
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              triggerLightTapHaptic();
+              setOpen(false);
+            }}
           />
           <div
             className="fixed left-0 right-0 z-[1300] border-b border-gray-200 bg-gradient-to-b from-gray-50 to-brand-stone px-6 py-4 shadow-lg"
@@ -89,7 +96,10 @@ export default function NavMobileMenu() {
                   <li key={href} className="flex w-full justify-center">
                     <Link
                       href={href}
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        triggerLightTapHaptic();
+                        setOpen(false);
+                      }}
                       className={`relative rounded-lg px-2 py-3 transition after:absolute after:left-1/2 after:h-0.5 after:-translate-x-1/2 after:bg-brand-gold after:transition-all after:content-[''] hover:bg-white/60 hover:text-brand-black ${
                         isActive
                           ? "text-brand-black after:bottom-0 after:w-3/4"
@@ -106,7 +116,10 @@ export default function NavMobileMenu() {
               <div className="flex items-center justify-center gap-4">
                 <Link
                   href="/lobby#ai-guide"
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    triggerLightTapHaptic();
+                    setOpen(false);
+                  }}
                   className="inline-flex items-center gap-1 whitespace-nowrap rounded-sm bg-brand-darkgray px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-sm transition hover:bg-gray-600"
                 >
                   <span>{aiLabel}</span>

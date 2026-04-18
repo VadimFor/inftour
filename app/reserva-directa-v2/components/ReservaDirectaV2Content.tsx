@@ -1,6 +1,8 @@
 ﻿"use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "@/app/lib/langStore";
 import type { Lang } from "@/app/lib/langStore";
 
@@ -688,6 +690,16 @@ const bookingResultsTranslations = {
     uk: "Натисніть на маркер, щоб побачити назву та розташування.",
     pl: "Kliknij znacznik, aby zobaczyc tytul i lokalizacje.",
   },
+  mapRecenterCalpe: {
+    eng: "Back to Calpe",
+    esp: "Volver a Calpe",
+    ru: "Вернуться к Кальпе",
+    fr: "Revenir a Calpe",
+    it: "Torna a Calpe",
+    de: "Zuruck nach Calpe",
+    uk: "Повернутись до Кальпе",
+    pl: "Wroc do Calpe",
+  },
   openInGoogleMaps: {
     eng: "Open in Google Maps",
     esp: "Abrir en Google Maps",
@@ -812,6 +824,56 @@ const propertyCardTranslations = {
     de: "Infos ansehen",
     uk: "Детальніше",
     pl: "Zobacz informacje",
+  },
+  sharePropertyAria: {
+    eng: "Share this property",
+    esp: "Compartir esta propiedad",
+    ru: "Поделиться объектом",
+    fr: "Partager ce logement",
+    it: "Condividi questa struttura",
+    de: "Unterkunft teilen",
+    uk: "Поділитися об’єктом",
+    pl: "Udostepnij obiekt",
+  },
+  shareMenuHeading: {
+    eng: "Share",
+    esp: "Compartir",
+    ru: "Поделиться",
+    fr: "Partager",
+    it: "Condividi",
+    de: "Teilen",
+    uk: "Поділитися",
+    pl: "Udostepnij",
+  },
+  shareCopyLink: {
+    eng: "Copy link",
+    esp: "Copiar enlace",
+    ru: "Скопировать ссылку",
+    fr: "Copier le lien",
+    it: "Copia link",
+    de: "Link kopieren",
+    uk: "Скопіювати посилання",
+    pl: "Kopiuj link",
+  },
+  shareCopied: {
+    eng: "Copied!",
+    esp: "¡Copiado!",
+    ru: "Скопировано!",
+    fr: "Copié !",
+    it: "Copiato!",
+    de: "Kopiert!",
+    uk: "Скопійовано!",
+    pl: "Skopiowano!",
+  },
+  shareMessageLead: {
+    eng: "Check out this stay in Calpe on INFTOUR:",
+    esp: "Mira este alojamiento en Calpe (INFTOUR):",
+    ru: "Посмотрите это жилье в Кальпе (INFTOUR):",
+    fr: "Découvrez ce logement à Calpe (INFTOUR) :",
+    it: "Scopri questa struttura a Calpe (INFTOUR):",
+    de: "Diese Unterkunft in Calpe (INFTOUR):",
+    uk: "Перегляньте це житло в Кальпе (INFTOUR):",
+    pl: "Zobacz to nocleg w Calpe (INFTOUR):",
   },
 } as const;
 
@@ -993,6 +1055,7 @@ function PropertyMap({
   bookingEndDate,
   isLoadingProperties,
   loadingPropertiesLabel,
+  recenterCalpeLabel,
   onOpen,
 }: {
   properties: MappedProperty[];
@@ -1010,6 +1073,7 @@ function PropertyMap({
   bookingEndDate?: string;
   isLoadingProperties: boolean;
   loadingPropertiesLabel: string;
+  recenterCalpeLabel: string;
   onOpen: (url: string) => void;
 }) {
   const mapRef = useRef<any>(null);
@@ -1320,6 +1384,35 @@ function PropertyMap({
             ref={mapNodeRef}
             className="h-full w-full bg-[#f3f1eb]"
           />
+          <button
+            type="button"
+            className="absolute right-3 top-3 z-[870] inline-flex max-w-[min(160px,calc(100%-5rem))] items-center gap-1.5 rounded-full border border-[#e7dcc0] bg-white/95 px-2.5 py-1.5 text-left text-[11px] font-semibold leading-tight text-[#5c4d27] shadow-sm backdrop-blur-sm transition hover:bg-white sm:max-w-[200px] sm:px-3 sm:text-[12px]"
+            aria-label={recenterCalpeLabel}
+            onClick={() => {
+              const map = mapRef.current;
+              if (!map) return;
+              if (typeof map.flyTo === "function") {
+                map.flyTo(CALPE_MAP_CENTER, CALPE_MAP_ZOOM, { duration: 0.55 });
+              } else {
+                map.setView(CALPE_MAP_CENTER, CALPE_MAP_ZOOM);
+              }
+            }}
+          >
+            <svg
+              className="h-4 w-4 shrink-0 text-[#8f7130]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 21s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10z" />
+              <circle cx="12" cy="11" r="2.25" />
+            </svg>
+            <span className="min-w-0 truncate">{recenterCalpeLabel}</span>
+          </button>
           {isLoadingProperties && (
             <div className="pointer-events-none absolute inset-x-4 top-4 z-[500] flex items-center justify-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-[#e7dcc0] bg-white/95 px-3 py-1.5 text-[12px] font-medium text-[#8f7130] shadow-sm">
@@ -1902,6 +1995,252 @@ function StatItem({
 
 // â”€â”€â”€ PropertyCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+function ShareGlyph({ className }: { className?: string }) {
+  return (
+    <Image
+      src="/share.png"
+      alt=""
+      width={18}
+      height={18}
+      className={`object-contain ${className ?? ""}`.trim()}
+      aria-hidden
+    />
+  );
+}
+
+function ShareMenuIconBadge({
+  children,
+  tone,
+}: {
+  children: React.ReactNode;
+  tone: "wa" | "x" | "fb" | "link";
+}) {
+  const bg =
+    tone === "wa"
+      ? "bg-[#e6faf0]"
+      : tone === "x"
+        ? "bg-[#f0f0f0]"
+        : tone === "fb"
+          ? "bg-[#e8f2fe]"
+          : "bg-[#eef5fc]";
+  return (
+    <span
+      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-black/6 ${bg}`}
+      aria-hidden
+    >
+      {children}
+    </span>
+  );
+}
+
+function ShareMenuIconWhatsApp() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
+      <path
+        fill="#25D366"
+        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.881 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.822 11.822 0 0020.885 3.353z"
+      />
+    </svg>
+  );
+}
+
+function ShareMenuIconX() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
+      <path
+        fill="#0f1419"
+        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+      />
+    </svg>
+  );
+}
+
+function ShareMenuIconFacebook() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
+      <path
+        fill="#1877F2"
+        d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078V7.161h3.047V5.593c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+      />
+    </svg>
+  );
+}
+
+function ShareMenuIconCopyLink() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-[18px] w-[18px] text-[#2a5580]"
+      aria-hidden
+    >
+      <rect
+        x="9"
+        y="9"
+        width="13"
+        height="13"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+      />
+    </svg>
+  );
+}
+
+function PropertyShareButton({
+  bookingUrl,
+  title,
+  shareAria,
+  menuHeading,
+  copyLinkLabel,
+  copiedLabel,
+  messageLead,
+}: {
+  bookingUrl: string;
+  title: string;
+  shareAria: string;
+  menuHeading: string;
+  copyLinkLabel: string;
+  copiedLabel: string;
+  messageLead: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const shareText = `${messageLead}\n${title}\n${bookingUrl}`;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  const encodedText = encodeURIComponent(shareText);
+  const encodedUrl = encodeURIComponent(bookingUrl);
+  const waHref = `https://wa.me/?text=${encodedText}`;
+  const xHref = `https://twitter.com/intent/tweet?text=${encodedText}`;
+  const fbHref = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+
+  const shareMenuRowBaseClass =
+    "flex w-full items-center justify-start gap-3 rounded-xl px-4 py-2.5 text-left text-[13px] font-semibold tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b6d3f0]/90 focus-visible:ring-offset-1";
+  const shareMenuRowXClass = `${shareMenuRowBaseClass} bg-[#f4f4f5] text-[#0f1419] hover:bg-[#e9e9eb] active:bg-[#dedee1]`;
+  const shareMenuRowFbClass = `${shareMenuRowBaseClass} bg-[#eef5fe] text-[#1447a0] hover:bg-[#e2ecfc] active:bg-[#d5e3f8]`;
+  const shareMenuRowWaClass = `${shareMenuRowBaseClass} bg-[#e8faf0] text-[#146b45] hover:bg-[#d9f5e6] active:bg-[#c9eedc]`;
+  const shareMenuRowLinkClass = `${shareMenuRowBaseClass} bg-[#f0f6fc] text-[#2a5580] hover:bg-[#e2eef8] active:bg-[#d4e6f5]`;
+
+  return (
+    <div ref={wrapRef} className="relative shrink-0 self-stretch">
+      <button
+        type="button"
+        aria-label={shareAria}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="flex h-full min-h-[42px] w-11 items-center justify-center rounded-[10px] border border-[#b6d3f0] bg-[#e8f2fc] text-[#2a5580] transition hover:bg-[#dbe9ff] active:bg-[#d0e4f8]"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerLightTapHaptic();
+          setOpen((v) => !v);
+        }}
+      >
+        <ShareGlyph />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute bottom-full right-0 z-[80] mb-2 flex w-[min(268px,calc(100vw-2rem))] flex-col items-stretch gap-0.5 overflow-hidden rounded-2xl border border-[#d4e4f4] bg-white px-2 py-3 text-left shadow-[0_16px_48px_rgba(15,40,71,0.16)]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-1 w-full px-4 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6a7f95]">
+            {menuHeading}
+          </div>
+          <a
+            role="menuitem"
+            href={xHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={shareMenuRowXClass}
+            onClick={() => {
+              triggerLightTapHaptic();
+              setOpen(false);
+            }}
+          >
+            <ShareMenuIconBadge tone="x">
+              <ShareMenuIconX />
+            </ShareMenuIconBadge>
+            <span>X</span>
+          </a>
+          <a
+            role="menuitem"
+            href={fbHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={shareMenuRowFbClass}
+            onClick={() => {
+              triggerLightTapHaptic();
+              setOpen(false);
+            }}
+          >
+            <ShareMenuIconBadge tone="fb">
+              <ShareMenuIconFacebook />
+            </ShareMenuIconBadge>
+            <span>Facebook</span>
+          </a>
+          <a
+            role="menuitem"
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={shareMenuRowWaClass}
+            onClick={() => {
+              triggerLightTapHaptic();
+              setOpen(false);
+            }}
+          >
+            <ShareMenuIconBadge tone="wa">
+              <ShareMenuIconWhatsApp />
+            </ShareMenuIconBadge>
+            <span>WhatsApp</span>
+          </a>
+          <button
+            type="button"
+            role="menuitem"
+            className={shareMenuRowLinkClass}
+            onClick={async (e) => {
+              e.stopPropagation();
+              triggerLightTapHaptic();
+              try {
+                await navigator.clipboard.writeText(bookingUrl);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 2000);
+              } catch {
+                /* ignore */
+              }
+            }}
+          >
+            <ShareMenuIconBadge tone="link">
+              <ShareMenuIconCopyLink />
+            </ShareMenuIconBadge>
+            <span>{copied ? copiedLabel : copyLinkLabel}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PropertyCard({
   prop,
   bookingUrl,
@@ -1917,6 +2256,11 @@ function PropertyCard({
   bedsLabel,
   bathroomsLabel,
   viewInfoLabel,
+  sharePropertyAriaLabel,
+  shareMenuHeadingLabel,
+  shareCopyLinkLabel,
+  shareCopiedLabel,
+  shareMessageLeadLabel,
 }: {
   prop: Property;
   bookingUrl: string;
@@ -1932,6 +2276,11 @@ function PropertyCard({
   bedsLabel: string;
   bathroomsLabel: string;
   viewInfoLabel: string;
+  sharePropertyAriaLabel: string;
+  shareMenuHeadingLabel: string;
+  shareCopyLinkLabel: string;
+  shareCopiedLabel: string;
+  shareMessageLeadLabel: string;
 }) {
   const feats = getTopFeats(prop.features);
   const title = prop.name || `${propertyFallbackLabel} #${prop.id}`;
@@ -2245,16 +2594,28 @@ function PropertyCard({
             )}
           </div>
         )}
-        <button
-          type="button"
-          className="mt-auto w-full rounded-[10px] border border-[#b6d3f0] bg-[#e8f2fc] py-2.5 text-center text-[13px] font-semibold text-[#2a5580] transition hover:bg-[#dbe9ff] active:bg-[#d0e4f8] md:hidden"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen(bookingUrl);
-          }}
-        >
-          {viewInfoLabel}
-        </button>
+        <div className="mt-auto flex min-h-[42px] items-stretch gap-2 pt-2 md:hidden">
+          <button
+            type="button"
+            className="min-w-0 flex-1 rounded-[10px] border border-[#b6d3f0] bg-[#e8f2fc] py-2.5 text-center text-[13px] font-semibold text-[#2a5580] transition hover:bg-[#dbe9ff] active:bg-[#d0e4f8]"
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerLightTapHaptic();
+              onOpen(bookingUrl);
+            }}
+          >
+            {viewInfoLabel}
+          </button>
+          <PropertyShareButton
+            bookingUrl={bookingUrl}
+            title={title}
+            shareAria={sharePropertyAriaLabel}
+            menuHeading={shareMenuHeadingLabel}
+            copyLinkLabel={shareCopyLinkLabel}
+            copiedLabel={shareCopiedLabel}
+            messageLead={shareMessageLeadLabel}
+          />
+        </div>
       </div>
     </div>
   );
@@ -2411,6 +2772,8 @@ export default function ReservaDirectaV2Content() {
     bookingResultsTranslations.noSearchResults[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
+  const mapRecenterCalpeLabel =
+    bookingResultsTranslations.mapRecenterCalpe[lang];
   const openInGoogleMapsLabel =
     bookingResultsTranslations.openInGoogleMaps[lang];
   const mapMoreInfoLabel = bookingResultsTranslations.moreInfo[lang];
@@ -2424,6 +2787,14 @@ export default function ReservaDirectaV2Content() {
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
   const viewInfoLabel = propertyCardTranslations.viewInfo[lang];
+  const sharePropertyAriaLabel =
+    propertyCardTranslations.sharePropertyAria[lang];
+  const shareMenuHeadingLabel =
+    propertyCardTranslations.shareMenuHeading[lang];
+  const shareCopyLinkLabel = propertyCardTranslations.shareCopyLink[lang];
+  const shareCopiedLabel = propertyCardTranslations.shareCopied[lang];
+  const shareMessageLeadLabel =
+    propertyCardTranslations.shareMessageLead[lang];
   const [propertiesState, setPropertiesState] = useState<Property[]>(() => [
     ...reservationPropertiesCache,
   ]);
@@ -3339,6 +3710,7 @@ export default function ReservaDirectaV2Content() {
                 bookingEndDate={searchDateRange?.endDate}
                 isLoadingProperties={loading || loadingDetails || isSearchRunning}
                 loadingPropertiesLabel={loadingPropertiesLabel}
+                recenterCalpeLabel={mapRecenterCalpeLabel}
                 onOpen={setSelectedBookingUrl}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -3358,6 +3730,11 @@ export default function ReservaDirectaV2Content() {
                     bedsLabel={bedsLabel}
                     bathroomsLabel={bathroomsLabel}
                     viewInfoLabel={viewInfoLabel}
+                    sharePropertyAriaLabel={sharePropertyAriaLabel}
+                    shareMenuHeadingLabel={shareMenuHeadingLabel}
+                    shareCopyLinkLabel={shareCopyLinkLabel}
+                    shareCopiedLabel={shareCopiedLabel}
+                    shareMessageLeadLabel={shareMessageLeadLabel}
                     bookingUrl={buildBookingUrl(prop.id, {
                       guests: activeGuestFilter,
                       startDate: searchDateRange?.startDate,
@@ -3401,12 +3778,18 @@ export default function ReservaDirectaV2Content() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center rounded-full border border-[#d7d7d7] px-4 py-2 text-sm font-medium text-[#444] transition-colors hover:bg-[#f6f6f6]"
+                onClick={() => {
+                  triggerLightTapHaptic();
+                }}
               >
                 {visitActualPageLabel}
               </a>
               <button
                 type="button"
-                onClick={() => setSelectedBookingUrl(null)}
+                onClick={() => {
+                  triggerLightTapHaptic();
+                  setSelectedBookingUrl(null);
+                }}
                 className="inline-flex items-center rounded-full bg-[#2d2d2d] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
               >
                 {closeModalLabel}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: "INFTOUR | Apartamentos premium en Calpe",
   description:
     "Apartamentos premium en Calpe con reserva directa, servicio tipo hotel y asistencia local durante toda la estancia.",
+};
+
+/** Lets `env(safe-area-inset-*)` match the screen on notched phones (modals, fixed UI). */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 import RestoreLang from "./components/RestoreLang";

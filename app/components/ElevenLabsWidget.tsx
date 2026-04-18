@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "@/app/lib/langStore";
 import type { Lang } from "@/app/lib/langStore";
 
@@ -367,7 +368,7 @@ export default function ElevenLabsWidget() {
       language: document.documentElement.lang || "es",
     };
 
-    el.setAttribute("placement", "bottom-right");
+    el.setAttribute("placement", isMobile ? "bottom" : "bottom-right");
     el.setAttribute("agent-id", EL_AGENT_ID);
     el.setAttribute("dynamic-variables", JSON.stringify(dynamicVariables));
 
@@ -400,7 +401,7 @@ export default function ElevenLabsWidget() {
         handleCall as EventListener,
       );
     };
-  }, [lang]);
+  }, [lang, isMobile]);
 
   useEffect(() => {
     const el = ref.current;
@@ -499,6 +500,7 @@ export default function ElevenLabsWidget() {
   }, [widgetKey]);
 
   const openWidgetFromLauncher = () => {
+    triggerLightTapHaptic();
     setIsMobilePanelVisible(true);
 
     window.setTimeout(() => {
@@ -527,7 +529,7 @@ export default function ElevenLabsWidget() {
         <button
           type="button"
           onClick={openWidgetFromLauncher}
-          className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] right-4 flex w-fit max-w-[calc(100vw-2rem)] flex-col rounded-[22px] bg-white px-3 py-2 text-left shadow-[0_10px_32px_rgba(0,0,0,0.16)]"
+          className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] left-1/2 flex w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-col rounded-[22px] bg-white px-3 py-2 text-left shadow-[0_10px_32px_rgba(0,0,0,0.16)]"
           style={{ zIndex: MOBILE_WIDGET_PANEL_Z }}
           aria-label={mobileWidgetText.startCallText}
         >
@@ -564,7 +566,10 @@ export default function ElevenLabsWidget() {
           aria-label={widgetText.closeAssistantAriaLabel}
           className="fixed inset-0 cursor-default border-0 bg-black/35 p-0"
           style={{ zIndex: MOBILE_WIDGET_BACKDROP_Z }}
-          onClick={closeMobilePanel}
+          onClick={() => {
+            triggerLightTapHaptic();
+            closeMobilePanel();
+          }}
         />
       )}
       <elevenlabs-convai
@@ -573,7 +578,7 @@ export default function ElevenLabsWidget() {
           ref.current = node as ConvaiWidgetElement | null;
         }}
         agent-id={EL_AGENT_ID}
-        placement="bottom-right"
+        placement={isMobile ? "bottom" : "bottom-right"}
         variant={isMobile && isMobilePanelVisible ? "expanded" : undefined}
         dismissible={isMobile && isMobilePanelVisible ? "false" : undefined}
         always-expanded={isMobile && isMobilePanelVisible ? "true" : undefined}
@@ -588,8 +593,11 @@ export default function ElevenLabsWidget() {
       {isMobile && isMobilePanelVisible && (
         <button
           type="button"
-          onClick={closeMobilePanel}
-          className="fixed bottom-[calc(12px+env(safe-area-inset-bottom,0px))] right-4 flex h-9 w-9 items-center justify-center rounded-full border border-red-200/90 bg-red-100 text-red-700 shadow-lg transition hover:border-red-300 hover:bg-red-200/90 hover:text-red-900"
+          onClick={() => {
+            triggerLightTapHaptic();
+            closeMobilePanel();
+          }}
+          className="fixed bottom-[calc(12px+env(safe-area-inset-bottom,0px))] left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-red-200/90 bg-red-100 text-red-700 shadow-lg transition hover:border-red-300 hover:bg-red-200/90 hover:text-red-900"
           style={{ zIndex: MOBILE_WIDGET_CLOSE_Z }}
           aria-label={widgetText.closeAssistantAriaLabel}
         >

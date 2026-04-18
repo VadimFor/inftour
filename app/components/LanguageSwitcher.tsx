@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "../lib/langStore";
 import type { Lang } from "../lib/langStore";
 
@@ -183,7 +184,10 @@ export default function LanguageSwitcher({
             type="button"
             role="option"
             aria-selected={lang === l.code}
-            onClick={() => setLang(l.code)}
+            onClick={() => {
+              triggerLightTapHaptic();
+              setLang(l.code);
+            }}
             title={l.title}
             className={`flex items-center gap-1.5 px-2 py-1 shrink-0 rounded-md border focus:outline-none focus:ring-2 focus:ring-brand-gold transition ${
               lang === l.code
@@ -210,6 +214,7 @@ export default function LanguageSwitcher({
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            triggerLightTapHaptic();
             setOpen((o) => !o);
           }}
           className="flex items-center gap-1.5 px-1.5 h-7 shrink-0 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-gold cursor-pointer"
@@ -248,6 +253,7 @@ export default function LanguageSwitcher({
                 role="option"
                 aria-selected={lang === l.code}
                 onClick={() => {
+                  triggerLightTapHaptic();
                   setLang(l.code);
                   setOpen(false);
                 }}
@@ -272,7 +278,10 @@ export default function LanguageSwitcher({
         <button
           key={l.code}
           type="button"
-          onClick={() => setLang(l.code)}
+          onClick={() => {
+            triggerLightTapHaptic();
+            setLang(l.code);
+          }}
           className={`flex items-center gap-1.5 px-2 py-1 rounded transition ${
             lang === l.code
               ? "text-brand-gold font-bold"
