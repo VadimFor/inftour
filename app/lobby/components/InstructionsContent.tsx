@@ -202,7 +202,7 @@ export default function InstructionsContent({
   const [openInstr, setOpenInstr] = useState<string | null>(null);
 
   return (
-    <div className={isModal ? "overflow-y-auto flex-1 px-6 py-6 md:px-8" : "container mx-auto px-4 py-12"}>
+    <div className={isModal ? "w-full min-h-0" : "container mx-auto px-4 py-12"}>
       <div
         className={
           isModal

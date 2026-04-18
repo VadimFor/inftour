@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { Fragment, type ReactNode, useEffect } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../../experiencias/components/modalStyles";
 import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
@@ -15,6 +17,9 @@ type OurServicesContentProps = {
   isModal?: boolean;
   onClose?: () => void;
 };
+
+const MODAL_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
 
 function renderBold(text: string): ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -48,9 +53,11 @@ const SERVICE_GROUP_BACKGROUNDS = [
 function ServiceContentGroup({
   tone,
   children,
+  compact,
 }: {
   tone: number;
   children: ReactNode;
+  compact?: boolean;
 }) {
   const bg =
     SERVICE_GROUP_BACKGROUNDS[
@@ -62,7 +69,15 @@ function ServiceContentGroup({
     <div
       className={`group ${bg} rounded-sm border border-gray-100 overflow-hidden transition-colors duration-200 hover:border-brand-gold/40`}
     >
-      <div className="space-y-3 px-5 py-4 sm:space-y-4 sm:py-5">{children}</div>
+      <div
+        className={
+          compact
+            ? "space-y-3 px-3 py-4 sm:space-y-4 sm:px-4 sm:py-5"
+            : "space-y-3 px-5 py-4 sm:space-y-4 sm:py-5"
+        }
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -167,8 +182,8 @@ export function OurServicesContent({
       <div
         className={
           isModal
-            ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14"
-            : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"
+            ? "bg-brand-bg border-b border-gray-200 -mx-3 px-3 pt-6 pb-6 mb-6 pr-11 sm:-mx-4 sm:px-4 sm:pr-12"
+            : "bg-brand-bg border border-gray-100 rounded-sm px-6 pt-6 pb-6 mb-6 sm:px-8"
         }
       >
         <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
@@ -179,14 +194,14 @@ export function OurServicesContent({
           {t("ourServicesModalTitle")}
         </h1>
       </div>
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <P k="ourServicesIntro1" />
         <P k="ourServicesIntro2" />
         <P k="ourServicesIntro3" />
         <P k="ourServicesIntro4" />
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <SectionTitle k="ourServicesSecCleaningTitle" />
         <P k="ourServicesCleaningP1" />
         <P k="ourServicesCleaningP2" />
@@ -198,14 +213,14 @@ export function OurServicesContent({
         <P k="ourServicesCleaningP5" />
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <SectionTitle k="ourServicesSecLinenTitle" />
         <P k="ourServicesLinenP1" />
         <BulletList keys={["ourServicesLinenLi1", "ourServicesLinenLi2"]} />
         <P k="ourServicesLinenP2" />
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={1}>
+      <ServiceContentGroup compact={isModal} tone={1}>
         <KitSubheading translationKey="ourServicesSecKitTitle" />
         <P k="ourServicesKitP1" />
         <P k="ourServicesKitP2" />
@@ -227,7 +242,7 @@ export function OurServicesContent({
         />
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <SectionTitle k="ourServicesSecExtrasTitle" />
         <P k="ourServicesExtrasIntro" />
         <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2 sm:gap-4">
@@ -279,7 +294,7 @@ export function OurServicesContent({
         </div>
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <SectionTitle k="ourServicesSecRulesTitle" />
         <P k="ourServicesRulesIntro" />
         <BulletList
@@ -294,7 +309,7 @@ export function OurServicesContent({
         />
       </ServiceContentGroup>
 
-      <ServiceContentGroup tone={0}>
+      <ServiceContentGroup compact={isModal} tone={0}>
         <SectionTitle k="ourServicesSecClosingTitle" />
         <P k="ourServicesClosingP1" />
         <P k="ourServicesClosingP2" />
@@ -324,21 +339,24 @@ export default function OurServicesModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="our-services-modal-title"
       onClick={onClose}
     >
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative flex min-h-0 w-full max-w-4xl max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] flex-col overflow-hidden rounded-sm bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            triggerLightTapHaptic();
+            onClose();
+          }}
           aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+          className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -356,21 +374,27 @@ export default function OurServicesModal({
           </svg>
         </button>
 
-        <div className="overflow-y-auto flex-1 px-8 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-4">
           <OurServicesContent isModal />
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-          <a
+        <div className="border-t border-gray-200 px-3 py-2 flex items-center justify-between gap-3">
+          <Link
             href="/services/our-services"
-            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+            }}
+            className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+              onClose();
+            }}
+            className={`bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold transition hover:opacity-90 ${MODAL_PRESS}`}
           >
             {t("close")}
           </button>

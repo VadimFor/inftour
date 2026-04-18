@@ -1079,6 +1079,7 @@ function PropertyMap({
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
   const mapNodeRef = useRef<HTMLDivElement>(null);
+  const mapSurfaceRef = useRef<HTMLDivElement>(null);
   const userAdjustedViewRef = useRef(false);
   const autoFittingRef = useRef(false);
   const clickedPropertyIdsRef = useRef<Set<number>>(new Set());
@@ -1338,6 +1339,30 @@ function PropertyMap({
     };
   }, [isExpanded]);
 
+  useEffect(() => {
+    const surface = mapSurfaceRef.current;
+    if (!surface || typeof ResizeObserver === "undefined") return;
+
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const map = mapRef.current;
+        if (!map) return;
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        map.invalidateSize({ animate: false });
+        map.setView(center, zoom, { animate: false });
+      });
+    });
+
+    ro.observe(surface);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [isExpanded]);
+
   return (
     <section className="mb-5 overflow-hidden rounded-[18px] border border-[#e3e0d7] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
       <button
@@ -1377,16 +1402,19 @@ function PropertyMap({
         </span>
       </button>
       <div
-        className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px]" : "max-h-0"}`}
+        className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] md:max-h-[min(760px,92vh)]" : "max-h-0"}`}
       >
-        <div className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px]">
+        <div
+          ref={mapSurfaceRef}
+          className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px] md:transition-[height] md:duration-300 md:ease-out md:hover:h-[640px]"
+        >
           <div
             ref={mapNodeRef}
             className="h-full w-full bg-[#f3f1eb]"
           />
           <button
             type="button"
-            className="absolute right-3 top-3 z-[870] inline-flex max-w-[min(160px,calc(100%-5rem))] items-center gap-1.5 rounded-full border border-[#e7dcc0] bg-white/95 px-2.5 py-1.5 text-left text-[11px] font-semibold leading-tight text-[#5c4d27] shadow-sm backdrop-blur-sm transition hover:bg-white sm:max-w-[200px] sm:px-3 sm:text-[12px]"
+            className="absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-[870] inline-flex max-w-[min(160px,calc(100%-5rem))] items-center gap-1.5 rounded-full border border-[#e7dcc0] bg-white/95 px-2.5 py-1.5 text-left text-[11px] font-semibold leading-tight text-[#5c4d27] shadow-sm backdrop-blur-sm transition hover:bg-white sm:max-w-[200px] sm:px-3 sm:text-[12px]"
             aria-label={recenterCalpeLabel}
             onClick={() => {
               const map = mapRef.current;

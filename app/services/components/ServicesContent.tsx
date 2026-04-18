@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { ProgressiveNextImage } from "../../components/ProgressiveNextImage";
 import { useLangStore } from "../../lib/langStore";
 import heroImage from "../pictures/chica_con_portatil.png";
@@ -113,6 +114,9 @@ const CARDS = [
   },
 ] as const;
 
+const CARD_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
+
 export default function ServicesContent() {
   const { t } = useLangStore(useShallow((s) => ({ lang: s.lang, t: s.t })));
   const [referenceModalOpen, setReferenceModalOpen] = useState(false);
@@ -198,10 +202,16 @@ export default function ServicesContent() {
   }, []);
 
   const openModalForCard = (titleKey: (typeof CARDS)[number]["titleKey"]) => {
+    triggerLightTapHaptic();
     if (titleKey === "svcCardRefTitle") setReferenceModalOpen(true);
     else if (titleKey === "svcCardCleaningTitle") setOurServicesModalOpen(true);
     else if (titleKey === "svcCardOfficeTitle") setRequestsModalOpen(true);
   };
+
+  const openAIWithHaptic = useCallback(() => {
+    triggerLightTapHaptic();
+    openAIWidget();
+  }, [openAIWidget]);
 
   return (
     <main className="relative z-20">
@@ -254,12 +264,12 @@ export default function ServicesContent() {
                   card.titleKey === "svcCardRefTitle" ||
                   card.titleKey === "svcCardCleaningTitle" ||
                   card.titleKey === "svcCardOfficeTitle"
-                    ? "cursor-pointer"
+                    ? `cursor-pointer ${CARD_PRESS}`
                     : ""
                 }`}
                 onClick={
                   card.titleKey === "svcCardAITitle"
-                    ? openAIWidget
+                    ? openAIWithHaptic
                     : card.titleKey === "svcCardRefTitle" ||
                         card.titleKey === "svcCardCleaningTitle" ||
                         card.titleKey === "svcCardOfficeTitle"
@@ -287,7 +297,7 @@ export default function ServicesContent() {
                     ? (e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          openAIWidget();
+                          openAIWithHaptic();
                         }
                       }
                     : card.titleKey === "svcCardRefTitle" ||

@@ -109,11 +109,11 @@ export default function AboutUsContent({
   const t = useLangStore((s) => s.t);
 
   return (
-    <div className={isModal ? "overflow-y-auto flex-1" : "container mx-auto px-4 py-12"}>
+    <div className={isModal ? "w-full min-h-0" : "container mx-auto px-4 py-12"}>
       <div
         className={
           isModal
-            ? "p-8 md:p-12 lg:p-14 bg-linear-to-br from-white via-brand-bg to-amber-50/30"
+            ? "bg-linear-to-br from-white via-brand-bg to-amber-50/30 px-3 py-4 sm:px-4 md:py-6"
             : "rounded-2xl border border-gray-200 bg-linear-to-br from-white via-brand-bg to-amber-50/30 p-8 md:p-12 lg:p-14 shadow-sm"
         }
       >
@@ -148,7 +148,7 @@ export default function AboutUsContent({
       <div
         className={
           isModal
-            ? "border-t border-brand-gold/20 bg-linear-to-br from-brand-bg/90 via-white to-amber-50/20 p-8 md:p-10 relative overflow-hidden"
+            ? "relative overflow-hidden border-t border-brand-gold/20 bg-linear-to-br from-brand-bg/90 via-white to-amber-50/20 px-3 py-6 sm:px-4 md:py-8"
             : "mt-6 rounded-2xl border border-brand-gold/20 bg-linear-to-br from-brand-bg/90 via-white to-amber-50/20 p-8 md:p-10 relative overflow-hidden"
         }
       >

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { Fragment, ReactNode, useCallback, useEffect, useMemo } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "../../lib/langStore";
 import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
 
@@ -20,6 +21,9 @@ type FaqContentProps = {
   isModal?: boolean;
   onOpenAIAdvice?: () => void;
 };
+
+const MODAL_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
 
 function normalizeAdviceLine(line: string): string {
   return line
@@ -372,6 +376,7 @@ function FaqContentBody({
   mainContentLines,
   adviceLines,
   onOpenAIAdvice,
+  isModal = false,
 }: {
   introLines: string[];
   introHeading: string;
@@ -381,12 +386,17 @@ function FaqContentBody({
   mainContentLines: string[];
   adviceLines: string[];
   onOpenAIAdvice?: () => void;
+  isModal?: boolean;
 }) {
   const t = useLangStore((s) => s.t);
 
   return (
-    <div className="scrollbar-modal overflow-y-auto flex-1 px-8 py-6">
-      <div className="bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14">
+    <div
+      className={`scrollbar-modal min-h-0 flex-1 overflow-y-auto py-6 ${isModal ? "px-3 sm:px-4" : "px-8"}`}
+    >
+      <div
+        className={`mb-6 border-b border-gray-200 bg-brand-bg pb-6 pr-14 pt-6 ${isModal ? "-mx-3 px-3 sm:-mx-4 sm:px-4" : "-mx-8 px-8"}`}
+      >
         <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
         <h1
           id="faq-modal-title"
@@ -512,7 +522,7 @@ function FaqContentBody({
                   key={`faq-advice-ai-${idx}`}
                   type="button"
                   onClick={onOpenAIAdvice}
-                  className="text-left text-xs leading-relaxed text-gray-300 hover:text-brand-gold hover:underline transition-colors"
+                  className={`text-left text-xs leading-relaxed text-gray-300 transition-colors hover:text-brand-gold hover:underline ${MODAL_PRESS}`}
                 >
                   {line}
                 </button>
@@ -620,11 +630,17 @@ export function FaqContent({
   }, [mainContentLines]);
 
   return (
-    <div className={isModal ? "flex-1 overflow-hidden" : "container mx-auto px-4 py-12"}>
+    <div
+      className={
+        isModal
+          ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+          : "container mx-auto px-4 py-12"
+      }
+    >
       <div
         className={
           isModal
-            ? "w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col"
+            ? "flex min-h-0 w-full max-w-4xl flex-1 flex-col overflow-hidden"
             : "rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
         }
       >
@@ -637,6 +653,7 @@ export function FaqContent({
           mainContentLines={mainContentLines}
           adviceLines={adviceLines}
           onOpenAIAdvice={onOpenAIAdvice}
+          isModal={isModal}
         />
       </div>
     </div>
@@ -705,6 +722,7 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
     }, 150);
   }, []);
   const handleAIAdviceClick = useCallback(() => {
+    triggerLightTapHaptic();
     onClose();
     openAIWidget();
   }, [onClose, openAIWidget]);
@@ -722,21 +740,24 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-9999 flex items-end justify-center bg-black/70 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))] backdrop-blur-sm sm:items-center sm:pt-[max(1rem,env(safe-area-inset-top,0px))] sm:pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pl-4 sm:pr-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="faq-modal-title"
       onClick={onClose}
     >
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-t-2xl sm:rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative flex min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1rem)] sm:max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] sm:rounded-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            triggerLightTapHaptic();
+            onClose();
+          }}
           aria-label={t("lobCloseModal")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+          className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -756,17 +777,23 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
 
         <FaqContent isModal onOpenAIAdvice={handleAIAdviceClick} />
 
-        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3 bg-white">
-          <a
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-200 bg-white px-3 py-3 sm:px-4">
+          <Link
             href="/lobby/faq"
-            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+            }}
+            className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+              onClose();
+            }}
+            className={`rounded-sm bg-brand-darkgray px-5 py-2 font-semibold text-white transition hover:opacity-90 ${MODAL_PRESS}`}
           >
             {t("close")}
           </button>

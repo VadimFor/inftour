@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { type ReactNode, useEffect } from "react";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "../../lib/langStore";
 import { MODAL_TITLE_CLASS } from "../../experiencias/components/modalStyles";
 import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
@@ -15,6 +17,9 @@ type RequestsCommentsContentProps = {
   isModal?: boolean;
   onClose?: () => void;
 };
+
+const MODAL_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
 
 const REQUEST_EMAIL = "mail@inftour.net";
 const REQUEST_WA_HREF = "https://wa.me/34640748732";
@@ -35,9 +40,11 @@ const REF_GROUP_BACKGROUNDS = [
 function RefContentGroup({
   tone,
   children,
+  compact,
 }: {
   tone: number;
   children: ReactNode;
+  compact?: boolean;
 }) {
   const bg =
     REF_GROUP_BACKGROUNDS[
@@ -48,7 +55,15 @@ function RefContentGroup({
     <section
       className={`group ${bg} rounded-sm border border-gray-100 overflow-hidden transition-colors duration-200 hover:border-brand-gold/40`}
     >
-      <div className="space-y-3 px-5 py-4 sm:space-y-4 sm:py-5">{children}</div>
+      <div
+        className={
+          compact
+            ? "space-y-3 px-3 py-4 sm:space-y-4 sm:px-4 sm:py-5"
+            : "space-y-3 px-5 py-4 sm:space-y-4 sm:py-5"
+        }
+      >
+        {children}
+      </div>
     </section>
   );
 }
@@ -120,7 +135,10 @@ function ActionButtons() {
     <div className="grid w-full min-w-0 grid-cols-2 gap-3">
       <a
         href={`mailto:${REQUEST_EMAIL}`}
-        className="inline-flex min-h-14 w-full min-w-0 items-center justify-center gap-2 rounded-md bg-brand-gold bg-linear-to-b from-brand-gold to-amber-600 px-2 py-3.5 text-sm font-semibold text-white shadow-[0_2px_10px_rgba(180,140,50,0.35)] transition duration-200 hover:shadow-[0_4px_16px_rgba(180,140,50,0.42)] hover:brightness-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold/70 active:scale-[0.99] sm:min-h-16 sm:gap-2.5 sm:px-4 sm:py-4"
+        onClick={() => {
+          triggerLightTapHaptic();
+        }}
+        className={`inline-flex min-h-14 w-full min-w-0 items-center justify-center gap-2 rounded-md bg-brand-gold bg-linear-to-b from-brand-gold to-amber-600 px-2 py-3.5 text-sm font-semibold text-white shadow-[0_2px_10px_rgba(180,140,50,0.35)] transition duration-200 hover:shadow-[0_4px_16px_rgba(180,140,50,0.42)] hover:brightness-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold/70 sm:min-h-16 sm:gap-2.5 sm:px-4 sm:py-4 ${MODAL_PRESS}`}
       >
         <IconEnvelope className="h-5 w-5 shrink-0 opacity-95 sm:h-6 sm:w-6" />
         <span className="min-w-0 text-center leading-tight">
@@ -131,7 +149,10 @@ function ActionButtons() {
         href={REQUEST_WA_HREF}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex min-h-16 w-full min-w-0 items-center justify-center gap-2 rounded-md border border-gray-200/90 bg-white px-2 py-3.5 text-sm font-semibold text-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition duration-200 hover:border-[#25D366]/45 hover:bg-emerald-50/50 hover:text-gray-900 hover:shadow-[0_2px_10px_rgba(37,211,102,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]/55 active:scale-[0.99] sm:min-h-16 sm:gap-2.5 sm:px-4 sm:py-4"
+        onClick={() => {
+          triggerLightTapHaptic();
+        }}
+        className={`inline-flex min-h-16 w-full min-w-0 items-center justify-center gap-2 rounded-md border border-gray-200/90 bg-white px-2 py-3.5 text-sm font-semibold text-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition duration-200 hover:border-[#25D366]/45 hover:bg-emerald-50/50 hover:text-gray-900 hover:shadow-[0_2px_10px_rgba(37,211,102,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]/55 sm:min-h-16 sm:gap-2.5 sm:px-4 sm:py-4 ${MODAL_PRESS}`}
       >
         <IconWhatsApp className="h-5 w-5 shrink-0 text-[#25D366] sm:h-6 sm:w-6" />
         <span className="min-w-0 text-center leading-tight">
@@ -151,8 +172,8 @@ export function RequestsCommentsContent({
       <div
         className={
           isModal
-            ? "bg-brand-bg border-b border-gray-200 -mx-8 px-8 pt-6 pb-6 mb-6 pr-14"
-            : "bg-brand-bg border border-gray-100 rounded-sm px-8 pt-6 pb-6 mb-6"
+            ? "bg-brand-bg border-b border-gray-200 -mx-3 px-3 pt-6 pb-6 mb-6 pr-11 sm:-mx-4 sm:px-4 sm:pr-12"
+            : "bg-brand-bg border border-gray-100 rounded-sm px-6 pt-6 pb-6 mb-6 sm:px-8"
         }
       >
         <div className="h-px w-12 bg-brand-gold mb-4" aria-hidden />
@@ -163,12 +184,12 @@ export function RequestsCommentsContent({
           {t("requestsCommentsModalTitle")}
         </h1>
       </div>
-      <RefContentGroup tone={0}>
+      <RefContentGroup tone={0} compact={isModal}>
         <Tp k="reqIntro1" />
         <Tp k="reqIntro2" />
       </RefContentGroup>
 
-      <RefContentGroup tone={1}>
+      <RefContentGroup tone={1} compact={isModal}>
         <SectionTitle k="reqSecServicesTitle" />
         <Tp k="reqServicesLead" />
         <div className={SUBITEM_CARD}>
@@ -180,7 +201,7 @@ export function RequestsCommentsContent({
         </div>
       </RefContentGroup>
 
-      <RefContentGroup tone={2}>
+      <RefContentGroup tone={2} compact={isModal}>
         <SectionTitle k="reqSecIdeaTitle" />
         <Tp k="reqIdeaLead" />
         <div className={`${SUBITEM_CARD} space-y-4`}>
@@ -196,7 +217,7 @@ export function RequestsCommentsContent({
         </div>
       </RefContentGroup>
 
-      <RefContentGroup tone={0}>
+      <RefContentGroup tone={0} compact={isModal}>
         <SectionTitle k="reqSecContactTitle" />
         <Tp k="reqContactLead" />
         <div className={SUBITEM_CARD}>
@@ -207,7 +228,7 @@ export function RequestsCommentsContent({
         </div>
       </RefContentGroup>
 
-      <RefContentGroup tone={1}>
+      <RefContentGroup tone={1} compact={isModal}>
         <Tp k="reqClosingP" className={`m-0 ${BODY_TEXT}`} />
         <ActionButtons />
       </RefContentGroup>
@@ -235,21 +256,24 @@ export default function RequestsCommentsModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 bg-black/70 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="requests-comments-modal-title"
       onClick={onClose}
     >
       <div
-        className="relative bg-white w-full max-w-4xl max-h-[92vh] rounded-sm shadow-2xl overflow-hidden flex flex-col"
+        className="relative flex min-h-0 w-full max-w-4xl max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] flex-col overflow-hidden rounded-sm bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            triggerLightTapHaptic();
+            onClose();
+          }}
           aria-label={t("close")}
-          className="absolute top-6 right-6 z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+          className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -267,21 +291,27 @@ export default function RequestsCommentsModal({
           </svg>
         </button>
 
-        <div className="overflow-y-auto flex-1 px-8 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-4">
           <RequestsCommentsContent isModal />
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-          <a
+        <div className="border-t border-gray-200 px-3 py-2 flex items-center justify-between gap-3">
+          <Link
             href="/services/requests-comments"
-            className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+            }}
+            className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
           >
             {t("openPage")}
-          </a>
+          </Link>
           <button
             type="button"
-            onClick={onClose}
-            className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+            onClick={() => {
+              triggerLightTapHaptic();
+              onClose();
+            }}
+            className={`bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold transition hover:opacity-90 ${MODAL_PRESS}`}
           >
             {t("close")}
           </button>

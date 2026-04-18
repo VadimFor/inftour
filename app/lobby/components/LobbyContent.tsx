@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { triggerLightTapHaptic } from "@/app/lib/haptics";
 import { useLangStore } from "../../lib/langStore";
 import { useModalBodyScrollLock } from "../../experiencias/components/useModalBodyScrollLock";
 import lobbyAboutImage from "../pictures/Inftour.png";
@@ -13,6 +14,9 @@ import FaqModal from "./FaqModal";
 import InstructionsContent from "./InstructionsContent";
 import PrivacyModal from "./PrivacyModal";
 import ReportingChannelModal from "./ReportingChannelModal";
+
+const MODAL_PRESS =
+  "touch-manipulation transition-transform duration-150 ease-out active:scale-[0.96]";
 
 const INSTRUCTION_ITEMS = [
   { q: "lobInstr1Q" as const, a: "lobInstr1A" as const },
@@ -697,20 +701,23 @@ export default function LobbyContent() {
       />
       {aboutModalOpen && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/55 p-4"
+          className="fixed inset-0 z-9999 flex items-end justify-center bg-black/55 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))] backdrop-blur-sm sm:items-center sm:pt-[max(1rem,env(safe-area-inset-top,0px))] sm:pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pl-4 sm:pr-4"
           role="dialog"
           aria-modal="true"
           aria-label={t("lobAboutDocMainTitle")}
           onClick={() => setAboutModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col"
+            className="relative flex min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-t-2xl border border-gray-200 bg-white shadow-2xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1rem)] sm:max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              onClick={() => setAboutModalOpen(false)}
-              className="absolute top-6 right-6 left-auto z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+              onClick={() => {
+                triggerLightTapHaptic();
+                setAboutModalOpen(false);
+              }}
+              className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
               aria-label={t("lobCloseModal")}
             >
               <svg
@@ -728,20 +735,26 @@ export default function LobbyContent() {
                 />
               </svg>
             </button>
-            <div className="overflow-y-auto flex-1">
+            <div className="scrollbar-modal min-h-0 flex-1 overflow-y-auto py-2 sm:py-4">
               <AboutUsContent isModal />
             </div>
-            <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-              <a
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-200 px-3 py-3 sm:px-4">
+              <Link
                 href="/lobby/about-us"
-                className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+                onClick={() => {
+                  triggerLightTapHaptic();
+                }}
+                className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
               >
                 {t("openPage")}
-              </a>
+              </Link>
               <button
                 type="button"
-                onClick={() => setAboutModalOpen(false)}
-                className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+                onClick={() => {
+                  triggerLightTapHaptic();
+                  setAboutModalOpen(false);
+                }}
+                className={`rounded-sm bg-brand-darkgray px-5 py-2 font-semibold text-white transition hover:opacity-90 ${MODAL_PRESS}`}
               >
                 {t("close")}
               </button>
@@ -751,20 +764,23 @@ export default function LobbyContent() {
       )}
       {instructionsModalOpen && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/55 p-4"
+          className="fixed inset-0 z-9999 flex items-end justify-center bg-black/55 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))] backdrop-blur-sm sm:items-center sm:pt-[max(1rem,env(safe-area-inset-top,0px))] sm:pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pl-4 sm:pr-4"
           role="dialog"
           aria-modal="true"
           aria-label={t("lobInstructionsTitle")}
           onClick={() => setInstructionsModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col"
+            className="relative flex min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-t-2xl border border-gray-200 bg-white shadow-2xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1rem)] sm:max-h-[calc(100dvh-max(1rem,env(safe-area-inset-top,0px))-max(1rem,env(safe-area-inset-bottom,0px)))] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              onClick={() => setInstructionsModalOpen(false)}
-              className="absolute top-6 right-6 left-auto z-10 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm transition"
+              onClick={() => {
+                triggerLightTapHaptic();
+                setInstructionsModalOpen(false);
+              }}
+              className={`absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-10 flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-900 ${MODAL_PRESS}`}
               aria-label={t("lobCloseModal")}
             >
               <svg
@@ -782,20 +798,26 @@ export default function LobbyContent() {
                 />
               </svg>
             </button>
-            <div className="overflow-y-auto flex-1 px-6 py-6 md:px-8">
+            <div className="scrollbar-modal min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-4">
               <InstructionsContent isModal />
             </div>
-            <div className="border-t border-gray-200 px-6 py-2 flex items-center justify-between gap-3">
-              <a
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-200 px-3 py-3 sm:px-4">
+              <Link
                 href="/lobby/instructions"
-                className="bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold hover:bg-gray-50 transition"
+                onClick={() => {
+                  triggerLightTapHaptic();
+                }}
+                className={`inline-flex items-center justify-center bg-white text-brand-darkgray border border-gray-300 rounded-sm px-5 py-2 font-semibold transition hover:bg-gray-50 ${MODAL_PRESS}`}
               >
                 {t("openPage")}
-              </a>
+              </Link>
               <button
                 type="button"
-                onClick={() => setInstructionsModalOpen(false)}
-                className="bg-brand-darkgray text-white rounded-sm px-5 py-2 font-semibold hover:opacity-90 transition"
+                onClick={() => {
+                  triggerLightTapHaptic();
+                  setInstructionsModalOpen(false);
+                }}
+                className={`rounded-sm bg-brand-darkgray px-5 py-2 font-semibold text-white transition hover:opacity-90 ${MODAL_PRESS}`}
               >
                 {t("close")}
               </button>
