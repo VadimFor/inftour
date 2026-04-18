@@ -7,7 +7,11 @@ import type { Lang } from "@/app/lib/langStore";
 
 const EL_AGENT_ID = "agent_7901kn00tj76ef0b6t7e7ebv8s22";
 const MOBILE_WIDGET_BREAKPOINT = 640;
-const MOBILE_CHAT_Z = 2147483647;
+
+/** Reserva Directa booking iframe modal uses `z-[2000]`; keep widget stack strictly below it. */
+const MOBILE_WIDGET_BACKDROP_Z = 1970;
+const MOBILE_WIDGET_PANEL_Z = 1980;
+const MOBILE_WIDGET_CLOSE_Z = 1990;
 
 const WIDGET_LANG_TO_CODE: Record<Lang, string> = {
   eng: "en",
@@ -30,6 +34,8 @@ const widgetTextTranslations: Record<
     speakingText: string;
     bookingLinksAriaLabel: string;
     closeAssistantAriaLabel: string;
+    /** Shown as the agent's first chat line when overrides are enabled for this field in ElevenLabs. */
+    firstMessage: string;
   }
 > = {
   eng: {
@@ -40,6 +46,8 @@ const widgetTextTranslations: Record<
     speakingText: "Assistant speaking",
     bookingLinksAriaLabel: "Booking links",
     closeAssistantAriaLabel: "Close assistant",
+    firstMessage:
+      "Call this number or talk to me here if you need any information.",
   },
   esp: {
     actionText: "Necesitas ayuda?",
@@ -49,6 +57,8 @@ const widgetTextTranslations: Record<
     speakingText: "Asistente hablando",
     bookingLinksAriaLabel: "Enlaces de reserva",
     closeAssistantAriaLabel: "Cerrar asistente",
+    firstMessage:
+      "Llama a este número o escríbeme aquí si necesitas cualquier información.",
   },
   ru: {
     actionText: "Нужна помощь?",
@@ -58,6 +68,8 @@ const widgetTextTranslations: Record<
     speakingText: "Ассистент говорит",
     bookingLinksAriaLabel: "Ссылки для бронирования",
     closeAssistantAriaLabel: "Закрыть помощника",
+    firstMessage:
+      "Позвоните по этому номеру или напишите мне здесь, если нужна информация.",
   },
   fr: {
     actionText: "Besoin d'aide ?",
@@ -67,6 +79,8 @@ const widgetTextTranslations: Record<
     speakingText: "Assistant en train de parler",
     bookingLinksAriaLabel: "Liens de reservation",
     closeAssistantAriaLabel: "Fermer l'assistant",
+    firstMessage:
+      "Appelez ce numéro ou parlez-moi ici pour toute information.",
   },
   it: {
     actionText: "Hai bisogno di aiuto?",
@@ -76,6 +90,8 @@ const widgetTextTranslations: Record<
     speakingText: "Assistente in conversazione",
     bookingLinksAriaLabel: "Link di prenotazione",
     closeAssistantAriaLabel: "Chiudi assistente",
+    firstMessage:
+      "Chiama questo numero o scrivimi qui se ti servono informazioni.",
   },
   de: {
     actionText: "Brauchst du Hilfe?",
@@ -85,6 +101,8 @@ const widgetTextTranslations: Record<
     speakingText: "Assistent spricht",
     bookingLinksAriaLabel: "Buchungslinks",
     closeAssistantAriaLabel: "Assistenten schließen",
+    firstMessage:
+      "Rufen Sie diese Nummer an oder schreiben Sie mir hier, wenn Sie Informationen brauchen.",
   },
   uk: {
     actionText: "Потрібна допомога?",
@@ -94,6 +112,8 @@ const widgetTextTranslations: Record<
     speakingText: "Асистент говорить",
     bookingLinksAriaLabel: "Посилання для бронювання",
     closeAssistantAriaLabel: "Закрити асистента",
+    firstMessage:
+      "Зателефонуйте за цим номером або напишіть мені тут, якщо потрібна інформація.",
   },
   pl: {
     actionText: "Potrzebujesz pomocy?",
@@ -103,12 +123,14 @@ const widgetTextTranslations: Record<
     speakingText: "Asystent mowi",
     bookingLinksAriaLabel: "Linki rezerwacyjne",
     closeAssistantAriaLabel: "Zamknij asystenta",
+    firstMessage:
+      "Zadzwon pod ten numer lub napisz do mnie tutaj, jesli potrzebujesz informacji.",
   },
 };
 
 const mobileWidgetTextTranslations: Record<
   Lang,
-  Pick<typeof widgetTextTranslations[Lang], "actionText" | "startCallText">
+  Pick<(typeof widgetTextTranslations)[Lang], "actionText" | "startCallText">
 > = {
   eng: {
     actionText: "Help?",
@@ -351,7 +373,7 @@ export default function ElevenLabsWidget() {
 
     const handleCall = (event: Event) => {
       const callEvent = event as ConvaiCallEvent;
-      const config = (callEvent.detail ??= {}).config ??= {};
+      const config = ((callEvent.detail ??= {}).config ??= {});
 
       config.clientTools = {
         ...(config.clientTools ?? {}),
@@ -390,10 +412,14 @@ export default function ElevenLabsWidget() {
     el.setAttribute("end-call-text", widgetText.endCallText);
     el.setAttribute("listening-text", widgetText.listeningText);
     el.setAttribute("speaking-text", widgetText.speakingText);
+    el.setAttribute("override-first-message", widgetText.firstMessage);
 
     const linksContainer = document.getElementById("el-booking-links");
     if (linksContainer) {
-      linksContainer.setAttribute("aria-label", widgetText.bookingLinksAriaLabel);
+      linksContainer.setAttribute(
+        "aria-label",
+        widgetText.bookingLinksAriaLabel,
+      );
     }
   }, [languageCode, widgetText]);
 
@@ -408,7 +434,9 @@ export default function ElevenLabsWidget() {
     }
 
     el.style.display = isMobilePanelVisible ? "" : "none";
-    el.style.zIndex = isMobilePanelVisible ? String(MOBILE_CHAT_Z) : "";
+    el.style.zIndex = isMobilePanelVisible
+      ? String(MOBILE_WIDGET_PANEL_Z)
+      : "";
   }, [isMobile, isMobilePanelVisible, widgetKey]);
 
   useEffect(() => {
@@ -427,11 +455,13 @@ export default function ElevenLabsWidget() {
   }, [isMobile, isMobilePanelVisible, closeMobilePanel]);
 
   useEffect(() => {
-    const el = ref.current as (ConvaiWidgetElement & {
-      __inftourPatched?: boolean;
-      __inftourOriginalOpen?: (() => void) | undefined;
-      __inftourOriginalToggle?: (() => void) | undefined;
-    }) | null;
+    const el = ref.current as
+      | (ConvaiWidgetElement & {
+          __inftourPatched?: boolean;
+          __inftourOriginalOpen?: (() => void) | undefined;
+          __inftourOriginalToggle?: (() => void) | undefined;
+        })
+      | null;
     if (!el || el.__inftourPatched) return;
 
     el.__inftourOriginalOpen =
@@ -497,7 +527,8 @@ export default function ElevenLabsWidget() {
         <button
           type="button"
           onClick={openWidgetFromLauncher}
-          className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] right-4 z-[2147483647] flex w-fit max-w-[calc(100vw-2rem)] flex-col rounded-[22px] bg-white px-3 py-2 text-left shadow-[0_10px_32px_rgba(0,0,0,0.16)]"
+          className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] right-4 flex w-fit max-w-[calc(100vw-2rem)] flex-col rounded-[22px] bg-white px-3 py-2 text-left shadow-[0_10px_32px_rgba(0,0,0,0.16)]"
+          style={{ zIndex: MOBILE_WIDGET_PANEL_Z }}
           aria-label={mobileWidgetText.startCallText}
         >
           <div className="flex min-w-0 items-center gap-2">
@@ -513,8 +544,16 @@ export default function ElevenLabsWidget() {
               {mobileWidgetText.actionText}
             </span>
           </div>
-          <div className="mt-2 w-full min-w-0 rounded-full bg-black px-3 py-2 text-center text-[13px] font-semibold text-white">
-            {mobileWidgetText.startCallText}
+          <div className="mt-2 flex w-full min-w-0 items-center justify-center gap-1.5 rounded-full bg-black px-3 py-2 text-[13px] font-semibold text-white">
+            <svg
+              className="h-4 w-4 shrink-0"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+            </svg>
+            <span>{mobileWidgetText.startCallText}</span>
           </div>
         </button>
       )}
@@ -523,7 +562,8 @@ export default function ElevenLabsWidget() {
           type="button"
           tabIndex={-1}
           aria-label={widgetText.closeAssistantAriaLabel}
-          className="fixed inset-0 z-[2147483646] cursor-default border-0 bg-black/35 p-0"
+          className="fixed inset-0 cursor-default border-0 bg-black/35 p-0"
+          style={{ zIndex: MOBILE_WIDGET_BACKDROP_Z }}
           onClick={closeMobilePanel}
         />
       )}
@@ -543,16 +583,28 @@ export default function ElevenLabsWidget() {
         end-call-text={widgetText.endCallText}
         listening-text={widgetText.listeningText}
         speaking-text={widgetText.speakingText}
+        override-first-message={widgetText.firstMessage}
       />
       {isMobile && isMobilePanelVisible && (
         <button
           type="button"
           onClick={closeMobilePanel}
-          className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px)+min(100vw-2rem,420px)-6px)] right-4 z-[2147483647] flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-500 shadow-md transition hover:text-gray-900"
+          className="fixed bottom-[calc(12px+env(safe-area-inset-bottom,0px))] right-4 flex h-9 w-9 items-center justify-center rounded-full border border-red-200/90 bg-red-100 text-red-700 shadow-lg transition hover:border-red-300 hover:bg-red-200/90 hover:text-red-900"
+          style={{ zIndex: MOBILE_WIDGET_CLOSE_Z }}
           aria-label={widgetText.closeAssistantAriaLabel}
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       )}

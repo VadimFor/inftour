@@ -803,6 +803,16 @@ const propertyCardTranslations = {
     uk: "ванні",
     pl: "lazienki",
   },
+  viewInfo: {
+    eng: "View info",
+    esp: "Ver información",
+    ru: "Подробнее",
+    fr: "Voir les infos",
+    it: "Vedi informazioni",
+    de: "Infos ansehen",
+    uk: "Детальніше",
+    pl: "Zobacz informacje",
+  },
 } as const;
 
 // Raw shape from AvaiBook API
@@ -1759,6 +1769,7 @@ function CardCarousel({
   nextPhotoLabel: string;
 }) {
   const [idx, setIdx] = useState(0);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const gallery = (images ?? []).filter((img) => Boolean(img.SMALL));
 
   if (!gallery.length) return <div className="w-full h-full bg-gray-100" />;
@@ -1773,8 +1784,39 @@ function CardCarousel({
     setIdx((i) => (i + 1) % gallery.length);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (gallery.length <= 1) return;
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (gallery.length <= 1) return;
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+    e.stopPropagation();
+    if (dx < 0) {
+      setIdx((i) => (i + 1) % gallery.length);
+    } else {
+      setIdx((i) => (i - 1 + gallery.length) % gallery.length);
+    }
+  };
+
   return (
-    <div className="relative w-full h-full group" data-idx={safeIdx}>
+    <div
+      className="relative h-full w-full touch-pan-y group"
+      data-idx={safeIdx}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={(e) => e.stopPropagation()}
+    >
       {gallery.map((img, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -1874,6 +1916,7 @@ function PropertyCard({
   bedroomsShortLabel,
   bedsLabel,
   bathroomsLabel,
+  viewInfoLabel,
 }: {
   prop: Property;
   bookingUrl: string;
@@ -1888,6 +1931,7 @@ function PropertyCard({
   bedroomsShortLabel: string;
   bedsLabel: string;
   bathroomsLabel: string;
+  viewInfoLabel: string;
 }) {
   const feats = getTopFeats(prop.features);
   const title = prop.name || `${propertyFallbackLabel} #${prop.id}`;
@@ -1923,16 +1967,7 @@ function PropertyCard({
 
   return (
     <div
-      onClick={() => onOpen(bookingUrl)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpen(bookingUrl);
-        }
-      }}
-      className="group bg-white overflow-hidden border border-[#e0e0e0] cursor-pointer transition-all duration-200 hover:-translate-y-1 focus-visible:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c2a457] focus-visible:ring-offset-2"
+      className="group overflow-hidden border border-[#e0e0e0] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] focus-within:-translate-y-1 focus-within:shadow-[0_8px_20px_rgba(0,0,0,0.12)]"
       style={{ borderRadius: "12px" }}
     >
       <div
@@ -1981,6 +2016,15 @@ function PropertyCard({
         )}
       </div>
       <div
+        tabIndex={0}
+        onClick={() => onOpen(bookingUrl)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen(bookingUrl);
+          }
+        }}
+        className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c2a457] focus-visible:ring-offset-2"
         style={{
           padding: "14px 16px 16px",
           minHeight: "168px",
@@ -2201,6 +2245,16 @@ function PropertyCard({
             )}
           </div>
         )}
+        <button
+          type="button"
+          className="mt-auto w-full rounded-[10px] border border-[#b6d3f0] bg-[#e8f2fc] py-2.5 text-center text-[13px] font-semibold text-[#2a5580] transition hover:bg-[#dbe9ff] active:bg-[#d0e4f8] md:hidden"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen(bookingUrl);
+          }}
+        >
+          {viewInfoLabel}
+        </button>
       </div>
     </div>
   );
@@ -2369,6 +2423,7 @@ export default function ReservaDirectaV2Content() {
   const bathroomsShortLabel = propertyCardTranslations.bathroomsShort[lang];
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
+  const viewInfoLabel = propertyCardTranslations.viewInfo[lang];
   const [propertiesState, setPropertiesState] = useState<Property[]>(() => [
     ...reservationPropertiesCache,
   ]);
@@ -3302,6 +3357,7 @@ export default function ReservaDirectaV2Content() {
                     bedroomsShortLabel={bedroomsShortLabel}
                     bedsLabel={bedsLabel}
                     bathroomsLabel={bathroomsLabel}
+                    viewInfoLabel={viewInfoLabel}
                     bookingUrl={buildBookingUrl(prop.id, {
                       guests: activeGuestFilter,
                       startDate: searchDateRange?.startDate,

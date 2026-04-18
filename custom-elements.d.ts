@@ -11,6 +11,7 @@ declare module "react" {
         "always-expanded"?: string;
         "default-expanded"?: string;
         "override-language"?: string;
+        "override-first-message"?: string;
         "action-text"?: string;
         "expand-text"?: string;
         "start-call-text"?: string;
