@@ -8,7 +8,7 @@ import type { Lang } from "@/app/lib/langStore";
 
 const API = "/api/avaibook";
 const DETAIL_BATCH_API = "/api/avaibook-batch";
-const BOOK = "https://inftour.bookonline.pro";
+const BOOK = "https://rentbooking.inftour.es";
 const BOOK_LANG_TO_PATH: Record<Lang, string> = {
   eng: "en",
   esp: "es",
