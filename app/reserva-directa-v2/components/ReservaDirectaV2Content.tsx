@@ -1034,9 +1034,9 @@ function buildMarkerHtml(capacity: number, isVisited: boolean): string {
     `<div style="display:inline-flex;min-height:18px;min-width:30px;align-items:center;justify-content:center;gap:3px;padding:0 6px;` +
     `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;line-height:1;` +
     `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">` +
-    `<svg width="9" height="9" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
-    `<circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.8"/>` +
-    `<path d="M3.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>` +
+    `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
+    `<circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/>` +
+    `<path d="M3.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` +
     `</svg>` +
     `<span>${safeCapacity}</span>` +
     `</div>`
@@ -1144,9 +1144,9 @@ function PropertyMap({
           attributionControl: false,
         });
 
-        L.tileLayer(
-          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        ).addTo(mapRef.current);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+          mapRef.current,
+        );
 
         layerRef.current = L.layerGroup().addTo(mapRef.current);
 
@@ -1218,12 +1218,25 @@ function PropertyMap({
         const safeTitle = escapeHtml(property.name);
         const safeLinkLabel = escapeHtml(openInGoogleMapsLabel);
         const safeMoreInfoLabel = escapeHtml(moreInfoLabel);
-        const safeImageUrl = escapeHtml(
-          property.images[0]?.SMALL ||
-            property.images[0]?.BIG ||
-            property.images[0]?.ORIGINAL ||
-            "",
+        const imageUrls = Array.from(
+          new Set(
+            (property.images ?? [])
+              .map(
+                (image) =>
+                  image?.SMALL || image?.BIG || image?.ORIGINAL || "",
+              )
+              .filter((value): value is string => value.length > 0),
+          ),
         );
+        const hasImages = imageUrls.length > 0;
+        const hasImageSlider = imageUrls.length > 1;
+        const sliderImagesHtml = imageUrls
+          .map(
+            (url, index) =>
+              `<img src="${escapeHtml(url)}" alt="${safeTitle}" style="display:block;width:100%;height:110px;object-fit:cover;flex:0 0 100%;" loading="${index === 0 ? "eager" : "lazy"}" />`,
+          )
+          .join("");
+        const firstImageUrl = hasImages ? escapeHtml(imageUrls[0]) : "";
         const capacityLabel =
           property.capacity > 0
             ? `${property.capacity} ${property.capacity === 1 ? guestSingularLabel : guestPluralLabel}`
@@ -1245,9 +1258,16 @@ function PropertyMap({
 
         marker.bindPopup(
           `<div style="min-width:190px;max-width:230px;font-family:Arial,sans-serif;">` +
-            (safeImageUrl
-              ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" />`
-              : "") +
+            (hasImageSlider
+              ? `<div style="position:relative;border-radius:10px;overflow:hidden;margin-bottom:8px;">` +
+                `<div data-slider-track style="display:flex;transform:translateX(0%);transition:transform .25s ease;">${sliderImagesHtml}</div>` +
+                `<button type="button" data-slider-prev aria-label="Previous image" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:999px;background:rgba(15,23,42,.68);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">‹</button>` +
+                `<button type="button" data-slider-next aria-label="Next image" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:999px;background:rgba(15,23,42,.68);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">›</button>` +
+                `<div data-slider-counter style="position:absolute;right:8px;bottom:8px;padding:2px 6px;border-radius:999px;background:rgba(15,23,42,.68);font-size:10px;font-weight:700;color:#fff;">1/${imageUrls.length}</div>` +
+                `</div>`
+              : firstImageUrl
+                ? `<img src="${firstImageUrl}" alt="${safeTitle}" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" />`
+                : "") +
             `<div style="margin-bottom:4px;font-size:14px;font-weight:700;color:#222;">${safeTitle}</div>` +
             (safeCapacity
               ? `<div style="margin-bottom:4px;font-size:12px;font-weight:600;color:#8f7130;">${safeCapacity}</div>`
@@ -1295,13 +1315,57 @@ function PropertyMap({
           const button = popupElement?.querySelector(
             "[data-booking-url]",
           ) as HTMLButtonElement | null;
-          if (!button) return;
+          if (button) {
+            button.onclick = (clickEvent) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+              onOpen(bookingUrl);
+              marker.closePopup();
+            };
+          }
 
-          button.onclick = (clickEvent) => {
+          const sliderTrack = popupElement?.querySelector(
+            "[data-slider-track]",
+          ) as HTMLElement | null;
+          const sliderPrevButton = popupElement?.querySelector(
+            "[data-slider-prev]",
+          ) as HTMLButtonElement | null;
+          const sliderNextButton = popupElement?.querySelector(
+            "[data-slider-next]",
+          ) as HTMLButtonElement | null;
+          const sliderCounter = popupElement?.querySelector(
+            "[data-slider-counter]",
+          ) as HTMLElement | null;
+
+          if (
+            !sliderTrack ||
+            !sliderPrevButton ||
+            !sliderNextButton ||
+            !sliderCounter ||
+            imageUrls.length < 2
+          ) {
+            return;
+          }
+
+          let activeSlide = 0;
+          const totalSlides = imageUrls.length;
+          const updateSliderUi = () => {
+            sliderTrack.style.transform = `translateX(-${activeSlide * 100}%)`;
+            sliderCounter.textContent = `${activeSlide + 1}/${totalSlides}`;
+          };
+
+          sliderPrevButton.onclick = (clickEvent) => {
             clickEvent.preventDefault();
             clickEvent.stopPropagation();
-            onOpen(bookingUrl);
-            marker.closePopup();
+            activeSlide = (activeSlide - 1 + totalSlides) % totalSlides;
+            updateSliderUi();
+          };
+
+          sliderNextButton.onclick = (clickEvent) => {
+            clickEvent.preventDefault();
+            clickEvent.stopPropagation();
+            activeSlide = (activeSlide + 1) % totalSlides;
+            updateSliderUi();
           };
         });
 
@@ -1387,7 +1451,9 @@ function PropertyMap({
       >
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0">
-            <h2 className="text-[18px] font-semibold text-[#2d2d2d]">{title}</h2>
+            <h2 className="text-[18px] font-semibold text-[#2d2d2d]">
+              {title}
+            </h2>
             {hint && (
               <p className="mt-0.5 text-[12px] text-[#8c8576]">{hint}</p>
             )}
@@ -1418,10 +1484,7 @@ function PropertyMap({
         className={`overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "max-h-[460px] lg:max-h-[580px]" : "max-h-0"}`}
       >
         <div className="relative h-[340px] w-full bg-[#f3f1eb] sm:h-[400px] lg:h-[500px]">
-          <div
-            ref={mapNodeRef}
-            className="h-full w-full bg-[#f3f1eb]"
-          />
+          <div ref={mapNodeRef} className="h-full w-full bg-[#f3f1eb]" />
           <button
             type="button"
             className="absolute right-[max(0.75rem,env(safe-area-inset-right,0px))] top-[max(0.75rem,env(safe-area-inset-top,0px))] z-[870] inline-flex max-w-[min(160px,calc(100%-5rem))] items-center gap-1.5 rounded-full border border-[#e7dcc0] bg-white/95 px-2.5 py-1.5 text-left text-[11px] font-semibold leading-tight text-[#5c4d27] shadow-sm backdrop-blur-sm transition hover:bg-white sm:max-w-[200px] sm:px-3 sm:text-[12px]"
@@ -1748,7 +1811,10 @@ const CALENDAR_CACHE_TTL_MS = 10 * 60 * 1000;
 const CALENDAR_CACHE_MONTHS_AHEAD = 3;
 const CALENDAR_CACHE_MAX_ENTRIES = 2000;
 
-const calendarAvailabilityCache = new Map<number, CalendarAvailabilityCacheEntry>();
+const calendarAvailabilityCache = new Map<
+  number,
+  CalendarAvailabilityCacheEntry
+>();
 const calendarAvailabilityInFlight = new Map<
   number,
   Promise<CalendarAvailabilityCacheEntry>
@@ -1815,9 +1881,7 @@ function isUnavailableCalendarRange(
     return true;
   }
 
-  return (
-    typeof record.booking === "string" && record.booking.trim().length > 0
-  );
+  return typeof record.booking === "string" && record.booking.trim().length > 0;
 }
 
 function extractUnavailableDates(
@@ -1866,7 +1930,11 @@ function extractUnavailableDates(
           ? record.dt
           : null;
 
-  if (dateCandidate && isIsoDateKey(dateCandidate) && looksUnavailable(record)) {
+  if (
+    dateCandidate &&
+    isIsoDateKey(dateCandidate) &&
+    looksUnavailable(record)
+  ) {
     unavailableDates.add(dateCandidate);
   }
 
@@ -1960,7 +2028,12 @@ async function fetchCalendarAvailabilityForProperty(
 ): Promise<CalendarAvailabilityCacheEntry> {
   const now = Date.now();
   pruneCalendarAvailabilityCache(now);
-  const cached = getFreshCalendarCacheForRange(propertyId, startDate, endDate, now);
+  const cached = getFreshCalendarCacheForRange(
+    propertyId,
+    startDate,
+    endDate,
+    now,
+  );
   if (cached) return cached;
 
   const inFlight = calendarAvailabilityInFlight.get(propertyId);
@@ -1969,10 +2042,15 @@ async function fetchCalendarAvailabilityForProperty(
   const requestPromise = (async () => {
     const today = startOfDay(new Date());
     const windowStart = today;
-    const threeMonthsAhead = addMonths(windowStart, CALENDAR_CACHE_MONTHS_AHEAD);
+    const threeMonthsAhead = addMonths(
+      windowStart,
+      CALENDAR_CACHE_MONTHS_AHEAD,
+    );
     const requestedCheckout = startOfDay(endDate);
     const windowEnd =
-      requestedCheckout > threeMonthsAhead ? requestedCheckout : threeMonthsAhead;
+      requestedCheckout > threeMonthsAhead
+        ? requestedCheckout
+        : threeMonthsAhead;
     const windowStartApi = formatApiDate(windowStart);
     const windowEndApi = formatApiDate(windowEnd);
     const response = await apiFetch(
@@ -2917,7 +2995,8 @@ export default function ReservaDirectaV2Content() {
   const guestPluralLabel = bookingSearchTranslations.guestPlural[lang];
   const staysInCalpeLabel = bookingResultsTranslations.staysInCalpe[lang];
   const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
-  const loadingPropertiesLabel = bookingResultsTranslations.loadingProperties[lang];
+  const loadingPropertiesLabel =
+    bookingResultsTranslations.loadingProperties[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
   const showingSearchResultsLabel =
     bookingResultsTranslations.showingSearchResults[lang];
@@ -2943,12 +3022,10 @@ export default function ReservaDirectaV2Content() {
   const viewInfoLabel = propertyCardTranslations.viewInfo[lang];
   const sharePropertyAriaLabel =
     propertyCardTranslations.sharePropertyAria[lang];
-  const shareMenuHeadingLabel =
-    propertyCardTranslations.shareMenuHeading[lang];
+  const shareMenuHeadingLabel = propertyCardTranslations.shareMenuHeading[lang];
   const shareCopyLinkLabel = propertyCardTranslations.shareCopyLink[lang];
   const shareCopiedLabel = propertyCardTranslations.shareCopied[lang];
-  const shareMessageLeadLabel =
-    propertyCardTranslations.shareMessageLead[lang];
+  const shareMessageLeadLabel = propertyCardTranslations.shareMessageLead[lang];
   const [propertiesState, setPropertiesState] = useState<Property[]>(() => [
     ...reservationPropertiesCache,
   ]);
@@ -2974,9 +3051,8 @@ export default function ReservaDirectaV2Content() {
   );
   const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
   const [searchGuestCount, setSearchGuestCount] = useState<number | null>(null);
-  const [searchAvailableIds, setSearchAvailableIds] = useState<Set<number> | null>(
-    null,
-  );
+  const [searchAvailableIds, setSearchAvailableIds] =
+    useState<Set<number> | null>(null);
   const [searchDateRange, setSearchDateRange] = useState<{
     startDate: string;
     endDate: string;
@@ -2985,7 +3061,8 @@ export default function ReservaDirectaV2Content() {
   const [searchButtonErrorFlash, setSearchButtonErrorFlash] = useState(false);
   const searchButtonErrorTimeoutRef = useRef<number | null>(null);
   const [showMissingCheckInError, setShowMissingCheckInError] = useState(false);
-  const [showMissingCheckOutError, setShowMissingCheckOutError] = useState(false);
+  const [showMissingCheckOutError, setShowMissingCheckOutError] =
+    useState(false);
   const searchSequenceRef = useRef(0);
   const calendarRef = useRef<HTMLDivElement>(null);
   const guestMenuRef = useRef<HTMLDivElement>(null);
@@ -3133,7 +3210,12 @@ export default function ReservaDirectaV2Content() {
       pruneCalendarAvailabilityCache(now);
       const queue: QueueItem[] = [];
       guestFilteredIds.forEach((id) => {
-        const cached = getFreshCalendarCacheForRange(id, startDate, endDate, now);
+        const cached = getFreshCalendarCacheForRange(
+          id,
+          startDate,
+          endDate,
+          now,
+        );
         if (cached) {
           if (
             isRangeAvailableFromUnavailableDates(
@@ -3244,8 +3326,7 @@ export default function ReservaDirectaV2Content() {
             queue.push({
               id: item.id,
               attempt: item.attempt + 1,
-              readyAt:
-                Date.now() + getRetryDelayMs(error, item.attempt),
+              readyAt: Date.now() + getRetryDelayMs(error, item.attempt),
             });
           }
         });
@@ -3492,7 +3573,9 @@ export default function ReservaDirectaV2Content() {
     (prop): prop is MappedProperty =>
       typeof prop.latitude === "number" && typeof prop.longitude === "number",
   );
-  const loadingDetails = properties.some((prop) => isPropertyDetailsPending(prop));
+  const loadingDetails = properties.some((prop) =>
+    isPropertyDetailsPending(prop),
+  );
   const showingInitialPlaceholders =
     loading && filtered.length > 0 && filtered.every((prop) => prop.id < 0);
 
@@ -3887,7 +3970,9 @@ export default function ReservaDirectaV2Content() {
                 guestFilter={activeGuestFilter}
                 bookingStartDate={searchDateRange?.startDate}
                 bookingEndDate={searchDateRange?.endDate}
-                isLoadingProperties={loading || loadingDetails || isSearchRunning}
+                isLoadingProperties={
+                  loading || loadingDetails || isSearchRunning
+                }
                 loadingPropertiesLabel={loadingPropertiesLabel}
                 recenterCalpeLabel={mapRecenterCalpeLabel}
                 onOpen={setSelectedBookingUrl}
