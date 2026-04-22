@@ -765,6 +765,16 @@ const propertyCardTranslations = {
     uk: "Завантаження даних...",
     pl: "Ladowanie danych...",
   },
+  calculatingPrice: {
+    eng: "Calculating price...",
+    esp: "Calculando precio...",
+    ru: "Расчет стоимости...",
+    fr: "Calcul du prix...",
+    it: "Calcolo del prezzo...",
+    de: "Preis wird berechnet...",
+    uk: "Розрахунок ціни...",
+    pl: "Obliczanie ceny...",
+  },
   retry: {
     eng: "Retry",
     esp: "Reintentar",
@@ -845,6 +855,16 @@ const propertyCardTranslations = {
     uk: "Детальніше",
     pl: "Zobacz informacje",
   },
+  totalPrice: {
+    eng: "Total stay",
+    esp: "Precio total",
+    ru: "Полная стоимость",
+    fr: "Prix total",
+    it: "Prezzo totale",
+    de: "Gesamtpreis",
+    uk: "Загальна вартість",
+    pl: "Cena laczna",
+  },
   sharePropertyAria: {
     eng: "Share this property",
     esp: "Compartir esta propiedad",
@@ -910,7 +930,11 @@ interface RawProperty {
     longitude?: number | string;
     address?: string;
   };
-  units?: Array<{ capacity?: number }>;
+  units?: Array<{
+    id?: number;
+    capacity?: number;
+    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+  }>;
   features?: Record<string, string | boolean | number>;
   images?: Array<{ SMALL?: string; BIG?: string; ORIGINAL?: string }>;
   introduction?: { es?: string };
@@ -923,6 +947,8 @@ interface RawProperty {
 // Normalised shape used in the UI
 interface Property {
   id: number;
+  unitIds: number[];
+  units: Array<{ id: number; name: string }>;
   name: string;
   type: string;
   city: string;
@@ -940,6 +966,8 @@ interface Property {
   introduction: string;
   description: string;
   license: string;
+  bookingPriceTotal?: number | null;
+  bookingPriceStatus?: string | null;
   loadError?: string | null;
 }
 
@@ -947,6 +975,19 @@ type AccommodationListItem = {
   id: number;
   name?: string;
   tradeName?: { es?: string; en?: string };
+  units?: Array<{
+    id?: number;
+    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+  }>;
+};
+
+type BookingPriceItem = {
+  status?: string;
+  total?: number;
+  unit?: {
+    id?: number;
+    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+  };
 };
 
 function getAccommodationListName(item: AccommodationListItem): string {
@@ -961,8 +1002,26 @@ function stripInftourSuffix(name: string): string {
 }
 
 function createPlaceholderProperty(item: AccommodationListItem): Property {
+  const units = (item.units ?? [])
+    .map((unit) => {
+      if (!Number.isFinite(unit.id)) return null;
+      return {
+        id: unit.id as number,
+        name: stripInftourSuffix(
+          unit.name?.es ||
+            unit.name?.en ||
+            item.tradeName?.es ||
+            item.name ||
+            "",
+        ),
+      };
+    })
+    .filter((unit): unit is { id: number; name: string } => unit !== null);
+
   return {
     id: item.id,
+    unitIds: units.map((unit) => unit.id),
+    units,
     name: getAccommodationListName(item),
     type: "",
     city: "",
@@ -980,13 +1039,29 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
     introduction: "",
     description: "",
     license: "",
+    bookingPriceTotal: null,
+    bookingPriceStatus: null,
     loadError: null,
   };
 }
 
 function normalize(a: RawProperty): Property {
+  const units = (a.units ?? [])
+    .map((unit) => {
+      if (!Number.isFinite(unit.id)) return null;
+      return {
+        id: unit.id as number,
+        name: stripInftourSuffix(
+          unit.name?.es || unit.name?.en || a.tradeName?.es || a.name || "",
+        ),
+      };
+    })
+    .filter((unit): unit is { id: number; name: string } => unit !== null);
+
   return {
     id: a.id,
+    unitIds: units.map((unit) => unit.id),
+    units,
     name: stripInftourSuffix(a.tradeName?.es || a.name || ""),
     type: a.accommodationType || "",
     city: a.location?.city || "Calp",
@@ -1012,8 +1087,121 @@ function normalize(a: RawProperty): Property {
     introduction: a.introduction?.es || "",
     description: a.description?.es || "",
     license: a.license || "",
+    bookingPriceTotal: null,
+    bookingPriceStatus: null,
     loadError: null,
   };
+}
+
+function formatCurrencyAmount(value: number, lang: Lang): string {
+  const roundedValue = Math.round(value);
+
+  return new Intl.NumberFormat(LANG_TO_LOCALE[lang] ?? "es-ES", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(roundedValue);
+}
+
+function clearPropertyBookingPrices(properties: Property[]): Property[] {
+  return properties.map((prop) =>
+    prop.bookingPriceTotal === null && prop.bookingPriceStatus === null
+      ? prop
+      : {
+          ...prop,
+          bookingPriceTotal: null,
+          bookingPriceStatus: null,
+        },
+  );
+}
+
+function normalizeUnitNameForMatch(name: string): string {
+  return stripInftourSuffix(name)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function mergeBookingPricesIntoProperties(
+  properties: Property[],
+  bookingPrices: BookingPriceItem[],
+): Property[] {
+  const propertyCandidatesByUnitId = new Map<
+    number,
+    Array<{ propertyId: number; normalizedUnitName: string }>
+  >();
+  properties.forEach((prop) => {
+    prop.units.forEach((unit) => {
+      const candidates = propertyCandidatesByUnitId.get(unit.id) ?? [];
+      candidates.push({
+        propertyId: prop.id,
+        normalizedUnitName: normalizeUnitNameForMatch(unit.name),
+      });
+      propertyCandidatesByUnitId.set(unit.id, candidates);
+    });
+  });
+
+  const bookingPriceByPropertyId = new Map<
+    number,
+    { total: number | null; status: string | null }
+  >();
+
+  bookingPrices.forEach((item) => {
+    const unitId = item.unit?.id;
+    if (typeof unitId !== "number" || !Number.isFinite(unitId)) return;
+
+    const candidates = propertyCandidatesByUnitId.get(unitId);
+    if (!candidates || candidates.length === 0) return;
+
+    const bookingUnitName = item.unit?.name?.es || item.unit?.name?.en || "";
+    const normalizedBookingUnitName =
+      normalizeUnitNameForMatch(bookingUnitName);
+    const propertyId =
+      candidates.length === 1
+        ? candidates[0].propertyId
+        : candidates.find(
+            (candidate) =>
+              normalizedBookingUnitName.length > 0 &&
+              candidate.normalizedUnitName === normalizedBookingUnitName,
+          )?.propertyId;
+    if (!propertyId) return;
+
+    const total =
+      typeof item.total === "number" && Number.isFinite(item.total)
+        ? item.total
+        : null;
+    const status = typeof item.status === "string" ? item.status : null;
+    const existing = bookingPriceByPropertyId.get(propertyId);
+
+    if (!existing) {
+      bookingPriceByPropertyId.set(propertyId, { total, status });
+      return;
+    }
+
+    if (total !== null && (existing.total === null || total < existing.total)) {
+      bookingPriceByPropertyId.set(propertyId, { total, status });
+    }
+  });
+
+  return properties.map((prop) => {
+    const bookingPrice = bookingPriceByPropertyId.get(prop.id);
+    if (!bookingPrice) {
+      return {
+        ...prop,
+        bookingPriceTotal: null,
+        bookingPriceStatus: null,
+      };
+    }
+
+    return {
+      ...prop,
+      bookingPriceTotal: bookingPrice.total,
+      bookingPriceStatus: bookingPrice.status,
+    };
+  });
 }
 
 function getTopFeats(
@@ -1048,17 +1236,33 @@ function buildGoogleMapsUrl(property: MappedProperty): string {
   );
 }
 
-function buildMarkerHtml(capacity: number, isVisited: boolean): string {
+function buildMarkerHtml(params: {
+  capacity: number;
+  isVisited: boolean;
+  formattedTotalPrice?: string | null;
+  showPriceLoading?: boolean;
+}): string {
+  const { capacity, isVisited, formattedTotalPrice, showPriceLoading } = params;
   const safeCapacity = Number.isFinite(capacity) && capacity > 0 ? capacity : 0;
+  const hasPriceRow =
+    Boolean(formattedTotalPrice && formattedTotalPrice.length > 0) ||
+    Boolean(showPriceLoading);
   return (
-    `<div style="display:inline-flex;min-height:18px;min-width:30px;align-items:center;justify-content:center;gap:3px;padding:0 6px;` +
+    `<div style="display:inline-flex;flex-direction:column;min-height:${hasPriceRow ? "34px" : "18px"};min-width:${hasPriceRow ? "48px" : "30px"};align-items:stretch;justify-content:center;overflow:hidden;` +
     `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;line-height:1;` +
     `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">` +
+    `<div style="display:flex;align-items:center;justify-content:center;gap:3px;padding:${hasPriceRow ? "2px 6px 1px" : "0 6px"};">` +
     `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
     `<circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="2"/>` +
     `<path d="M3.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` +
     `</svg>` +
     `<span>${safeCapacity}</span>` +
+    `</div>` +
+    (formattedTotalPrice && formattedTotalPrice.length > 0
+      ? `<div style="display:flex;align-items:center;justify-content:center;min-height:16px;padding:1px 6px;border-top:1px solid rgba(255,255,255,.18);font-size:10px;font-weight:800;line-height:1.1;white-space:nowrap;">${formattedTotalPrice}</div>`
+      : showPriceLoading
+        ? `<div style="display:flex;align-items:center;justify-content:center;min-height:16px;padding:1px 6px;border-top:1px solid rgba(255,255,255,.18);font-size:10px;font-weight:800;line-height:1;">...</div>`
+        : "") +
     `</div>`
   );
 }
@@ -1072,8 +1276,12 @@ function PropertyMap({
   hint,
   openInGoogleMapsLabel,
   moreInfoLabel,
+  totalPriceLabel,
+  calculatingPriceLabel,
   guestSingularLabel,
   guestPluralLabel,
+  nightSingularLabel,
+  nightPluralLabel,
   bedroomsShortLabel,
   bathroomsShortLabel,
   lang,
@@ -1081,6 +1289,7 @@ function PropertyMap({
   bookingStartDate,
   bookingEndDate,
   isLoadingProperties,
+  isBookingPriceLoading,
   loadingPropertiesLabel,
   recenterCalpeLabel,
   onOpen,
@@ -1090,8 +1299,12 @@ function PropertyMap({
   hint: string;
   openInGoogleMapsLabel: string;
   moreInfoLabel: string;
+  totalPriceLabel: string;
+  calculatingPriceLabel: string;
   guestSingularLabel: string;
   guestPluralLabel: string;
+  nightSingularLabel: string;
+  nightPluralLabel: string;
   bedroomsShortLabel: string;
   bathroomsShortLabel: string;
   lang: Lang;
@@ -1099,6 +1312,7 @@ function PropertyMap({
   bookingStartDate?: string;
   bookingEndDate?: string;
   isLoadingProperties: boolean;
+  isBookingPriceLoading: boolean;
   loadingPropertiesLabel: string;
   recenterCalpeLabel: string;
   onOpen: (url: string) => void;
@@ -1218,13 +1432,24 @@ function PropertyMap({
         const latLng = L.latLng(property.latitude, property.longitude);
         bounds.extend(latLng);
         const isVisited = clickedPropertyIdsRef.current.has(property.id);
+        const markerFormattedTotalPrice =
+          typeof property.bookingPriceTotal === "number"
+            ? formatCurrencyAmount(property.bookingPriceTotal, lang)
+            : null;
+        const hasMarkerPriceState =
+          Boolean(markerFormattedTotalPrice) || isBookingPriceLoading;
 
         const marker = L.marker(latLng, {
           icon: L.divIcon({
             className: "inftour-map-marker",
-            html: buildMarkerHtml(property.capacity, isVisited),
-            iconSize: [30, 18],
-            iconAnchor: [15, 9],
+            html: buildMarkerHtml({
+              capacity: property.capacity,
+              isVisited,
+              formattedTotalPrice: markerFormattedTotalPrice,
+              showPriceLoading: isBookingPriceLoading,
+            }),
+            iconSize: hasMarkerPriceState ? [48, 34] : [30, 18],
+            iconAnchor: hasMarkerPriceState ? [24, 17] : [15, 9],
           }),
         });
 
@@ -1238,6 +1463,8 @@ function PropertyMap({
         const safeTitle = escapeHtml(property.name);
         const safeLinkLabel = escapeHtml(openInGoogleMapsLabel);
         const safeMoreInfoLabel = escapeHtml(moreInfoLabel);
+        const safeTotalPriceLabel = escapeHtml(totalPriceLabel);
+        const safeCalculatingPriceLabel = escapeHtml(calculatingPriceLabel);
         const imageUrls = Array.from(
           new Set(
             (property.images ?? [])
@@ -1274,6 +1501,30 @@ function PropertyMap({
             .filter(Boolean)
             .join(" · "),
         );
+        const totalNights =
+          bookingStartDate && bookingEndDate
+            ? Math.max(
+                0,
+                Math.round(
+                  (startOfDay(new Date(bookingEndDate)).getTime() -
+                    startOfDay(new Date(bookingStartDate)).getTime()) /
+                    (1000 * 60 * 60 * 24),
+                ),
+              )
+            : 0;
+        const totalNightsLabel =
+          totalNights > 0
+            ? `${totalNights} ${
+                totalNights === 1 ? nightSingularLabel : nightPluralLabel
+              }`
+            : "";
+        const safeTotalNightsLabel = escapeHtml(totalNightsLabel);
+        const formattedTotalPrice =
+          typeof property.bookingPriceTotal === "number"
+            ? escapeHtml(formatCurrencyAmount(property.bookingPriceTotal, lang))
+            : "";
+        const showPopupPriceLoading =
+          isBookingPriceLoading && formattedTotalPrice.length === 0;
 
         marker.bindPopup(
           `<div style="min-width:190px;max-width:230px;font-family:Arial,sans-serif;">` +
@@ -1293,6 +1544,22 @@ function PropertyMap({
               : "") +
             (safeMeta
               ? `<div style="margin-bottom:6px;font-size:12px;line-height:1.45;color:#555;">${safeMeta}</div>`
+              : "") +
+            (formattedTotalPrice || showPopupPriceLoading
+              ? `<div style="margin-bottom:8px;border:1px solid #eadfbf;background:#fbf7eb;border-radius:10px;padding:8px 10px;">` +
+                `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;">` +
+                `<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8f7130;">${safeTotalPriceLabel}</span>` +
+                (safeTotalNightsLabel
+                  ? `<span style="display:inline-flex;align-items:center;border:1px solid #e2cf96;background:#f3e7bf;border-radius:999px;padding:2px 8px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#7f6630;">${safeTotalNightsLabel}</span>`
+                  : "") +
+                `</div>` +
+                (showPopupPriceLoading
+                  ? `<div style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:24px;color:#8f7130;font-size:13px;font-weight:600;">` +
+                    `<span style="display:inline-flex;width:14px;height:14px;border:2px solid #e4d4a6;border-top-color:#c2a457;border-radius:999px;"></span>` +
+                    `<span>${safeCalculatingPriceLabel}</span>` +
+                    `</div>`
+                  : `<div style="text-align:center;font-size:20px;font-weight:700;color:#2d2d2d;">${formattedTotalPrice}</div>`) +
+                `</div>`
               : "") +
             `<div style="display:flex;gap:10px;flex-wrap:wrap;">` +
             `<button type="button" data-booking-url="${escapeHtml(bookingUrl)}" style="cursor:pointer;border:0;display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#2563eb;padding:9px 12px;border-radius:999px;">` +
@@ -1323,9 +1590,14 @@ function PropertyMap({
             marker.setIcon(
               L.divIcon({
                 className: "inftour-map-marker",
-                html: buildMarkerHtml(property.capacity, true),
-                iconSize: [30, 18],
-                iconAnchor: [15, 9],
+                html: buildMarkerHtml({
+                  capacity: property.capacity,
+                  isVisited: true,
+                  formattedTotalPrice: markerFormattedTotalPrice,
+                  showPriceLoading: isBookingPriceLoading,
+                }),
+                iconSize: hasMarkerPriceState ? [48, 34] : [30, 18],
+                iconAnchor: hasMarkerPriceState ? [24, 17] : [15, 9],
               }),
             );
           }
@@ -1463,10 +1735,15 @@ function PropertyMap({
     guestFilter,
     bookingEndDate,
     bookingStartDate,
+    calculatingPriceLabel,
+    isBookingPriceLoading,
     lang,
     moreInfoLabel,
+    totalPriceLabel,
     guestPluralLabel,
     guestSingularLabel,
+    nightPluralLabel,
+    nightSingularLabel,
     bedroomsShortLabel,
     bathroomsShortLabel,
     onOpen,
@@ -1829,6 +2106,24 @@ async function fetchAccommodationBatch(
   };
 
   return Array.isArray(payload.results) ? payload.results : [];
+}
+
+async function fetchBookingPrices(params: {
+  checkinDate: string;
+  checkoutDate: string;
+  travelers: number;
+}): Promise<BookingPriceItem[]> {
+  const searchParams = new URLSearchParams({
+    checkinDate: params.checkinDate,
+    checkoutDate: params.checkoutDate,
+    travelers: String(params.travelers),
+  });
+
+  const response = await apiFetchWithRetry(
+    `/accommodations/booking-price/?${searchParams.toString()}`,
+  );
+
+  return Array.isArray(response) ? (response as BookingPriceItem[]) : [];
 }
 
 type QueueItem = {
@@ -2542,6 +2837,10 @@ function PropertyCard({
   bedsLabel,
   bathroomsLabel,
   viewInfoLabel,
+  totalPriceLabel,
+  totalPriceNightsLabel,
+  calculatingPriceLabel,
+  bookingPriceLoading,
   sharePropertyAriaLabel,
   shareMenuHeadingLabel,
   shareCopyLinkLabel,
@@ -2562,6 +2861,10 @@ function PropertyCard({
   bedsLabel: string;
   bathroomsLabel: string;
   viewInfoLabel: string;
+  totalPriceLabel: string;
+  totalPriceNightsLabel: string | null;
+  calculatingPriceLabel: string;
+  bookingPriceLoading: boolean;
   sharePropertyAriaLabel: string;
   shareMenuHeadingLabel: string;
   shareCopyLinkLabel: string;
@@ -2583,6 +2886,8 @@ function PropertyCard({
     !prop.sqm;
   const canRetry = isPending && prop.id > 0;
   const showStatsLoading = isPending;
+  const hasBookingPrice = typeof prop.bookingPriceTotal === "number";
+  const showBookingPriceLoading = bookingPriceLoading && !hasBookingPrice;
   const [showRetryButton, setShowRetryButton] = useState(false);
 
   useEffect(() => {
@@ -2880,6 +3185,35 @@ function PropertyCard({
             )}
           </div>
         )}
+        {(showBookingPriceLoading || hasBookingPrice) && (
+          <div className="mt-3 rounded-[10px] border border-[#eadfbf] bg-[#fbf7eb] px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8f7130]">
+                {totalPriceLabel}
+              </p>
+              {totalPriceNightsLabel && (
+                <span className="inline-flex items-center rounded-full border border-[#e2cf96] bg-[#f3e7bf] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-[#7f6630]">
+                  {totalPriceNightsLabel}
+                </span>
+              )}
+            </div>
+            {showBookingPriceLoading ? (
+              <div className="mt-1 flex items-center justify-center gap-2 text-[#8f7130]">
+                <span
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-[#e4d4a6] border-t-[#c2a457]"
+                  aria-hidden="true"
+                />
+                <span className="text-[13px] font-medium">
+                  {calculatingPriceLabel}
+                </span>
+              </div>
+            ) : (
+              <p className="mt-0.5 text-center text-[18px] font-semibold text-[#2d2d2d]">
+                {formatCurrencyAmount(prop.bookingPriceTotal as number, lang)}
+              </p>
+            )}
+          </div>
+        )}
         <div className="mt-auto flex min-h-[42px] items-stretch gap-2 pt-2 md:hidden">
           <button
             type="button"
@@ -3081,6 +3415,9 @@ export default function ReservaDirectaV2Content() {
   const bedsLabel = propertyCardTranslations.beds[lang];
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
   const viewInfoLabel = propertyCardTranslations.viewInfo[lang];
+  const totalPriceLabel = propertyCardTranslations.totalPrice[lang];
+  const calculatingPriceLabel =
+    propertyCardTranslations.calculatingPrice[lang];
   const sharePropertyAriaLabel =
     propertyCardTranslations.sharePropertyAria[lang];
   const shareMenuHeadingLabel = propertyCardTranslations.shareMenuHeading[lang];
@@ -3119,6 +3456,7 @@ export default function ReservaDirectaV2Content() {
     endDate: string;
   } | null>(null);
   const [isSearchRunning, setIsSearchRunning] = useState(false);
+  const [isBookingPriceLoading, setIsBookingPriceLoading] = useState(false);
   const [searchButtonErrorFlash, setSearchButtonErrorFlash] = useState(false);
   const searchButtonErrorTimeoutRef = useRef<number | null>(null);
   const [showMissingCheckInError, setShowMissingCheckInError] = useState(false);
@@ -3227,6 +3565,8 @@ export default function ReservaDirectaV2Content() {
     setIsSearchRunning(false);
 
     const guestCount = Number.parseInt(guestFilter, 10) || 2;
+    setProperties((prev) => clearPropertyBookingPrices(prev));
+    setIsBookingPriceLoading(false);
     const guestFilteredProperties = properties.filter((prop) => {
       if (isPropertyDetailsPending(prop)) return false;
       return prop.capacity >= guestCount;
@@ -3405,6 +3745,46 @@ export default function ReservaDirectaV2Content() {
 
     if (searchSequenceRef.current !== sequence) return;
 
+    if (availableIds.size > 0) {
+      setIsBookingPriceLoading(true);
+      try {
+        const bookingPrices = await fetchBookingPrices({
+          checkinDate: startDateApi,
+          checkoutDate: endDateApi,
+          travelers: guestCount,
+        });
+
+        if (searchSequenceRef.current !== sequence) return;
+
+        const availableProperties = properties.filter((prop) =>
+          availableIds.has(prop.id),
+        );
+
+        setProperties((prev) => {
+          const availablePropertyIds = new Set(
+            availableProperties.map((prop) => prop.id),
+          );
+          const merged = mergeBookingPricesIntoProperties(
+            prev.filter((prop) => availablePropertyIds.has(prop.id)),
+            bookingPrices,
+          );
+          const mergedById = new Map(merged.map((prop) => [prop.id, prop]));
+
+          return prev.map((prop) => mergedById.get(prop.id) ?? prop);
+        });
+      } catch {
+        // Availability results are still valid even if the booking-price call fails.
+      } finally {
+        if (searchSequenceRef.current === sequence) {
+          setIsBookingPriceLoading(false);
+        }
+      }
+    }
+
+    if (availableIds.size === 0) {
+      setIsBookingPriceLoading(false);
+    }
+
     setSearchAvailableIds(availableIds);
   }
 
@@ -3416,6 +3796,7 @@ export default function ReservaDirectaV2Content() {
     setSearchDateRange(null);
     setCheckIn("");
     setCheckOut("");
+    setIsBookingPriceLoading(false);
     setGuestFilter("2");
     setCheckoutPreviewDate(null);
     setOpenDatePicker(null);
@@ -3424,6 +3805,7 @@ export default function ReservaDirectaV2Content() {
     setShowMissingCheckInError(false);
     setShowMissingCheckOutError(false);
     setSearchButtonErrorFlash(false);
+    setProperties((prev) => clearPropertyBookingPrices(prev));
     if (searchButtonErrorTimeoutRef.current) {
       window.clearTimeout(searchButtonErrorTimeoutRef.current);
       searchButtonErrorTimeoutRef.current = null;
@@ -4037,8 +4419,12 @@ export default function ReservaDirectaV2Content() {
                 hint={mapHintLabel}
                 openInGoogleMapsLabel={openInGoogleMapsLabel}
                 moreInfoLabel={mapMoreInfoLabel}
+                totalPriceLabel={totalPriceLabel}
+                calculatingPriceLabel={calculatingPriceLabel}
                 guestSingularLabel={guestSingularLabel}
                 guestPluralLabel={guestPluralLabel}
+                nightSingularLabel={nightSingularLabel}
+                nightPluralLabel={nightPluralLabel}
                 bedroomsShortLabel={bedroomsShortLabel}
                 bathroomsShortLabel={bathroomsShortLabel}
                 lang={lang}
@@ -4048,6 +4434,7 @@ export default function ReservaDirectaV2Content() {
                 isLoadingProperties={
                   loading || loadingDetails || isSearchRunning
                 }
+                isBookingPriceLoading={isBookingPriceLoading}
                 loadingPropertiesLabel={loadingPropertiesLabel}
                 recenterCalpeLabel={mapRecenterCalpeLabel}
                 onOpen={setSelectedBookingUrl}
@@ -4069,6 +4456,10 @@ export default function ReservaDirectaV2Content() {
                     bedsLabel={bedsLabel}
                     bathroomsLabel={bathroomsLabel}
                     viewInfoLabel={viewInfoLabel}
+                    totalPriceLabel={totalPriceLabel}
+                    totalPriceNightsLabel={activeNightsLabel}
+                    calculatingPriceLabel={calculatingPriceLabel}
+                    bookingPriceLoading={isBookingPriceLoading}
                     sharePropertyAriaLabel={sharePropertyAriaLabel}
                     shareMenuHeadingLabel={shareMenuHeadingLabel}
                     shareCopyLinkLabel={shareCopyLinkLabel}
