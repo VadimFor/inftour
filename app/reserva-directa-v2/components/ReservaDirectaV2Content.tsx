@@ -1028,11 +1028,18 @@ function buildGoogleMapsUrl(property: MappedProperty): string {
   );
 }
 
-function buildMarkerHtml(index: number, isVisited: boolean): string {
+function buildMarkerHtml(capacity: number, isVisited: boolean): string {
+  const safeCapacity = Number.isFinite(capacity) && capacity > 0 ? capacity : 0;
   return (
-    `<div style="display:flex;height:18px;width:18px;align-items:center;justify-content:center;` +
-    `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;` +
-    `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">${index + 1}</div>`
+    `<div style="display:inline-flex;min-height:18px;min-width:30px;align-items:center;justify-content:center;gap:3px;padding:0 6px;` +
+    `border-radius:999px;background:${isVisited ? "#7c3aed" : "#0f172a"};color:#fff;font-size:10px;font-weight:700;line-height:1;` +
+    `box-shadow:0 4px 12px rgba(0,0,0,0.26);border:2px solid ${isVisited ? "#c4b5fd" : "#c2a457"};">` +
+    `<svg width="9" height="9" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
+    `<circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.8"/>` +
+    `<path d="M3.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>` +
+    `</svg>` +
+    `<span>${safeCapacity}</span>` +
+    `</div>`
   );
 }
 
@@ -1178,14 +1185,9 @@ function PropertyMap({
 
       const bounds = L.latLngBounds([]);
 
-      const source: MappedProperty[] =
-        properties.length > 0
-          ? properties
-          : reservationMapMarkersCache.length > 0
-            ? reservationMapMarkersCache
-            : [];
+      const source: MappedProperty[] = properties;
 
-      source.forEach((property, index) => {
+      source.forEach((property) => {
         if (
           typeof property.latitude !== "number" ||
           typeof property.longitude !== "number"
@@ -1200,9 +1202,9 @@ function PropertyMap({
         const marker = L.marker(latLng, {
           icon: L.divIcon({
             className: "inftour-map-marker",
-            html: buildMarkerHtml(index, isVisited),
-            iconSize: [18, 18],
-            iconAnchor: [9, 9],
+            html: buildMarkerHtml(property.capacity, isVisited),
+            iconSize: [30, 18],
+            iconAnchor: [15, 9],
           }),
         });
 
@@ -1213,11 +1215,7 @@ function PropertyMap({
           endDate: bookingEndDate,
           lang,
         });
-        const location = property.address
-          ? `${property.address}, ${property.city} (${property.region})`
-          : `${property.city} (${property.region})`;
         const safeTitle = escapeHtml(property.name);
-        const safeLocation = escapeHtml(location);
         const safeLinkLabel = escapeHtml(openInGoogleMapsLabel);
         const safeMoreInfoLabel = escapeHtml(moreInfoLabel);
         const safeImageUrl = escapeHtml(
@@ -1257,7 +1255,6 @@ function PropertyMap({
             (safeMeta
               ? `<div style="margin-bottom:6px;font-size:12px;line-height:1.45;color:#555;">${safeMeta}</div>`
               : "") +
-            `<div style="margin-bottom:8px;font-size:12px;line-height:1.45;color:#666;">${safeLocation}</div>` +
             `<div style="display:flex;gap:10px;flex-wrap:wrap;">` +
             `<button type="button" data-booking-url="${escapeHtml(bookingUrl)}" style="cursor:pointer;border:0;display:inline-flex;width:100%;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#2563eb;padding:9px 12px;border-radius:999px;">` +
             `<span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;">` +
@@ -1287,9 +1284,9 @@ function PropertyMap({
             marker.setIcon(
               L.divIcon({
                 className: "inftour-map-marker",
-                html: buildMarkerHtml(index, true),
-                iconSize: [18, 18],
-                iconAnchor: [9, 9],
+                html: buildMarkerHtml(property.capacity, true),
+                iconSize: [30, 18],
+                iconAnchor: [15, 9],
               }),
             );
           }
@@ -1311,14 +1308,12 @@ function PropertyMap({
         marker.addTo(layerRef.current);
       });
 
-      if (source.length > 0) {
-        const snapshot = source.slice();
-        reservationMapMarkersCache.splice(
-          0,
-          reservationMapMarkersCache.length,
-          ...snapshot,
-        );
-      }
+      const snapshot = source.slice();
+      reservationMapMarkersCache.splice(
+        0,
+        reservationMapMarkersCache.length,
+        ...snapshot,
+      );
 
       if (!userAdjustedViewRef.current) {
         autoFittingRef.current = true;
@@ -1465,11 +1460,6 @@ function PropertyMap({
                 />
                 {loadingPropertiesLabel}
               </span>
-            </div>
-          )}
-          {properties.length === 0 && hint && (
-            <div className="pointer-events-none absolute inset-x-6 bottom-5 z-[500] rounded-[12px] bg-white/92 px-4 py-3 text-center text-[12px] text-[#8c8576] shadow-sm">
-              {hint}
             </div>
           )}
         </div>
@@ -1727,6 +1717,14 @@ type QueueItem = {
   readyAt: number;
 };
 
+type CalendarAvailabilityCacheEntry = {
+  unavailableDates: Set<string>;
+  windowStart: string;
+  windowEnd: string;
+  fetchedAt: number;
+  expiresAt: number;
+};
+
 type BatchDetailResponseItem = {
   id: number;
   ok: boolean;
@@ -1746,6 +1744,15 @@ const SEARCH_QUEUE_GAP_MS = 100;
 const SEARCH_MAX_RETRIES = 6;
 const SEARCH_429_BASE_COOLDOWN_MS = 2500;
 const SEARCH_429_MAX_COOLDOWN_MS = 12000;
+const CALENDAR_CACHE_TTL_MS = 10 * 60 * 1000;
+const CALENDAR_CACHE_MONTHS_AHEAD = 3;
+const CALENDAR_CACHE_MAX_ENTRIES = 2000;
+
+const calendarAvailabilityCache = new Map<number, CalendarAvailabilityCacheEntry>();
+const calendarAvailabilityInFlight = new Map<
+  number,
+  Promise<CalendarAvailabilityCacheEntry>
+>();
 
 function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
   if (!hitRateLimit) return DETAIL_QUEUE_GAP_MS;
@@ -1872,14 +1879,11 @@ function extractUnavailableDates(
   });
 }
 
-function isCalendarRangeAvailable(
-  payload: unknown,
+function isRangeAvailableFromUnavailableDates(
+  unavailableDates: Set<string>,
   startDate: Date,
   endDate: Date,
 ): boolean {
-  const unavailableDates = new Set<string>();
-  extractUnavailableDates(payload, unavailableDates);
-
   let cursor = startOfDay(startDate);
   const checkout = startOfDay(endDate);
 
@@ -1891,6 +1895,110 @@ function isCalendarRangeAvailable(
   }
 
   return true;
+}
+
+function isDateRangeCoveredByCalendarWindow(
+  startDate: Date,
+  endDate: Date,
+  windowStart: string,
+  windowEnd: string,
+): boolean {
+  const startKey = formatApiDate(startOfDay(startDate));
+  const checkout = startOfDay(endDate);
+  if (checkout <= startOfDay(startDate)) return true;
+  const lastNightKey = formatApiDate(addDays(checkout, -1));
+  return startKey >= windowStart && lastNightKey <= windowEnd;
+}
+
+function pruneCalendarAvailabilityCache(now = Date.now()): void {
+  calendarAvailabilityCache.forEach((entry, propertyId) => {
+    if (entry.expiresAt <= now) {
+      calendarAvailabilityCache.delete(propertyId);
+    }
+  });
+
+  if (calendarAvailabilityCache.size <= CALENDAR_CACHE_MAX_ENTRIES) return;
+
+  const oldestFirst = [...calendarAvailabilityCache.entries()].sort(
+    (a, b) => a[1].fetchedAt - b[1].fetchedAt,
+  );
+  const excess = calendarAvailabilityCache.size - CALENDAR_CACHE_MAX_ENTRIES;
+  oldestFirst.slice(0, excess).forEach(([propertyId]) => {
+    calendarAvailabilityCache.delete(propertyId);
+  });
+}
+
+function getFreshCalendarCacheForRange(
+  propertyId: number,
+  startDate: Date,
+  endDate: Date,
+  now = Date.now(),
+): CalendarAvailabilityCacheEntry | null {
+  const entry = calendarAvailabilityCache.get(propertyId);
+  if (!entry) return null;
+  if (entry.expiresAt <= now) {
+    calendarAvailabilityCache.delete(propertyId);
+    return null;
+  }
+  if (
+    !isDateRangeCoveredByCalendarWindow(
+      startDate,
+      endDate,
+      entry.windowStart,
+      entry.windowEnd,
+    )
+  ) {
+    return null;
+  }
+  return entry;
+}
+
+async function fetchCalendarAvailabilityForProperty(
+  propertyId: number,
+  startDate: Date,
+  endDate: Date,
+): Promise<CalendarAvailabilityCacheEntry> {
+  const now = Date.now();
+  pruneCalendarAvailabilityCache(now);
+  const cached = getFreshCalendarCacheForRange(propertyId, startDate, endDate, now);
+  if (cached) return cached;
+
+  const inFlight = calendarAvailabilityInFlight.get(propertyId);
+  if (inFlight) return inFlight;
+
+  const requestPromise = (async () => {
+    const today = startOfDay(new Date());
+    const windowStart = today;
+    const threeMonthsAhead = addMonths(windowStart, CALENDAR_CACHE_MONTHS_AHEAD);
+    const requestedCheckout = startOfDay(endDate);
+    const windowEnd =
+      requestedCheckout > threeMonthsAhead ? requestedCheckout : threeMonthsAhead;
+    const windowStartApi = formatApiDate(windowStart);
+    const windowEndApi = formatApiDate(windowEnd);
+    const response = await apiFetch(
+      `/accommodations/${propertyId}/calendar?startDate=${windowStartApi}&endDate=${windowEndApi}`,
+    );
+    const unavailableDates = new Set<string>();
+    extractUnavailableDates(response, unavailableDates);
+    const fetchedAt = Date.now();
+    const entry: CalendarAvailabilityCacheEntry = {
+      unavailableDates,
+      windowStart: windowStartApi,
+      windowEnd: windowEndApi,
+      fetchedAt,
+      expiresAt: fetchedAt + CALENDAR_CACHE_TTL_MS,
+    };
+    calendarAvailabilityCache.set(propertyId, entry);
+    pruneCalendarAvailabilityCache(fetchedAt);
+    return entry;
+  })();
+
+  calendarAvailabilityInFlight.set(propertyId, requestPromise);
+  try {
+    return await requestPromise;
+  } finally {
+    calendarAvailabilityInFlight.delete(propertyId);
+  }
 }
 
 function CardCarousel({
@@ -3021,11 +3129,30 @@ export default function ReservaDirectaV2Content() {
     setSearchAvailableIds(new Set<number>());
 
     try {
-      const queue: QueueItem[] = guestFilteredIds.map((id) => ({
-        id,
-        attempt: 0,
-        readyAt: Date.now(),
-      }));
+      const now = Date.now();
+      pruneCalendarAvailabilityCache(now);
+      const queue: QueueItem[] = [];
+      guestFilteredIds.forEach((id) => {
+        const cached = getFreshCalendarCacheForRange(id, startDate, endDate, now);
+        if (cached) {
+          if (
+            isRangeAvailableFromUnavailableDates(
+              cached.unavailableDates,
+              startDate,
+              endDate,
+            )
+          ) {
+            availableIds.add(id);
+          }
+          return;
+        }
+        queue.push({
+          id,
+          attempt: 0,
+          readyAt: Date.now(),
+        });
+      });
+      setSearchAvailableIds(new Set<number>(availableIds));
       let rateLimitStreak = 0;
 
       while (queue.length > 0) {
@@ -3060,13 +3187,19 @@ export default function ReservaDirectaV2Content() {
         const batchResults = await Promise.all(
           readyItems.map(async (item) => {
             try {
-              const response = await apiFetch(
-                `/accommodations/${item.id}/calendar?startDate=${startDateApi}&endDate=${endDateApi}`,
+              const cacheEntry = await fetchCalendarAvailabilityForProperty(
+                item.id,
+                startDate,
+                endDate,
               );
 
               return {
                 item,
-                available: isCalendarRangeAvailable(response, startDate, endDate),
+                available: isRangeAvailableFromUnavailableDates(
+                  cacheEntry.unavailableDates,
+                  startDate,
+                  endDate,
+                ),
               };
             } catch (error) {
               return {
