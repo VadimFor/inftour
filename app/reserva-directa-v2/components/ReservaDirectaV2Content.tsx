@@ -1361,6 +1361,7 @@ function PropertyMap({
   const autoFittingRef = useRef(false);
   const clickedPropertyIdsRef = useRef<Set<number>>(new Set());
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isMapReady, setIsMapReady] = useState(false);
   const [mapVisibilityEpoch, setMapVisibilityEpoch] = useState(0);
 
   useEffect(() => {
@@ -1433,17 +1434,22 @@ function PropertyMap({
           mapRef.current?.invalidateSize();
         }, 50);
       }
+
+      if (!cancelled && mapRef.current && layerRef.current) {
+        setIsMapReady(true);
+      }
     }
 
     void mountMap();
 
     return () => {
       cancelled = true;
+      setIsMapReady(false);
     };
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !layerRef.current) return;
+    if (!isMapReady || !mapRef.current || !layerRef.current) return;
 
     let cancelled = false;
 
@@ -1822,6 +1828,7 @@ function PropertyMap({
     onOpen,
     openInGoogleMapsLabel,
     properties,
+    isMapReady,
     mapVisibilityEpoch,
   ]);
 
