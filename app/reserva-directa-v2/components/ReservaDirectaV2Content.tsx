@@ -670,6 +670,26 @@ const bookingResultsTranslations = {
     uk: "Немає доступних варіантів проживання для {guests} на дати {dates}.",
     pl: "Brak dostepnych noclegow dla {guests} w terminie {dates}.",
   },
+  nightSingular: {
+    eng: "night",
+    esp: "noche",
+    ru: "ночь",
+    fr: "nuit",
+    it: "notte",
+    de: "Nacht",
+    uk: "ніч",
+    pl: "noc",
+  },
+  nightPlural: {
+    eng: "nights",
+    esp: "noches",
+    ru: "ночей",
+    fr: "nuits",
+    it: "notti",
+    de: "Nachte",
+    uk: "ночей",
+    pl: "nocy",
+  },
   mapTitle: {
     eng: "Property map",
     esp: "Mapa de propiedades",
@@ -3042,6 +3062,8 @@ export default function ReservaDirectaV2Content() {
   const viewAllLabel = bookingResultsTranslations.viewAll[lang];
   const noSearchResultsTemplate =
     bookingResultsTranslations.noSearchResults[lang];
+  const nightSingularLabel = bookingResultsTranslations.nightSingular[lang];
+  const nightPluralLabel = bookingResultsTranslations.nightPlural[lang];
   const mapTitleLabel = bookingResultsTranslations.mapTitle[lang];
   const mapHintLabel = bookingResultsTranslations.mapHint[lang];
   const mapRecenterCalpeLabel =
@@ -3602,6 +3624,21 @@ export default function ReservaDirectaV2Content() {
   }`;
   const activeDateRangeLabel =
     checkIn && checkOut ? `${checkIn} -> ${checkOut}` : null;
+  const activeNightsCount =
+    parsedCheckIn && parsedCheckOut
+      ? Math.max(
+          0,
+          Math.round(
+            (startOfDay(parsedCheckOut).getTime() -
+              startOfDay(parsedCheckIn).getTime()) /
+              (1000 * 60 * 60 * 24),
+          ),
+        )
+      : null;
+  const activeNightsLabel =
+    typeof activeNightsCount === "number" && activeNightsCount > 0
+      ? `${activeNightsCount} ${activeNightsCount === 1 ? nightSingularLabel : nightPluralLabel}`
+      : null;
   const noSearchResultsLabel =
     isSearchApplied && activeDateRangeLabel
       ? noSearchResultsTemplate
@@ -3956,6 +3993,7 @@ export default function ReservaDirectaV2Content() {
                   <span className="text-[12px] text-[#4f6781]">
                     {activeGuestLabel}
                     {activeDateRangeLabel ? ` · ${activeDateRangeLabel}` : ""}
+                    {activeNightsLabel ? ` · ${activeNightsLabel}` : ""}
                   </span>
                   <button
                     type="button"
