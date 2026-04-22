@@ -1,0 +1,48 @@
+name: Deploy to IONOS VPX
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ionos-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          APP_DIR: ${{ secrets.APP_DIR }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          ssh "${SSH_USER}@${SSH_HOST}" << EOF
+          set -e
+          cd "${APP_DIR}"
+          git fetch --all --prune
+          git checkout "${BRANCH}"
+          git pull origin "${BRANCH}"
+          npm ci
+          npm run build
+          pm2 restart inftour || pm2 start npm --name inftour -- start
+          pm2 save
+          EOF
