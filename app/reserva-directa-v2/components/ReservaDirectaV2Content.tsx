@@ -1477,6 +1477,7 @@ function PropertyMap({
         const isVisited = clickedPropertyIdsRef.current.has(property.id);
         const hasActivePriceContext = Boolean(bookingStartDate && bookingEndDate);
         const markerFormattedTotalPrice =
+          hasActivePriceContext &&
           typeof property.bookingPriceTotal === "number" &&
           property.bookingPriceTotal > 0
             ? formatCurrencyAmount(property.bookingPriceTotal, lang)
@@ -1574,6 +1575,7 @@ function PropertyMap({
             : "";
         const safeTotalNightsLabel = escapeHtml(totalNightsLabel);
         const formattedTotalPrice =
+          hasActivePriceContext &&
           typeof property.bookingPriceTotal === "number" &&
           property.bookingPriceTotal > 0
             ? escapeHtml(formatCurrencyAmount(property.bookingPriceTotal, lang))
