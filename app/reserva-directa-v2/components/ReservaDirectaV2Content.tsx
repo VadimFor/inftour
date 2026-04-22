@@ -775,6 +775,16 @@ const propertyCardTranslations = {
     uk: "Розрахунок ціни...",
     pl: "Obliczanie ceny...",
   },
+  retryPrice: {
+    eng: "Retry price",
+    esp: "Reintentar precio",
+    ru: "Повторить расчет",
+    fr: "Reessayer le prix",
+    it: "Riprova prezzo",
+    de: "Preis erneut laden",
+    uk: "Повторити розрахунок",
+    pl: "Ponow cene",
+  },
   retry: {
     eng: "Retry",
     esp: "Reintentar",
@@ -966,6 +976,8 @@ interface Property {
   introduction: string;
   description: string;
   license: string;
+  entryTime: string | null;
+  departureTime: string | null;
   bookingPriceTotal?: number | null;
   bookingPriceStatus?: string | null;
   loadError?: string | null;
@@ -1039,6 +1051,8 @@ function createPlaceholderProperty(item: AccommodationListItem): Property {
     introduction: "",
     description: "",
     license: "",
+    entryTime: null,
+    departureTime: null,
     bookingPriceTotal: null,
     bookingPriceStatus: null,
     loadError: null,
@@ -1087,6 +1101,8 @@ function normalize(a: RawProperty): Property {
     introduction: a.introduction?.es || "",
     description: a.description?.es || "",
     license: a.license || "",
+    entryTime: a.entryTime || null,
+    departureTime: a.departureTime || null,
     bookingPriceTotal: null,
     bookingPriceStatus: null,
     loadError: null,
@@ -1264,6 +1280,21 @@ function buildMarkerHtml(params: {
         ? `<div style="display:flex;align-items:center;justify-content:center;min-height:16px;padding:1px 6px;border-top:1px solid rgba(255,255,255,.18);font-size:10px;font-weight:800;line-height:1;">...</div>`
         : "") +
     `</div>`
+  );
+}
+
+function markBookingPriceErrorForProperties(
+  properties: Property[],
+  propertyIds: Set<number>,
+): Property[] {
+  return properties.map((prop) =>
+    propertyIds.has(prop.id)
+      ? {
+          ...prop,
+          bookingPriceTotal: null,
+          bookingPriceStatus: "ERROR",
+        }
+      : prop,
   );
 }
 
@@ -1935,6 +1966,81 @@ function addDays(date: Date, amount: number): Date {
 
 function addMonths(date: Date, amount: number): Date {
   return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function getTimeZoneDateParts(
+  date: Date,
+  timeZone: string,
+): {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+} {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    Number.parseInt(
+      parts.find((part) => part.type === type)?.value ?? "0",
+      10,
+    );
+
+  return {
+    year: getPart("year"),
+    month: getPart("month"),
+    day: getPart("day"),
+    hour: getPart("hour"),
+    minute: getPart("minute"),
+    second: getPart("second"),
+  };
+}
+
+function getMadridNowWallClockMs(): number {
+  const nowInMadrid = getTimeZoneDateParts(new Date(), "Europe/Madrid");
+  return Date.UTC(
+    nowInMadrid.year,
+    nowInMadrid.month - 1,
+    nowInMadrid.day,
+    nowInMadrid.hour,
+    nowInMadrid.minute,
+    nowInMadrid.second,
+  );
+}
+
+function getCheckInWallClockMs(date: Date, entryTime: string | null): number {
+  const match = (entryTime ?? "16:00").match(/^(\d{1,2}):(\d{2})/);
+  const hours = match ? Number.parseInt(match[1], 10) : 16;
+  const minutes = match ? Number.parseInt(match[2], 10) : 0;
+
+  return Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hours,
+    minutes,
+    0,
+  );
+}
+
+function hasMinimumCheckInNotice(
+  checkInDate: Date,
+  entryTime: string | null,
+  minimumHours = 24,
+): boolean {
+  const checkInMs = getCheckInWallClockMs(checkInDate, entryTime);
+  const nowMadridMs = getMadridNowWallClockMs();
+  return checkInMs - nowMadridMs >= minimumHours * 60 * 60 * 1000;
 }
 
 function datesEqual(a: Date, b: Date): boolean {
@@ -2826,6 +2932,7 @@ function PropertyCard({
   prop,
   bookingUrl,
   onRetry,
+  onRetryPrice,
   onOpen,
   lang,
   propertyFallbackLabel,
@@ -2840,6 +2947,7 @@ function PropertyCard({
   totalPriceLabel,
   totalPriceNightsLabel,
   calculatingPriceLabel,
+  retryPriceLabel,
   bookingPriceLoading,
   sharePropertyAriaLabel,
   shareMenuHeadingLabel,
@@ -2850,6 +2958,7 @@ function PropertyCard({
   prop: Property;
   bookingUrl: string;
   onRetry: (id: number) => void;
+  onRetryPrice: () => void;
   onOpen: (url: string) => void;
   lang: Lang;
   propertyFallbackLabel: string;
@@ -2864,6 +2973,7 @@ function PropertyCard({
   totalPriceLabel: string;
   totalPriceNightsLabel: string | null;
   calculatingPriceLabel: string;
+  retryPriceLabel: string;
   bookingPriceLoading: boolean;
   sharePropertyAriaLabel: string;
   shareMenuHeadingLabel: string;
@@ -2888,6 +2998,8 @@ function PropertyCard({
   const showStatsLoading = isPending;
   const hasBookingPrice = typeof prop.bookingPriceTotal === "number";
   const showBookingPriceLoading = bookingPriceLoading && !hasBookingPrice;
+  const showBookingPriceRetry =
+    prop.bookingPriceStatus === "ERROR" && !bookingPriceLoading;
   const [showRetryButton, setShowRetryButton] = useState(false);
 
   useEffect(() => {
@@ -3207,6 +3319,20 @@ function PropertyCard({
                   {calculatingPriceLabel}
                 </span>
               </div>
+            ) : showBookingPriceRetry ? (
+              <div className="mt-1 flex items-center justify-center">
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-full border border-[#e2cf96] bg-[#f3e7bf] px-3 py-1.5 text-[12px] font-semibold text-[#7f6630] transition hover:bg-[#eedda6]"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    triggerLightTapHaptic();
+                    onRetryPrice();
+                  }}
+                >
+                  {retryPriceLabel}
+                </button>
+              </div>
             ) : (
               <p className="mt-0.5 text-center text-[18px] font-semibold text-[#2d2d2d]">
                 {formatCurrencyAmount(prop.bookingPriceTotal as number, lang)}
@@ -3418,6 +3544,7 @@ export default function ReservaDirectaV2Content() {
   const totalPriceLabel = propertyCardTranslations.totalPrice[lang];
   const calculatingPriceLabel =
     propertyCardTranslations.calculatingPrice[lang];
+  const retryPriceLabel = propertyCardTranslations.retryPrice[lang];
   const sharePropertyAriaLabel =
     propertyCardTranslations.sharePropertyAria[lang];
   const shareMenuHeadingLabel = propertyCardTranslations.shareMenuHeading[lang];
@@ -3484,6 +3611,46 @@ export default function ReservaDirectaV2Content() {
         ...next,
       );
       return next;
+    });
+  }
+
+  async function loadBookingPricesForPropertyIds(
+    propertyIds: Set<number>,
+    params: {
+      checkinDate: string;
+      checkoutDate: string;
+      travelers: number;
+    },
+  ) {
+    if (propertyIds.size === 0) return;
+
+    setIsBookingPriceLoading(true);
+    try {
+      const bookingPrices = await fetchBookingPrices(params);
+      setProperties((prev) => {
+        const merged = mergeBookingPricesIntoProperties(
+          prev.filter((prop) => propertyIds.has(prop.id)),
+          bookingPrices,
+        );
+        const mergedById = new Map(merged.map((prop) => [prop.id, prop]));
+
+        return prev.map((prop) => mergedById.get(prop.id) ?? prop);
+      });
+    } catch {
+      setProperties((prev) => markBookingPriceErrorForProperties(prev, propertyIds));
+    } finally {
+      setIsBookingPriceLoading(false);
+    }
+  }
+
+  function retryBookingPrices() {
+    if (!searchDateRange) return;
+
+    const propertyIds = new Set(filtered.map((prop) => prop.id));
+    void loadBookingPricesForPropertyIds(propertyIds, {
+      checkinDate: searchDateRange.startDate,
+      checkoutDate: searchDateRange.endDate,
+      travelers: Number.parseInt(activeGuestFilter, 10) || 2,
     });
   }
 
@@ -3574,6 +3741,9 @@ export default function ReservaDirectaV2Content() {
     const guestFilteredIds = guestFilteredProperties
       .map((prop) => prop.id)
       .filter((id) => id > 0);
+    const guestFilteredPropertyById = new Map(
+      guestFilteredProperties.map((prop) => [prop.id, prop]),
+    );
 
     setSearchGuestCount(guestCount);
     setSearchDateRange(null);
@@ -3618,7 +3788,13 @@ export default function ReservaDirectaV2Content() {
           now,
         );
         if (cached) {
+          const property = guestFilteredPropertyById.get(id);
+          const passesMinimumNotice = hasMinimumCheckInNotice(
+            startDate,
+            property?.entryTime ?? null,
+          );
           if (
+            passesMinimumNotice &&
             isRangeAvailableFromUnavailableDates(
               cached.unavailableDates,
               startDate,
@@ -3675,14 +3851,20 @@ export default function ReservaDirectaV2Content() {
                 startDate,
                 endDate,
               );
+              const property = guestFilteredPropertyById.get(item.id);
 
               return {
                 item,
-                available: isRangeAvailableFromUnavailableDates(
-                  cacheEntry.unavailableDates,
-                  startDate,
-                  endDate,
-                ),
+                available:
+                  hasMinimumCheckInNotice(
+                    startDate,
+                    property?.entryTime ?? null,
+                  ) &&
+                  isRangeAvailableFromUnavailableDates(
+                    cacheEntry.unavailableDates,
+                    startDate,
+                    endDate,
+                  ),
               };
             } catch (error) {
               return {
@@ -3746,39 +3928,11 @@ export default function ReservaDirectaV2Content() {
     if (searchSequenceRef.current !== sequence) return;
 
     if (availableIds.size > 0) {
-      setIsBookingPriceLoading(true);
-      try {
-        const bookingPrices = await fetchBookingPrices({
-          checkinDate: startDateApi,
-          checkoutDate: endDateApi,
-          travelers: guestCount,
-        });
-
-        if (searchSequenceRef.current !== sequence) return;
-
-        const availableProperties = properties.filter((prop) =>
-          availableIds.has(prop.id),
-        );
-
-        setProperties((prev) => {
-          const availablePropertyIds = new Set(
-            availableProperties.map((prop) => prop.id),
-          );
-          const merged = mergeBookingPricesIntoProperties(
-            prev.filter((prop) => availablePropertyIds.has(prop.id)),
-            bookingPrices,
-          );
-          const mergedById = new Map(merged.map((prop) => [prop.id, prop]));
-
-          return prev.map((prop) => mergedById.get(prop.id) ?? prop);
-        });
-      } catch {
-        // Availability results are still valid even if the booking-price call fails.
-      } finally {
-        if (searchSequenceRef.current === sequence) {
-          setIsBookingPriceLoading(false);
-        }
-      }
+      await loadBookingPricesForPropertyIds(availableIds, {
+        checkinDate: startDateApi,
+        checkoutDate: endDateApi,
+        travelers: guestCount,
+      });
     }
 
     if (availableIds.size === 0) {
@@ -4445,6 +4599,7 @@ export default function ReservaDirectaV2Content() {
                     key={prop.id}
                     prop={prop}
                     onRetry={retryProperty}
+                    onRetryPrice={retryBookingPrices}
                     onOpen={setSelectedBookingUrl}
                     lang={lang}
                     propertyFallbackLabel={propertyFallbackLabel}
@@ -4459,6 +4614,7 @@ export default function ReservaDirectaV2Content() {
                     totalPriceLabel={totalPriceLabel}
                     totalPriceNightsLabel={activeNightsLabel}
                     calculatingPriceLabel={calculatingPriceLabel}
+                    retryPriceLabel={retryPriceLabel}
                     bookingPriceLoading={isBookingPriceLoading}
                     sharePropertyAriaLabel={sharePropertyAriaLabel}
                     shareMenuHeadingLabel={shareMenuHeadingLabel}
