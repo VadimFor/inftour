@@ -1186,7 +1186,9 @@ function mergeBookingPricesIntoProperties(
     if (!propertyId) return;
 
     const total =
-      typeof item.total === "number" && Number.isFinite(item.total)
+      typeof item.total === "number" &&
+      Number.isFinite(item.total) &&
+      item.total > 0
         ? item.total
         : null;
     const status = typeof item.status === "string" ? item.status : null;
@@ -1309,6 +1311,7 @@ function PropertyMap({
   moreInfoLabel,
   totalPriceLabel,
   calculatingPriceLabel,
+  retryPriceLabel,
   guestSingularLabel,
   guestPluralLabel,
   nightSingularLabel,
@@ -1323,6 +1326,7 @@ function PropertyMap({
   isBookingPriceLoading,
   loadingPropertiesLabel,
   recenterCalpeLabel,
+  onRetryPrice,
   onOpen,
 }: {
   properties: MappedProperty[];
@@ -1332,6 +1336,7 @@ function PropertyMap({
   moreInfoLabel: string;
   totalPriceLabel: string;
   calculatingPriceLabel: string;
+  retryPriceLabel: string;
   guestSingularLabel: string;
   guestPluralLabel: string;
   nightSingularLabel: string;
@@ -1346,6 +1351,7 @@ function PropertyMap({
   isBookingPriceLoading: boolean;
   loadingPropertiesLabel: string;
   recenterCalpeLabel: string;
+  onRetryPrice: () => void;
   onOpen: (url: string) => void;
 }) {
   const mapRef = useRef<any>(null);
@@ -1463,12 +1469,22 @@ function PropertyMap({
         const latLng = L.latLng(property.latitude, property.longitude);
         bounds.extend(latLng);
         const isVisited = clickedPropertyIdsRef.current.has(property.id);
+        const hasActivePriceContext = Boolean(bookingStartDate && bookingEndDate);
         const markerFormattedTotalPrice =
-          typeof property.bookingPriceTotal === "number"
+          typeof property.bookingPriceTotal === "number" &&
+          property.bookingPriceTotal > 0
             ? formatCurrencyAmount(property.bookingPriceTotal, lang)
             : null;
+        const showMarkerPricePending =
+          hasActivePriceContext &&
+          !markerFormattedTotalPrice &&
+          property.bookingPriceStatus !== "ERROR";
+        const showPopupPriceRetry =
+          hasActivePriceContext &&
+          property.bookingPriceStatus === "ERROR" &&
+          !isBookingPriceLoading;
         const hasMarkerPriceState =
-          Boolean(markerFormattedTotalPrice) || isBookingPriceLoading;
+          Boolean(markerFormattedTotalPrice) || showMarkerPricePending;
 
         const marker = L.marker(latLng, {
           icon: L.divIcon({
@@ -1477,7 +1493,7 @@ function PropertyMap({
               capacity: property.capacity,
               isVisited,
               formattedTotalPrice: markerFormattedTotalPrice,
-              showPriceLoading: isBookingPriceLoading,
+              showPriceLoading: showMarkerPricePending,
             }),
             iconSize: hasMarkerPriceState ? [48, 34] : [30, 18],
             iconAnchor: hasMarkerPriceState ? [24, 17] : [15, 9],
@@ -1496,6 +1512,7 @@ function PropertyMap({
         const safeMoreInfoLabel = escapeHtml(moreInfoLabel);
         const safeTotalPriceLabel = escapeHtml(totalPriceLabel);
         const safeCalculatingPriceLabel = escapeHtml(calculatingPriceLabel);
+        const safeRetryPriceLabel = escapeHtml(retryPriceLabel);
         const imageUrls = Array.from(
           new Set(
             (property.images ?? [])
@@ -1551,11 +1568,14 @@ function PropertyMap({
             : "";
         const safeTotalNightsLabel = escapeHtml(totalNightsLabel);
         const formattedTotalPrice =
-          typeof property.bookingPriceTotal === "number"
+          typeof property.bookingPriceTotal === "number" &&
+          property.bookingPriceTotal > 0
             ? escapeHtml(formatCurrencyAmount(property.bookingPriceTotal, lang))
             : "";
-        const showPopupPriceLoading =
-          isBookingPriceLoading && formattedTotalPrice.length === 0;
+        const showPopupPricePending =
+          hasActivePriceContext &&
+          formattedTotalPrice.length === 0 &&
+          property.bookingPriceStatus !== "ERROR";
 
         marker.bindPopup(
           `<div style="min-width:190px;max-width:230px;font-family:Arial,sans-serif;">` +
@@ -1576,7 +1596,7 @@ function PropertyMap({
             (safeMeta
               ? `<div style="margin-bottom:6px;font-size:12px;line-height:1.45;color:#555;">${safeMeta}</div>`
               : "") +
-            (formattedTotalPrice || showPopupPriceLoading
+            (formattedTotalPrice || showPopupPricePending || showPopupPriceRetry
               ? `<div style="margin-bottom:8px;border:1px solid #eadfbf;background:#fbf7eb;border-radius:10px;padding:8px 10px;">` +
                 `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;">` +
                 `<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8f7130;">${safeTotalPriceLabel}</span>` +
@@ -1584,11 +1604,21 @@ function PropertyMap({
                   ? `<span style="display:inline-flex;align-items:center;border:1px solid #e2cf96;background:#f3e7bf;border-radius:999px;padding:2px 8px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#7f6630;">${safeTotalNightsLabel}</span>`
                   : "") +
                 `</div>` +
-                (showPopupPriceLoading
+                (showPopupPricePending
                   ? `<div style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:24px;color:#8f7130;font-size:13px;font-weight:600;">` +
                     `<span style="display:inline-flex;width:14px;height:14px;border:2px solid #e4d4a6;border-top-color:#c2a457;border-radius:999px;"></span>` +
                     `<span>${safeCalculatingPriceLabel}</span>` +
                     `</div>`
+                  : showPopupPriceRetry
+                    ? `<div style="display:flex;align-items:center;justify-content:center;min-height:24px;">` +
+                      `<button type="button" data-retry-price="true" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid #b8d7f3;background:#e8f4ff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:#4e86b7;">` +
+                      `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">` +
+                      `<path d="M13 8a5 5 0 1 1-1.46-3.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+                      `<path d="M13 3v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+                      `</svg>` +
+                      `<span>${safeRetryPriceLabel}</span>` +
+                      `</button>` +
+                      `</div>`
                   : `<div style="text-align:center;font-size:20px;font-weight:700;color:#2d2d2d;">${formattedTotalPrice}</div>`) +
                 `</div>`
               : "") +
@@ -1625,7 +1655,7 @@ function PropertyMap({
                   capacity: property.capacity,
                   isVisited: true,
                   formattedTotalPrice: markerFormattedTotalPrice,
-                  showPriceLoading: isBookingPriceLoading,
+                  showPriceLoading: showMarkerPricePending,
                 }),
                 iconSize: hasMarkerPriceState ? [48, 34] : [30, 18],
                 iconAnchor: hasMarkerPriceState ? [24, 17] : [15, 9],
@@ -1643,6 +1673,18 @@ function PropertyMap({
               clickEvent.stopPropagation();
               onOpen(bookingUrl);
               marker.closePopup();
+            };
+          }
+
+          const retryPriceButton = popupElement?.querySelector(
+            "[data-retry-price]",
+          ) as HTMLButtonElement | null;
+          if (retryPriceButton) {
+            retryPriceButton.onclick = (clickEvent) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+              triggerLightTapHaptic();
+              onRetryPrice();
             };
           }
 
@@ -2246,6 +2288,12 @@ type CalendarAvailabilityCacheEntry = {
   expiresAt: number;
 };
 
+type CalendarAvailabilityInFlightEntry = {
+  windowStart: string;
+  windowEnd: string;
+  promise: Promise<CalendarAvailabilityCacheEntry>;
+};
+
 type BatchDetailResponseItem = {
   id: number;
   ok: boolean;
@@ -2275,7 +2323,7 @@ const calendarAvailabilityCache = new Map<
 >();
 const calendarAvailabilityInFlight = new Map<
   number,
-  Promise<CalendarAvailabilityCacheEntry>
+  CalendarAvailabilityInFlightEntry
 >();
 
 function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
@@ -2436,6 +2484,48 @@ function isDateRangeCoveredByCalendarWindow(
   return startKey >= windowStart && lastNightKey <= windowEnd;
 }
 
+function getCalendarFetchWindow(endDate: Date): {
+  windowStart: string;
+  windowEnd: string;
+} {
+  const today = startOfDay(new Date());
+  const threeMonthsAhead = addMonths(today, CALENDAR_CACHE_MONTHS_AHEAD);
+  const requestedCheckout = startOfDay(endDate);
+  const windowEnd =
+    requestedCheckout > threeMonthsAhead ? requestedCheckout : threeMonthsAhead;
+
+  return {
+    windowStart: formatApiDate(today),
+    windowEnd: formatApiDate(windowEnd),
+  };
+}
+
+function formatApiDateForDisplay(value: string): string {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return value;
+  return `${match[3]}/${match[2]}/${match[1]}`;
+}
+
+function parseApiDate(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10) - 1;
+  const day = Number.parseInt(match[3], 10);
+  const parsed = new Date(year, month, day);
+
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return parsed;
+}
+
 function pruneCalendarAvailabilityCache(now = Date.now()): void {
   calendarAvailabilityCache.forEach((entry, propertyId) => {
     if (entry.expiresAt <= now) {
@@ -2494,33 +2584,31 @@ async function fetchCalendarAvailabilityForProperty(
   );
   if (cached) return cached;
 
+  const { windowStart, windowEnd } = getCalendarFetchWindow(endDate);
   const inFlight = calendarAvailabilityInFlight.get(propertyId);
-  if (inFlight) return inFlight;
+  if (
+    inFlight &&
+    isDateRangeCoveredByCalendarWindow(
+      startDate,
+      endDate,
+      inFlight.windowStart,
+      inFlight.windowEnd,
+    )
+  ) {
+    return inFlight.promise;
+  }
 
   const requestPromise = (async () => {
-    const today = startOfDay(new Date());
-    const windowStart = today;
-    const threeMonthsAhead = addMonths(
-      windowStart,
-      CALENDAR_CACHE_MONTHS_AHEAD,
-    );
-    const requestedCheckout = startOfDay(endDate);
-    const windowEnd =
-      requestedCheckout > threeMonthsAhead
-        ? requestedCheckout
-        : threeMonthsAhead;
-    const windowStartApi = formatApiDate(windowStart);
-    const windowEndApi = formatApiDate(windowEnd);
     const response = await apiFetch(
-      `/accommodations/${propertyId}/calendar?startDate=${windowStartApi}&endDate=${windowEndApi}`,
+      `/accommodations/${propertyId}/calendar?startDate=${windowStart}&endDate=${windowEnd}`,
     );
     const unavailableDates = new Set<string>();
     extractUnavailableDates(response, unavailableDates);
     const fetchedAt = Date.now();
     const entry: CalendarAvailabilityCacheEntry = {
       unavailableDates,
-      windowStart: windowStartApi,
-      windowEnd: windowEndApi,
+      windowStart,
+      windowEnd,
       fetchedAt,
       expiresAt: fetchedAt + CALENDAR_CACHE_TTL_MS,
     };
@@ -2529,11 +2617,18 @@ async function fetchCalendarAvailabilityForProperty(
     return entry;
   })();
 
-  calendarAvailabilityInFlight.set(propertyId, requestPromise);
+  calendarAvailabilityInFlight.set(propertyId, {
+    windowStart,
+    windowEnd,
+    promise: requestPromise,
+  });
   try {
     return await requestPromise;
   } finally {
-    calendarAvailabilityInFlight.delete(propertyId);
+    const activeRequest = calendarAvailabilityInFlight.get(propertyId);
+    if (activeRequest?.promise === requestPromise) {
+      calendarAvailabilityInFlight.delete(propertyId);
+    }
   }
 }
 
@@ -2996,10 +3091,19 @@ function PropertyCard({
     !prop.sqm;
   const canRetry = isPending && prop.id > 0;
   const showStatsLoading = isPending;
-  const hasBookingPrice = typeof prop.bookingPriceTotal === "number";
+  const hasBookingPrice =
+    typeof prop.bookingPriceTotal === "number" && prop.bookingPriceTotal > 0;
   const showBookingPriceLoading = bookingPriceLoading && !hasBookingPrice;
   const showBookingPriceRetry =
     prop.bookingPriceStatus === "ERROR" && !bookingPriceLoading;
+  const showBookingPricePending =
+    totalPriceNightsLabel !== null && !hasBookingPrice && !showBookingPriceRetry;
+  const shouldShowBookingPriceBox =
+    totalPriceNightsLabel !== null ||
+    showBookingPriceLoading ||
+    showBookingPriceRetry ||
+    showBookingPricePending ||
+    hasBookingPrice;
   const [showRetryButton, setShowRetryButton] = useState(false);
 
   useEffect(() => {
@@ -3297,7 +3401,7 @@ function PropertyCard({
             )}
           </div>
         )}
-        {(showBookingPriceLoading || hasBookingPrice) && (
+        {shouldShowBookingPriceBox && (
           <div className="mt-3 rounded-[10px] border border-[#eadfbf] bg-[#fbf7eb] px-3 py-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8f7130]">
@@ -3309,12 +3413,14 @@ function PropertyCard({
                 </span>
               )}
             </div>
-            {showBookingPriceLoading ? (
+            {showBookingPriceLoading || showBookingPricePending ? (
               <div className="mt-1 flex items-center justify-center gap-2 text-[#8f7130]">
-                <span
-                  className="h-4 w-4 animate-spin rounded-full border-2 border-[#e4d4a6] border-t-[#c2a457]"
-                  aria-hidden="true"
-                />
+                {showBookingPriceLoading && (
+                  <span
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-[#e4d4a6] border-t-[#c2a457]"
+                    aria-hidden="true"
+                  />
+                )}
                 <span className="text-[13px] font-medium">
                   {calculatingPriceLabel}
                 </span>
@@ -3323,14 +3429,37 @@ function PropertyCard({
               <div className="mt-1 flex items-center justify-center">
                 <button
                   type="button"
-                  className="inline-flex items-center rounded-full border border-[#e2cf96] bg-[#f3e7bf] px-3 py-1.5 text-[12px] font-semibold text-[#7f6630] transition hover:bg-[#eedda6]"
+                  aria-label={retryPriceLabel}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#b8d7f3] bg-[#e8f4ff] px-3 py-1.5 text-[12px] font-semibold text-[#4e86b7] transition hover:bg-[#d9ecff]"
                   onClick={(event) => {
                     event.stopPropagation();
                     triggerLightTapHaptic();
                     onRetryPrice();
                   }}
                 >
-                  {retryPriceLabel}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M13 8a5 5 0 1 1-1.46-3.54"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13 3v3h-3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>{retryPriceLabel}</span>
                 </button>
               </div>
             ) : (
@@ -3621,12 +3750,14 @@ export default function ReservaDirectaV2Content() {
       checkoutDate: string;
       travelers: number;
     },
+    sequence: number,
   ) {
     if (propertyIds.size === 0) return;
 
     setIsBookingPriceLoading(true);
     try {
       const bookingPrices = await fetchBookingPrices(params);
+      if (searchSequenceRef.current !== sequence) return;
       setProperties((prev) => {
         const merged = mergeBookingPricesIntoProperties(
           prev.filter((prop) => propertyIds.has(prop.id)),
@@ -3637,9 +3768,12 @@ export default function ReservaDirectaV2Content() {
         return prev.map((prop) => mergedById.get(prop.id) ?? prop);
       });
     } catch {
+      if (searchSequenceRef.current !== sequence) return;
       setProperties((prev) => markBookingPriceErrorForProperties(prev, propertyIds));
     } finally {
-      setIsBookingPriceLoading(false);
+      if (searchSequenceRef.current === sequence) {
+        setIsBookingPriceLoading(false);
+      }
     }
   }
 
@@ -3651,7 +3785,7 @@ export default function ReservaDirectaV2Content() {
       checkinDate: searchDateRange.startDate,
       checkoutDate: searchDateRange.endDate,
       travelers: Number.parseInt(activeGuestFilter, 10) || 2,
-    });
+    }, searchSequenceRef.current);
   }
 
   function openCalendar(target: "checkIn" | "checkOut") {
@@ -3751,11 +3885,6 @@ export default function ReservaDirectaV2Content() {
     setOpenDatePicker(null);
     setIsGuestMenuOpen(false);
 
-    if (guestFilteredIds.length === 0) {
-      setSearchAvailableIds(new Set<number>());
-      return;
-    }
-
     if (!parsedCheckIn || !parsedCheckOut) {
       setSearchAvailableIds(new Set<number>(guestFilteredIds));
       return;
@@ -3768,12 +3897,17 @@ export default function ReservaDirectaV2Content() {
       return;
     }
 
-    setIsSearchRunning(true);
-
     const startDateApi = formatApiDate(startDate);
     const endDateApi = formatApiDate(endDate);
-    const availableIds = new Set<number>();
     setSearchDateRange({ startDate: startDateApi, endDate: endDateApi });
+
+    if (guestFilteredIds.length === 0) {
+      setSearchAvailableIds(new Set<number>());
+      return;
+    }
+
+    setIsSearchRunning(true);
+    const availableIds = new Set<number>();
     setSearchAvailableIds(new Set<number>());
 
     try {
@@ -3932,7 +4066,7 @@ export default function ReservaDirectaV2Content() {
         checkinDate: startDateApi,
         checkoutDate: endDateApi,
         travelers: guestCount,
-      });
+      }, sequence);
     }
 
     if (availableIds.size === 0) {
@@ -4158,15 +4292,28 @@ export default function ReservaDirectaV2Content() {
   const activeGuestLabel = `${activeGuestCount} ${
     activeGuestCount === 1 ? guestSingularLabel : guestPluralLabel
   }`;
-  const activeDateRangeLabel =
-    checkIn && checkOut ? `${checkIn} -> ${checkOut}` : null;
+  const appliedDateRange = searchDateRange
+    ? {
+        startDate: formatApiDateForDisplay(searchDateRange.startDate),
+        endDate: formatApiDateForDisplay(searchDateRange.endDate),
+      }
+    : null;
+  const activeDateRangeLabel = appliedDateRange
+    ? `${appliedDateRange.startDate} -> ${appliedDateRange.endDate}`
+    : null;
+  const appliedStartDate = searchDateRange
+    ? parseApiDate(searchDateRange.startDate)
+    : null;
+  const appliedEndDate = searchDateRange
+    ? parseApiDate(searchDateRange.endDate)
+    : null;
   const activeNightsCount =
-    parsedCheckIn && parsedCheckOut
+    appliedStartDate && appliedEndDate
       ? Math.max(
           0,
           Math.round(
-            (startOfDay(parsedCheckOut).getTime() -
-              startOfDay(parsedCheckIn).getTime()) /
+            (startOfDay(appliedEndDate).getTime() -
+              startOfDay(appliedStartDate).getTime()) /
               (1000 * 60 * 60 * 24),
           ),
         )
@@ -4575,6 +4722,7 @@ export default function ReservaDirectaV2Content() {
                 moreInfoLabel={mapMoreInfoLabel}
                 totalPriceLabel={totalPriceLabel}
                 calculatingPriceLabel={calculatingPriceLabel}
+                retryPriceLabel={retryPriceLabel}
                 guestSingularLabel={guestSingularLabel}
                 guestPluralLabel={guestPluralLabel}
                 nightSingularLabel={nightSingularLabel}
@@ -4591,6 +4739,7 @@ export default function ReservaDirectaV2Content() {
                 isBookingPriceLoading={isBookingPriceLoading}
                 loadingPropertiesLabel={loadingPropertiesLabel}
                 recenterCalpeLabel={mapRecenterCalpeLabel}
+                onRetryPrice={retryBookingPrices}
                 onOpen={setSelectedBookingUrl}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const AVAIBOOK_API = "https://api.avaibook.com/api/owner";
-const AVAIBOOK_TOKEN = process.env.AVAIBOOK_TOKEN;
+const AVAIBOOK_TOKEN =
+  process.env.AVAIBOOK_TOKEN_PROPERTY_INFO || process.env.AVAIBOOK_TOKEN;
+const AVAIBOOK_ROTATION_TOKENS = Array.from({ length: 30 }, (_, index) =>
+  process.env[`AVAIBOOK_TOKEN_${index}`],
+).filter((token): token is string => Boolean(token && token.trim().length));
+let rotationTokenCursor = 0;
 
 const DETAIL_CACHE_TTL_MS = 10 * 60 * 1000;
 const UPSTREAM_GAP_MS = 100;
@@ -31,6 +36,21 @@ let upstreamStartQueue: Promise<void> = Promise.resolve();
 let upstreamNextAllowedAt = 0;
 let upstreamActiveCount = 0;
 const upstreamSlotWaiters: Array<() => void> = [];
+
+function getNextRotationToken(currentToken?: string): string | undefined {
+  if (!AVAIBOOK_ROTATION_TOKENS.length) return undefined;
+
+  for (let attempt = 0; attempt < AVAIBOOK_ROTATION_TOKENS.length; attempt++) {
+    const token =
+      AVAIBOOK_ROTATION_TOKENS[rotationTokenCursor % AVAIBOOK_ROTATION_TOKENS.length];
+    rotationTokenCursor += 1;
+    if (token !== currentToken || AVAIBOOK_ROTATION_TOKENS.length === 1) {
+      return token;
+    }
+  }
+
+  return currentToken;
+}
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -111,12 +131,13 @@ async function runInUpstreamQueue<T>(task: () => Promise<T>): Promise<T> {
 }
 
 async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
-  if (!AVAIBOOK_TOKEN) {
+  let authToken = AVAIBOOK_TOKEN || getNextRotationToken();
+  if (!authToken) {
     return {
       id,
       ok: false,
       status: 500,
-      error: "Missing AVAIBOOK_TOKEN",
+      error: "Missing AVAIBOOK_TOKEN_PROPERTY_INFO",
     };
   }
 
@@ -124,7 +145,7 @@ async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
     const response = await fetch(`${AVAIBOOK_API}/accommodations/${id}/`, {
       headers: {
         accept: "application/json",
-        "X-AUTH-TOKEN": AVAIBOOK_TOKEN,
+        "X-AUTH-TOKEN": authToken,
       },
       cache: "no-store",
     });
@@ -137,6 +158,17 @@ async function fetchDetailFromUpstream(id: number): Promise<BatchItemResult> {
         Math.min(UPSTREAM_429_MAX_MS, UPSTREAM_429_BASE_MS * 2 ** attempt),
       );
       upstreamNextAllowedAt = Math.max(upstreamNextAllowedAt, Date.now() + cooldown);
+      console.warn(
+        `[avaibook-batch] 429 for accommodation ${id}. Rotating token (attempt ${attempt + 1}/${UPSTREAM_MAX_RETRIES + 1}).`,
+      );
+      const rotatedToken = getNextRotationToken(authToken);
+      if (rotatedToken) {
+        authToken = rotatedToken;
+      } else {
+        console.warn(
+          `[avaibook-batch] No alternative token available after 429 for accommodation ${id}.`,
+        );
+      }
 
       if (attempt < UPSTREAM_MAX_RETRIES) {
         await scheduleUpstreamStart();
