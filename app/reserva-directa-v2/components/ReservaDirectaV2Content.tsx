@@ -2256,11 +2256,14 @@ async function fetchAccommodationBatch(
   return Array.isArray(payload.results) ? payload.results : [];
 }
 
-async function fetchBookingPrices(params: {
+async function fetchBookingPricesForAccommodation(
+  accommodationId: number,
+  params: {
   checkinDate: string;
   checkoutDate: string;
   travelers: number;
-}): Promise<BookingPriceItem[]> {
+  },
+): Promise<BookingPriceItem[]> {
   const searchParams = new URLSearchParams({
     checkinDate: params.checkinDate,
     checkoutDate: params.checkoutDate,
@@ -2268,10 +2271,14 @@ async function fetchBookingPrices(params: {
   });
 
   const response = await apiFetchWithRetry(
-    `/accommodations/booking-price/?${searchParams.toString()}`,
+    `/accommodations/${accommodationId}/booking-price/?${searchParams.toString()}`,
   );
 
-  return Array.isArray(response) ? (response as BookingPriceItem[]) : [];
+  if (Array.isArray(response)) return response as BookingPriceItem[];
+  if (response && typeof response === "object") {
+    return [response as BookingPriceItem];
+  }
+  return [];
 }
 
 type QueueItem = {
@@ -3756,17 +3763,100 @@ export default function ReservaDirectaV2Content() {
 
     setIsBookingPriceLoading(true);
     try {
-      const bookingPrices = await fetchBookingPrices(params);
-      if (searchSequenceRef.current !== sequence) return;
-      setProperties((prev) => {
-        const merged = mergeBookingPricesIntoProperties(
-          prev.filter((prop) => propertyIds.has(prop.id)),
-          bookingPrices,
-        );
-        const mergedById = new Map(merged.map((prop) => [prop.id, prop]));
+      const queue: QueueItem[] = Array.from(propertyIds).map((id) => ({
+        id,
+        attempt: 0,
+        readyAt: Date.now(),
+      }));
+      let rateLimitStreak = 0;
 
-        return prev.map((prop) => mergedById.get(prop.id) ?? prop);
-      });
+      while (queue.length > 0) {
+        if (searchSequenceRef.current !== sequence) return;
+
+        queue.sort((a, b) => a.readyAt - b.readyAt);
+        const firstReadyAt = queue[0]?.readyAt;
+        if (typeof firstReadyAt !== "number") break;
+
+        const delayUntilReady = firstReadyAt - Date.now();
+        if (delayUntilReady > 0) {
+          await wait(delayUntilReady);
+          if (searchSequenceRef.current !== sequence) return;
+        }
+
+        const readyItems: QueueItem[] = [];
+        const now = Date.now();
+        while (
+          queue.length > 0 &&
+          readyItems.length < SEARCH_BATCH_SIZE &&
+          queue[0] &&
+          queue[0].readyAt <= now
+        ) {
+          const nextItem = queue.shift();
+          if (nextItem) readyItems.push(nextItem);
+        }
+
+        if (readyItems.length === 0) continue;
+
+        const results = await Promise.all(
+          readyItems.map(async (item) => {
+            try {
+              const bookingPrices = await fetchBookingPricesForAccommodation(
+                item.id,
+                params,
+              );
+              return { item, bookingPrices };
+            } catch (error) {
+              return { item, error };
+            }
+          }),
+        );
+
+        if (searchSequenceRef.current !== sequence) return;
+
+        let hitRateLimit = false;
+
+        results.forEach(({ item, bookingPrices, error }) => {
+          if (!error && bookingPrices) {
+            setProperties((prev) =>
+              prev.map((prop) => {
+                if (prop.id !== item.id) return prop;
+                const [merged] = mergeBookingPricesIntoProperties(
+                  [prop],
+                  bookingPrices,
+                );
+                return merged ?? prop;
+              }),
+            );
+            return;
+          }
+
+          const status =
+            error && typeof error === "object"
+              ? (error as { status?: number }).status
+              : undefined;
+          if (status === 429) {
+            hitRateLimit = true;
+          }
+
+          if (status === 429 && item.attempt < SEARCH_MAX_RETRIES) {
+            queue.push({
+              id: item.id,
+              attempt: item.attempt + 1,
+              readyAt: Date.now() + getRetryDelayMs(error, item.attempt),
+            });
+            return;
+          }
+
+          setProperties((prev) =>
+            markBookingPriceErrorForProperties(prev, new Set([item.id])),
+          );
+        });
+
+        if (queue.length > 0) {
+          rateLimitStreak = hitRateLimit ? rateLimitStreak + 1 : 0;
+          await wait(getSearchCooldownMs(hitRateLimit, rateLimitStreak));
+        }
+      }
     } catch {
       if (searchSequenceRef.current !== sequence) return;
       setProperties((prev) => markBookingPriceErrorForProperties(prev, propertyIds));
@@ -3899,6 +3989,11 @@ export default function ReservaDirectaV2Content() {
 
     const startDateApi = formatApiDate(startDate);
     const endDateApi = formatApiDate(endDate);
+    const priceParams = {
+      checkinDate: startDateApi,
+      checkoutDate: endDateApi,
+      travelers: guestCount,
+    };
     setSearchDateRange({ startDate: startDateApi, endDate: endDateApi });
 
     if (guestFilteredIds.length === 0) {
@@ -3908,7 +4003,44 @@ export default function ReservaDirectaV2Content() {
 
     setIsSearchRunning(true);
     const availableIds = new Set<number>();
+    const priceRequestedIds = new Set<number>();
+    let activePriceRequests = 0;
     setSearchAvailableIds(new Set<number>());
+
+    const queuePriceFetchForProperty = (propertyId: number) => {
+      if (priceRequestedIds.has(propertyId)) return;
+      priceRequestedIds.add(propertyId);
+      activePriceRequests += 1;
+      setIsBookingPriceLoading(true);
+
+      void (async () => {
+        try {
+          const bookingPrices = await fetchBookingPricesForAccommodation(
+            propertyId,
+            priceParams,
+          );
+          if (searchSequenceRef.current !== sequence) return;
+          setProperties((prev) =>
+            prev.map((prop) => {
+              if (prop.id !== propertyId) return prop;
+              const [merged] = mergeBookingPricesIntoProperties([prop], bookingPrices);
+              return merged ?? prop;
+            }),
+          );
+        } catch {
+          if (searchSequenceRef.current !== sequence) return;
+          setProperties((prev) =>
+            markBookingPriceErrorForProperties(prev, new Set([propertyId])),
+          );
+        } finally {
+          if (searchSequenceRef.current !== sequence) return;
+          activePriceRequests = Math.max(0, activePriceRequests - 1);
+          if (activePriceRequests === 0) {
+            setIsBookingPriceLoading(false);
+          }
+        }
+      })();
+    };
 
     try {
       const now = Date.now();
@@ -3936,6 +4068,7 @@ export default function ReservaDirectaV2Content() {
             )
           ) {
             availableIds.add(id);
+            queuePriceFetchForProperty(id);
           }
           return;
         }
@@ -4017,6 +4150,7 @@ export default function ReservaDirectaV2Content() {
           if (!error) {
             if (available) {
               availableIds.add(item.id);
+              queuePriceFetchForProperty(item.id);
               setSearchAvailableIds((prev) => {
                 if (searchSequenceRef.current !== sequence) {
                   return prev ?? new Set<number>();
@@ -4060,16 +4194,7 @@ export default function ReservaDirectaV2Content() {
     }
 
     if (searchSequenceRef.current !== sequence) return;
-
-    if (availableIds.size > 0) {
-      await loadBookingPricesForPropertyIds(availableIds, {
-        checkinDate: startDateApi,
-        checkoutDate: endDateApi,
-        travelers: guestCount,
-      }, sequence);
-    }
-
-    if (availableIds.size === 0) {
+    if (availableIds.size === 0 && activePriceRequests === 0) {
       setIsBookingPriceLoading(false);
     }
 
