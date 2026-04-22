@@ -1222,8 +1222,7 @@ function PropertyMap({
           new Set(
             (property.images ?? [])
               .map(
-                (image) =>
-                  image?.SMALL || image?.BIG || image?.ORIGINAL || "",
+                (image) => image?.SMALL || image?.BIG || image?.ORIGINAL || "",
               )
               .filter((value): value is string => value.length > 0),
           ),
@@ -1260,7 +1259,7 @@ function PropertyMap({
           `<div style="min-width:190px;max-width:230px;font-family:Arial,sans-serif;">` +
             (hasImageSlider
               ? `<div style="position:relative;border-radius:10px;overflow:hidden;margin-bottom:8px;">` +
-                `<div data-slider-track style="display:flex;transform:translateX(0%);transition:transform .25s ease;">${sliderImagesHtml}</div>` +
+                `<div data-slider-track style="display:flex;transform:translateX(0%);transition:transform .25s ease;touch-action:pan-y;">${sliderImagesHtml}</div>` +
                 `<button type="button" data-slider-prev aria-label="Previous image" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:999px;background:rgba(15,23,42,.68);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">‹</button>` +
                 `<button type="button" data-slider-next aria-label="Next image" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:999px;background:rgba(15,23,42,.68);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">›</button>` +
                 `<div data-slider-counter style="position:absolute;right:8px;bottom:8px;padding:2px 6px;border-radius:999px;background:rgba(15,23,42,.68);font-size:10px;font-weight:700;color:#fff;">1/${imageUrls.length}</div>` +
@@ -1365,6 +1364,44 @@ function PropertyMap({
             clickEvent.preventDefault();
             clickEvent.stopPropagation();
             activeSlide = (activeSlide + 1) % totalSlides;
+            updateSliderUi();
+          };
+
+          let touchStartX = 0;
+          let touchStartY = 0;
+          let touchHandled = false;
+
+          sliderTrack.ontouchstart = (touchEvent) => {
+            const touch = touchEvent.touches[0];
+            if (!touch) return;
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchHandled = false;
+          };
+
+          sliderTrack.ontouchmove = (touchEvent) => {
+            const touch = touchEvent.touches[0];
+            if (!touch) return;
+            const deltaX = Math.abs(touch.clientX - touchStartX);
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+            if (deltaX > deltaY) {
+              touchEvent.preventDefault();
+              touchEvent.stopPropagation();
+            }
+          };
+
+          sliderTrack.ontouchend = (touchEvent) => {
+            const touch = touchEvent.changedTouches[0];
+            if (!touch) return;
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+            if (Math.abs(deltaX) < 35 || deltaY > 70 || touchHandled) return;
+            touchHandled = true;
+            if (deltaX < 0) {
+              activeSlide = (activeSlide + 1) % totalSlides;
+            } else {
+              activeSlide = (activeSlide - 1 + totalSlides) % totalSlides;
+            }
             updateSliderUi();
           };
         });
@@ -2855,6 +2892,7 @@ function DatePickerPopover({
   visibleMonth,
   selectedDate,
   minDate,
+  highlightToday = true,
   rangeStart,
   rangeEnd,
   previewRangeEnd,
@@ -2867,6 +2905,7 @@ function DatePickerPopover({
   visibleMonth: Date;
   selectedDate: Date | null;
   minDate?: Date | null;
+  highlightToday?: boolean;
   rangeStart?: Date | null;
   rangeEnd?: Date | null;
   previewRangeEnd?: Date | null;
@@ -2914,7 +2953,7 @@ function DatePickerPopover({
           const isSelected = selectedDate
             ? datesEqual(normalizedDate, selectedDate)
             : false;
-          const isToday = datesEqual(normalizedDate, today);
+          const isToday = highlightToday && datesEqual(normalizedDate, today);
           const isDisabled = min ? normalizedDate < min : false;
           const activeRangeEnd = previewRangeEnd || rangeEnd;
           const isInRange =
@@ -2945,7 +2984,7 @@ function DatePickerPopover({
                     : isInRange
                       ? "bg-[#dbe9ff] text-[#3f6ea8]"
                       : isToday
-                        ? "bg-[#f2ead6] text-[#8f7130]"
+                        ? "border border-[#82aee8] bg-white text-[#3f6ea8] hover:bg-[#f3f8ff]"
                         : "text-[#2d2d2d] hover:bg-[#f3f3f3]"
               } ${inCurrentMonth ? "" : "text-[#c2c2c2]"} ${isDisabled ? "cursor-not-allowed opacity-35" : ""}`}
             >
@@ -3125,12 +3164,12 @@ export default function ReservaDirectaV2Content() {
     if (target === "checkIn") {
       setShowMissingCheckInError(false);
       setCheckIn(formatted);
-      if (!parsedCheckOut || date >= parsedCheckOut) {
-        setCheckOut(formatDateInput(addDays(date, 1), lang));
+      if (parsedCheckOut && date >= parsedCheckOut) {
+        setCheckOut("");
       }
-      setVisibleMonth(startOfMonth(addDays(date, 1)));
-      setCheckoutPreviewDate(addDays(date, 1));
-      setOpenDatePicker("checkOut");
+      setVisibleMonth(startOfMonth(date));
+      setCheckoutPreviewDate(null);
+      setOpenDatePicker(null);
       return;
     }
 
@@ -3691,6 +3730,15 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
+              {showMissingCheckInError && (
+                <p
+                  className="mt-1 inline-flex items-center gap-1 rounded-[6px] bg-[#fef2f2] px-2 py-1 text-[11px] font-semibold text-[#b91c1c]"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {missingDateLabel}
+                </p>
+              )}
               {openDatePicker === "checkIn" && (
                 <DatePickerPopover
                   lang={lang}
@@ -3752,11 +3800,21 @@ export default function ReservaDirectaV2Content() {
                   </span>
                 </span>
               </button>
+              {showMissingCheckOutError && (
+                <p
+                  className="mt-1 inline-flex items-center gap-1 rounded-[6px] bg-[#fef2f2] px-2 py-1 text-[11px] font-semibold text-[#b91c1c]"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {missingDateLabel}
+                </p>
+              )}
               {openDatePicker === "checkOut" && (
                 <DatePickerPopover
                   lang={lang}
                   visibleMonth={visibleMonth}
                   selectedDate={parsedCheckOut}
+                  highlightToday={false}
                   minDate={
                     parsedCheckIn
                       ? addDays(parsedCheckIn, 1)
@@ -3871,27 +3929,6 @@ export default function ReservaDirectaV2Content() {
               {searchLabel}
             </button>
           </div>
-          {(showMissingCheckInError || showMissingCheckOutError) && (
-            <div className="mx-auto grid max-w-[1240px] grid-cols-1 px-1 pt-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_96px_96px]">
-              <div className="px-3">
-                {showMissingCheckInError && (
-                  <p className="text-[11px] font-medium text-[#dc2626]">
-                    {missingDateLabel}
-                  </p>
-                )}
-              </div>
-              <div className="px-3">
-                {showMissingCheckOutError && (
-                  <p className="text-[11px] font-medium text-[#dc2626]">
-                    {missingDateLabel}
-                  </p>
-                )}
-              </div>
-              <div />
-              <div />
-              <div />
-            </div>
-          )}
         </div>
 
         {/* Grid */}
