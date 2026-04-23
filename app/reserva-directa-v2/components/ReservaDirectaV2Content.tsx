@@ -943,7 +943,17 @@ interface RawProperty {
   units?: Array<{
     id?: number;
     capacity?: number;
-    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+    name?: {
+      es?: string;
+      en?: string;
+      ca?: string;
+      de?: string;
+      fr?: string;
+      it?: string;
+      pt?: string;
+      nl?: string;
+      ru?: string;
+    };
   }>;
   features?: Record<string, string | boolean | number>;
   images?: Array<{ SMALL?: string; BIG?: string; ORIGINAL?: string }>;
@@ -989,7 +999,17 @@ type AccommodationListItem = {
   tradeName?: { es?: string; en?: string };
   units?: Array<{
     id?: number;
-    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+    name?: {
+      es?: string;
+      en?: string;
+      ca?: string;
+      de?: string;
+      fr?: string;
+      it?: string;
+      pt?: string;
+      nl?: string;
+      ru?: string;
+    };
   }>;
 };
 
@@ -998,7 +1018,17 @@ type BookingPriceItem = {
   total?: number;
   unit?: {
     id?: number;
-    name?: { es?: string; en?: string; ca?: string; de?: string; fr?: string; it?: string; pt?: string; nl?: string; ru?: string };
+    name?: {
+      es?: string;
+      en?: string;
+      ca?: string;
+      de?: string;
+      fr?: string;
+      it?: string;
+      pt?: string;
+      nl?: string;
+      ru?: string;
+    };
   };
 };
 
@@ -1475,7 +1505,9 @@ function PropertyMap({
         const latLng = L.latLng(property.latitude, property.longitude);
         bounds.extend(latLng);
         const isVisited = clickedPropertyIdsRef.current.has(property.id);
-        const hasActivePriceContext = Boolean(bookingStartDate && bookingEndDate);
+        const hasActivePriceContext = Boolean(
+          bookingStartDate && bookingEndDate,
+        );
         const markerFormattedTotalPrice =
           hasActivePriceContext &&
           typeof property.bookingPriceTotal === "number" &&
@@ -1627,7 +1659,7 @@ function PropertyMap({
                       `<span>${safeRetryPriceLabel}</span>` +
                       `</button>` +
                       `</div>`
-                  : `<div style="text-align:center;font-size:20px;font-weight:700;color:#2d2d2d;">${formattedTotalPrice}</div>`) +
+                    : `<div style="text-align:center;font-size:20px;font-weight:700;color:#2d2d2d;">${formattedTotalPrice}</div>`) +
                 `</div>`
               : "") +
             `<div style="display:flex;gap:10px;flex-wrap:wrap;">` +
@@ -2042,10 +2074,7 @@ function getTimeZoneDateParts(
   }).formatToParts(date);
 
   const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    Number.parseInt(
-      parts.find((part) => part.type === type)?.value ?? "0",
-      10,
-    );
+    Number.parseInt(parts.find((part) => part.type === type)?.value ?? "0", 10);
 
   return {
     year: getPart("year"),
@@ -2268,9 +2297,9 @@ async function fetchAccommodationBatch(
 async function fetchBookingPricesForAccommodation(
   accommodationId: number,
   params: {
-  checkinDate: string;
-  checkoutDate: string;
-  travelers: number;
+    checkinDate: string;
+    checkoutDate: string;
+    travelers: number;
   },
 ): Promise<BookingPriceItem[]> {
   const searchParams = new URLSearchParams({
@@ -3113,7 +3142,9 @@ function PropertyCard({
   const showBookingPriceRetry =
     prop.bookingPriceStatus === "ERROR" && !bookingPriceLoading;
   const showBookingPricePending =
-    totalPriceNightsLabel !== null && !hasBookingPrice && !showBookingPriceRetry;
+    totalPriceNightsLabel !== null &&
+    !hasBookingPrice &&
+    !showBookingPriceRetry;
   const shouldShowBookingPriceBox =
     totalPriceNightsLabel !== null ||
     showBookingPriceLoading ||
@@ -3644,10 +3675,6 @@ function isPropertyDetailsPending(prop: Property): boolean {
 
 export default function ReservaDirectaV2Content() {
   const lang = useLangStore((s) => s.lang);
-  const visitActualPageLabel = modalTranslations.visitActualPage[lang];
-  const closeModalLabel = modalTranslations.closeModal[lang];
-  const bookingPropertyLabel = modalTranslations.bookingProperty[lang];
-  const loadingPageLabel = modalTranslations.loadingPage[lang];
   const checkInLabel = bookingSearchTranslations.checkIn[lang];
   const checkOutLabel = bookingSearchTranslations.checkOut[lang];
   const guestsLabel = bookingSearchTranslations.guests[lang];
@@ -3658,7 +3685,6 @@ export default function ReservaDirectaV2Content() {
   const guestSingularLabel = bookingSearchTranslations.guestSingular[lang];
   const guestPluralLabel = bookingSearchTranslations.guestPlural[lang];
   const staysInCalpeLabel = bookingResultsTranslations.staysInCalpe[lang];
-  const loadingListingsLabel = bookingResultsTranslations.loadingListings[lang];
   const loadingPropertiesLabel =
     bookingResultsTranslations.loadingProperties[lang];
   const loadErrorLabel = bookingResultsTranslations.loadError[lang];
@@ -3687,8 +3713,7 @@ export default function ReservaDirectaV2Content() {
   const bathroomsLabel = propertyCardTranslations.bathrooms[lang];
   const viewInfoLabel = propertyCardTranslations.viewInfo[lang];
   const totalPriceLabel = propertyCardTranslations.totalPrice[lang];
-  const calculatingPriceLabel =
-    propertyCardTranslations.calculatingPrice[lang];
+  const calculatingPriceLabel = propertyCardTranslations.calculatingPrice[lang];
   const retryPriceLabel = propertyCardTranslations.retryPrice[lang];
   const sharePropertyAriaLabel =
     propertyCardTranslations.sharePropertyAria[lang];
@@ -3716,10 +3741,6 @@ export default function ReservaDirectaV2Content() {
   const [checkoutPreviewDate, setCheckoutPreviewDate] = useState<Date | null>(
     null,
   );
-  const [selectedBookingUrl, setSelectedBookingUrl] = useState<string | null>(
-    null,
-  );
-  const [isBookingModalLoading, setIsBookingModalLoading] = useState(false);
   const [searchGuestCount, setSearchGuestCount] = useState<number | null>(null);
   const [searchAvailableIds, setSearchAvailableIds] =
     useState<Set<number> | null>(null);
@@ -3740,6 +3761,9 @@ export default function ReservaDirectaV2Content() {
   const properties = propertiesState;
   const parsedCheckIn = parseDateInput(checkIn);
   const parsedCheckOut = parseDateInput(checkOut);
+  function openBookingUrl(bookingUrl: string) {
+    window.open(bookingUrl, "_blank", "noopener,noreferrer");
+  }
   const selectedGuestCount = Number.parseInt(guestFilter, 10) || 2;
   const selectedGuestLabel = `${selectedGuestCount} ${
     selectedGuestCount === 1 ? guestSingularLabel : guestPluralLabel
@@ -3868,7 +3892,9 @@ export default function ReservaDirectaV2Content() {
       }
     } catch {
       if (searchSequenceRef.current !== sequence) return;
-      setProperties((prev) => markBookingPriceErrorForProperties(prev, propertyIds));
+      setProperties((prev) =>
+        markBookingPriceErrorForProperties(prev, propertyIds),
+      );
     } finally {
       if (searchSequenceRef.current === sequence) {
         setIsBookingPriceLoading(false);
@@ -3880,11 +3906,15 @@ export default function ReservaDirectaV2Content() {
     if (!searchDateRange) return;
 
     const propertyIds = new Set(filtered.map((prop) => prop.id));
-    void loadBookingPricesForPropertyIds(propertyIds, {
-      checkinDate: searchDateRange.startDate,
-      checkoutDate: searchDateRange.endDate,
-      travelers: Number.parseInt(activeGuestFilter, 10) || 2,
-    }, searchSequenceRef.current);
+    void loadBookingPricesForPropertyIds(
+      propertyIds,
+      {
+        checkinDate: searchDateRange.startDate,
+        checkoutDate: searchDateRange.endDate,
+        travelers: Number.parseInt(activeGuestFilter, 10) || 2,
+      },
+      searchSequenceRef.current,
+    );
   }
 
   function openCalendar(target: "checkIn" | "checkOut") {
@@ -4032,7 +4062,10 @@ export default function ReservaDirectaV2Content() {
           setProperties((prev) =>
             prev.map((prop) => {
               if (prop.id !== propertyId) return prop;
-              const [merged] = mergeBookingPricesIntoProperties([prop], bookingPrices);
+              const [merged] = mergeBookingPricesIntoProperties(
+                [prop],
+                bookingPrices,
+              );
               return merged ?? prop;
             }),
           );
@@ -4508,27 +4541,6 @@ export default function ReservaDirectaV2Content() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!selectedBookingUrl) return;
-
-    setIsBookingModalLoading(true);
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedBookingUrl(null);
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [selectedBookingUrl]);
-
   return (
     <div className="min-h-screen bg-[#efefef]">
       <div className="container mx-auto px-4 md:px-6">
@@ -4787,21 +4799,12 @@ export default function ReservaDirectaV2Content() {
 
         {/* Grid */}
         <div className="max-w-[1240px] mx-auto py-4">
-          {loading && properties.length === 0 && (
-            <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
-              <div className="w-6 h-6 border-2 border-gray-200 border-t-[#C5A85F] rounded-full animate-spin" />
-              <span className="text-xs font-bold uppercase tracking-widest">
-                {loadingListingsLabel}
-              </span>
-            </div>
-          )}
           {error && (
             <p className="text-center text-sm text-red-500 py-20">
               {loadErrorLabel}
             </p>
           )}
-          {(filtered.length > 0 || searchGuestCount !== null) && (
-            <>
+          <>
               {isSearchApplied && (
                 <div className="mb-2 flex flex-wrap items-center gap-2 rounded-[10px] border border-[#d9e6f7] bg-[#eef4fb] px-3 py-2">
                   <span className="text-[12px] font-semibold text-[#3d5f86]">
@@ -4874,7 +4877,7 @@ export default function ReservaDirectaV2Content() {
                 loadingPropertiesLabel={loadingPropertiesLabel}
                 recenterCalpeLabel={mapRecenterCalpeLabel}
                 onRetryPrice={retryBookingPrices}
-                onOpen={setSelectedBookingUrl}
+                onOpen={openBookingUrl}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {filtered.map((prop) => (
@@ -4883,7 +4886,7 @@ export default function ReservaDirectaV2Content() {
                     prop={prop}
                     onRetry={retryProperty}
                     onRetryPrice={retryBookingPrices}
-                    onOpen={setSelectedBookingUrl}
+                    onOpen={openBookingUrl}
                     lang={lang}
                     propertyFallbackLabel={propertyFallbackLabel}
                     loadingDataLabel={cardLoadingDataLabel}
@@ -4912,61 +4915,9 @@ export default function ReservaDirectaV2Content() {
                   />
                 ))}
               </div>
-            </>
-          )}
+          </>
         </div>
       </div>
-      {selectedBookingUrl && (
-        <div
-          className="fixed inset-0 z-[2000] bg-black/60 p-3 sm:p-5"
-          onClick={() => setSelectedBookingUrl(null)}
-        >
-          <div
-            className="relative mx-auto flex h-full w-full max-w-[1280px] flex-col overflow-hidden rounded-[20px] bg-white shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {isBookingModalLoading && (
-              <div className="absolute inset-x-0 top-0 bottom-[57px] z-10 flex items-center justify-center bg-white">
-                <div className="flex flex-col items-center gap-3 text-[#6b6b6b]">
-                  <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
-                  <span className="text-sm font-medium">
-                    {loadingPageLabel}
-                  </span>
-                </div>
-              </div>
-            )}
-            <iframe
-              src={selectedBookingUrl}
-              title={bookingPropertyLabel}
-              className="min-h-0 flex-1 border-0"
-              onLoad={() => setIsBookingModalLoading(false)}
-            />
-            <div className="flex items-center justify-start gap-3 border-t border-[#e7e7e7] bg-white px-4 py-3 sm:justify-center">
-              <a
-                href={selectedBookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full border border-[#d7d7d7] px-4 py-2 text-sm font-medium text-[#444] transition-colors hover:bg-[#f6f6f6]"
-                onClick={() => {
-                  triggerLightTapHaptic();
-                }}
-              >
-                {visitActualPageLabel}
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerLightTapHaptic();
-                  setSelectedBookingUrl(null);
-                }}
-                className="inline-flex items-center rounded-full bg-[#2d2d2d] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
-              >
-                {closeModalLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
