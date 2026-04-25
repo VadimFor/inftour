@@ -1,4 +1,4 @@
-name: Deploy to IONOS VPX
+name: Deploy Docker to VPS
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-ionos-production
+  group: deploy-docker-production
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy over SSH
+      - name: Deploy over SSH (Docker Compose)
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -41,8 +41,6 @@ jobs:
           git fetch --all --prune
           git checkout "${BRANCH}"
           git pull origin "${BRANCH}"
-          npm ci
-          npm run build
-          pm2 restart inftour || pm2 start npm --name inftour -- start
-          pm2 save
+          docker compose up -d --build
+          docker image prune -f
           EOF
