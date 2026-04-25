@@ -15,11 +15,7 @@ async function TopBarData() {
   return <TopBar weather={weather} seaTemp={seaTemp} />;
 }
 
-export default function PageShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <ScrollHeaderProvider>
