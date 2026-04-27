@@ -456,7 +456,7 @@ const TOP_FEATS = [
 const modalTranslations = {
   visitActualPage: {
     eng: "Visit page",
-    esp: "Visitar pagina",
+    esp: "Visitar página",
     ru: "Открыть страницу",
     fr: "Voir la page",
     it: "Visita pagina",
@@ -486,7 +486,7 @@ const modalTranslations = {
   },
   loadingPage: {
     eng: "Loading page...",
-    esp: "Cargando pagina...",
+    esp: "Cargando página...",
     ru: "Загрузка страницы...",
     fr: "Chargement de la page...",
     it: "Caricamento pagina...",
