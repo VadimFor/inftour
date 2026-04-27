@@ -15,7 +15,9 @@ export interface DriveFileWithSlug extends DriveFile {
   slug: string;
 }
 
-const FOLDER_ID = "1tEdwGPSe6PJuMEa56nLVp249P-4CPCQC";
+const FOLDER_ID = "1RxX8e-Hh5f82z1NHfoJ1q2BksDKv_J_I";
+const PDFJS_STANDARD_FONTS_URL =
+  "https://unpkg.com/pdfjs-dist@5.6.205/standard_fonts/";
 
 export function getThumbnailUrl(fileId: string): string {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
@@ -115,7 +117,10 @@ const fetchPdfDetails = unstable_cache(
 
     const data = new Uint8Array(await res.arrayBuffer());
     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    const pdf = await pdfjsLib.getDocument({
+      data,
+      standardFontDataUrl: PDFJS_STANDARD_FONTS_URL,
+    }).promise;
     const pages = pdf.numPages;
 
     let text = "";

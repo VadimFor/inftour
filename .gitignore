@@ -45,3 +45,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+GUIA_COMPLETA_AUTODEPLOY_VPS_DOCKER.md
