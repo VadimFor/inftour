@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   title: "INFTOUR | Apartamentos premium en Calpe",
   description:
     "Apartamentos premium en Calpe con reserva directa, servicio tipo hotel y asistencia local durante toda la estancia.",
+  icons: {
+    icon: "/logo-alt.svg",
+    shortcut: "/logo-alt.svg",
+    apple: "/logo-alt.svg",
+  },
 };
 
 /** Lets `env(safe-area-inset-*)` match the screen on notched phones (modals, fixed UI). */

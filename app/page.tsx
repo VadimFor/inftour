@@ -22,6 +22,10 @@ const reservaJsonLd = {
   "@type": "LodgingBusiness",
   name: "INFTOUR Reserva Directa",
   url: SITE_URL,
+  sameAs: [
+    "https://www.facebook.com/inftourspain",
+    "https://www.instagram.com/inftourcalpe/",
+  ],
   image: `${SITE_URL}/opengraph-image`,
   description:
     "Plataforma de reserva directa de apartamentos INFTOUR en Calpe con disponibilidad actualizada y atención personalizada.",

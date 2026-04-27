@@ -4805,116 +4805,114 @@ export default function ReservaDirectaV2Content() {
             </p>
           )}
           <>
-              {isSearchApplied && (
-                <div className="mb-2 flex flex-wrap items-center gap-2 rounded-[10px] border border-[#d9e6f7] bg-[#eef4fb] px-3 py-2">
-                  <span className="text-[12px] font-semibold text-[#3d5f86]">
-                    {showingSearchResultsLabel}
-                  </span>
-                  <span className="text-[12px] text-[#4f6781]">
-                    {activeGuestLabel}
-                    {activeDateRangeLabel ? ` · ${activeDateRangeLabel}` : ""}
-                    {activeNightsLabel ? ` · ${activeNightsLabel}` : ""}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={resetSearchResults}
-                    className="ml-auto inline-flex items-center rounded-full border border-[#c8daef] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#496788] transition-colors hover:bg-[#f4f8fd]"
-                  >
-                    {viewAllLabel}
-                  </button>
+            {isSearchApplied && (
+              <div className="mb-2 flex flex-wrap items-center gap-2 rounded-[10px] border border-[#d9e6f7] bg-[#eef4fb] px-3 py-2">
+                <span className="text-[12px] font-semibold text-[#3d5f86]">
+                  {showingSearchResultsLabel}
+                </span>
+                <span className="text-[12px] text-[#4f6781]">
+                  {activeGuestLabel}
+                  {activeDateRangeLabel ? ` · ${activeDateRangeLabel}` : ""}
+                  {activeNightsLabel ? ` · ${activeNightsLabel}` : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={resetSearchResults}
+                  className="ml-auto inline-flex items-center rounded-full border border-[#c8daef] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#496788] transition-colors hover:bg-[#f4f8fd]"
+                >
+                  {viewAllLabel}
+                </button>
+              </div>
+            )}
+            <p className="text-[22px] text-[#5f5f5f] mb-3 font-light">
+              <strong className="inline-flex min-w-[28px] items-center justify-center text-[#2d2d2d] font-bold">
+                {showingInitialPlaceholders ? (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
+                ) : (
+                  filtered.length
+                )}
+              </strong>{" "}
+              {staysInCalpeLabel}
+              {(loading || loadingDetails || isSearchRunning) && (
+                <span className="ml-2 inline-flex items-center gap-1 text-[#c2a457] text-sm font-medium">
+                  <span
+                    className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
+                    aria-hidden="true"
+                  />
+                  {loadingPropertiesLabel}
+                </span>
+              )}
+            </p>
+            {isSearchApplied &&
+              !isSearchRunning &&
+              filtered.length === 0 &&
+              noSearchResultsLabel && (
+                <div className="mb-4 rounded-[12px] border border-[#ecd9d9] bg-[#fff7f7] px-4 py-3 text-[14px] text-[#8f3d3d]">
+                  {noSearchResultsLabel}
                 </div>
               )}
-              <p className="text-[22px] text-[#5f5f5f] mb-3 font-light">
-                <strong className="inline-flex min-w-[28px] items-center justify-center text-[#2d2d2d] font-bold">
-                  {showingInitialPlaceholders ? (
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#d8c188] border-t-[#c2a457]" />
-                  ) : (
-                    filtered.length
-                  )}
-                </strong>{" "}
-                {staysInCalpeLabel}
-                {(loading || loadingDetails || isSearchRunning) && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-[#c2a457] text-sm font-medium">
-                    <span
-                      className="h-3.5 w-3.5 animate-spin rounded-full border border-[#d8c188] border-t-[#c2a457]"
-                      aria-hidden="true"
-                    />
-                    {loadingPropertiesLabel}
-                  </span>
-                )}
-              </p>
-              {isSearchApplied &&
-                !isSearchRunning &&
-                filtered.length === 0 &&
-                noSearchResultsLabel && (
-                  <div className="mb-4 rounded-[12px] border border-[#ecd9d9] bg-[#fff7f7] px-4 py-3 text-[14px] text-[#8f3d3d]">
-                    {noSearchResultsLabel}
-                  </div>
-                )}
-              <PropertyMap
-                properties={mappedProperties}
-                title={mapTitleLabel}
-                hint={mapHintLabel}
-                openInGoogleMapsLabel={openInGoogleMapsLabel}
-                moreInfoLabel={mapMoreInfoLabel}
-                totalPriceLabel={totalPriceLabel}
-                calculatingPriceLabel={calculatingPriceLabel}
-                retryPriceLabel={retryPriceLabel}
-                guestSingularLabel={guestSingularLabel}
-                guestPluralLabel={guestPluralLabel}
-                nightSingularLabel={nightSingularLabel}
-                nightPluralLabel={nightPluralLabel}
-                bedroomsShortLabel={bedroomsShortLabel}
-                bathroomsShortLabel={bathroomsShortLabel}
-                lang={lang}
-                guestFilter={activeGuestFilter}
-                bookingStartDate={searchDateRange?.startDate}
-                bookingEndDate={searchDateRange?.endDate}
-                isLoadingProperties={
-                  loading || loadingDetails || isSearchRunning
-                }
-                isBookingPriceLoading={isBookingPriceLoading}
-                loadingPropertiesLabel={loadingPropertiesLabel}
-                recenterCalpeLabel={mapRecenterCalpeLabel}
-                onRetryPrice={retryBookingPrices}
-                onOpen={openBookingUrl}
-              />
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {filtered.map((prop) => (
-                  <PropertyCard
-                    key={prop.id}
-                    prop={prop}
-                    onRetry={retryProperty}
-                    onRetryPrice={retryBookingPrices}
-                    onOpen={openBookingUrl}
-                    lang={lang}
-                    propertyFallbackLabel={propertyFallbackLabel}
-                    loadingDataLabel={cardLoadingDataLabel}
-                    retryLabel={retryLabel}
-                    previousPhotoLabel={previousPhotoLabel}
-                    nextPhotoLabel={nextPhotoLabel}
-                    bedroomsShortLabel={bedroomsShortLabel}
-                    bedsLabel={bedsLabel}
-                    bathroomsLabel={bathroomsLabel}
-                    viewInfoLabel={viewInfoLabel}
-                    totalPriceLabel={totalPriceLabel}
-                    totalPriceNightsLabel={activeNightsLabel}
-                    calculatingPriceLabel={calculatingPriceLabel}
-                    retryPriceLabel={retryPriceLabel}
-                    bookingPriceLoading={isBookingPriceLoading}
-                    sharePropertyAriaLabel={sharePropertyAriaLabel}
-                    shareMenuHeadingLabel={shareMenuHeadingLabel}
-                    shareCopyLinkLabel={shareCopyLinkLabel}
-                    shareCopiedLabel={shareCopiedLabel}
-                    shareMessageLeadLabel={shareMessageLeadLabel}
-                    bookingUrl={buildBookingUrl(prop.id, {
-                      guests: activeGuestFilter,
-                      startDate: searchDateRange?.startDate,
-                      endDate: searchDateRange?.endDate,
-                    })}
-                  />
-                ))}
-              </div>
+            <PropertyMap
+              properties={mappedProperties}
+              title={mapTitleLabel}
+              hint={mapHintLabel}
+              openInGoogleMapsLabel={openInGoogleMapsLabel}
+              moreInfoLabel={mapMoreInfoLabel}
+              totalPriceLabel={totalPriceLabel}
+              calculatingPriceLabel={calculatingPriceLabel}
+              retryPriceLabel={retryPriceLabel}
+              guestSingularLabel={guestSingularLabel}
+              guestPluralLabel={guestPluralLabel}
+              nightSingularLabel={nightSingularLabel}
+              nightPluralLabel={nightPluralLabel}
+              bedroomsShortLabel={bedroomsShortLabel}
+              bathroomsShortLabel={bathroomsShortLabel}
+              lang={lang}
+              guestFilter={activeGuestFilter}
+              bookingStartDate={searchDateRange?.startDate}
+              bookingEndDate={searchDateRange?.endDate}
+              isLoadingProperties={loading || loadingDetails || isSearchRunning}
+              isBookingPriceLoading={isBookingPriceLoading}
+              loadingPropertiesLabel={loadingPropertiesLabel}
+              recenterCalpeLabel={mapRecenterCalpeLabel}
+              onRetryPrice={retryBookingPrices}
+              onOpen={openBookingUrl}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {filtered.map((prop) => (
+                <PropertyCard
+                  key={prop.id}
+                  prop={prop}
+                  onRetry={retryProperty}
+                  onRetryPrice={retryBookingPrices}
+                  onOpen={openBookingUrl}
+                  lang={lang}
+                  propertyFallbackLabel={propertyFallbackLabel}
+                  loadingDataLabel={cardLoadingDataLabel}
+                  retryLabel={retryLabel}
+                  previousPhotoLabel={previousPhotoLabel}
+                  nextPhotoLabel={nextPhotoLabel}
+                  bedroomsShortLabel={bedroomsShortLabel}
+                  bedsLabel={bedsLabel}
+                  bathroomsLabel={bathroomsLabel}
+                  viewInfoLabel={viewInfoLabel}
+                  totalPriceLabel={totalPriceLabel}
+                  totalPriceNightsLabel={activeNightsLabel}
+                  calculatingPriceLabel={calculatingPriceLabel}
+                  retryPriceLabel={retryPriceLabel}
+                  bookingPriceLoading={isBookingPriceLoading}
+                  sharePropertyAriaLabel={sharePropertyAriaLabel}
+                  shareMenuHeadingLabel={shareMenuHeadingLabel}
+                  shareCopyLinkLabel={shareCopyLinkLabel}
+                  shareCopiedLabel={shareCopiedLabel}
+                  shareMessageLeadLabel={shareMessageLeadLabel}
+                  bookingUrl={buildBookingUrl(prop.id, {
+                    guests: activeGuestFilter,
+                    startDate: searchDateRange?.startDate,
+                    endDate: searchDateRange?.endDate,
+                  })}
+                />
+              ))}
+            </div>
           </>
         </div>
       </div>
