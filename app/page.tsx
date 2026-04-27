@@ -2,10 +2,11 @@ import PageShell from "./components/PageShell";
 import { buildPageMetadata } from "./lib/metadata";
 import ReservaDirectaV2Content from "./reserva-directa-v2/components/ReservaDirectaV2Content";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.inftour.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rent.inftour.es";
+const HOME_H1 = "Reserva directa en Calpe | INFTOUR";
 
 export const metadata = buildPageMetadata({
-  title: "Reserva directa en Calpe | INFTOUR",
+  title: HOME_H1,
   description:
     "Consulta disponibilidad y reserva directamente apartamentos en Calpe con INFTOUR, sin intermediarios y con atencion personalizada.",
   path: "/",
@@ -31,6 +32,7 @@ const reservaJsonLd = {
 export default function Home() {
   return (
     <PageShell>
+      <h1 className="sr-only">{HOME_H1}</h1>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(reservaJsonLd) }}

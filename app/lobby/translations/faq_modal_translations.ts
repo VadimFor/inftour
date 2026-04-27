@@ -42,7 +42,7 @@ A refundable security deposit will be requested
 1. Reservations
 How can I make a reservation?
 You can book directly through our website in the Direct Booking section:
-www.inftourcom
+rent.inftour.es
 When is my reservation confirmed?
 The reservation is confirmed the moment the payment is made during the booking process. You will receive an email confirming your stay.
 What payment methods do you accept?
@@ -128,7 +128,7 @@ Todos los huéspedes deben completar el check-in online
 Si llega fuera de horario podrá realizar auto check-in
 Se solicitará una fianza reembolsable
 1. Reservas
-¿Cómo puedo hacer una reserva?Puede reservar directamente a través de nuestra web www.inftourcom en el apartado Reserva Directa.
+¿Cómo puedo hacer una reserva?Puede reservar directamente a través de nuestra web rent.inftour.es en el apartado Reserva Directa.
  ¿Cuándo se confirma mi reserva?La reserva se confirma en el momento en que se realiza el pago durante el proceso de reserva. Recibirá un correo electrónico con la confirmación de su estancia.
 ¿Qué métodos de pago aceptan?Las reservas pueden pagarse mediante tarjeta de crédito o débito.
 ¿Se puede modificar una reserva?Para solicitar una modificación de su reserva puede contactarnos por correo electrónico en mail@inftour.net o por teléfono durante nuestro horario de atención al cliente.
@@ -182,7 +182,7 @@ Utilice también nuestro Asistente IA`,
 1. Бронирование
 Как я могу сделать бронирование?
 Вы можете забронировать жилье напрямую через наш сайт в разделе Прямое бронирование:
-www.inftour.com
+rent.inftour.es
 Когда мое бронирование подтверждается?
 Бронирование подтверждается в момент внесения оплаты в процессе бронирования. Вы получите электронное письмо с подтверждением вашего проживания.
 Какие способы оплаты вы принимаете?
@@ -270,7 +270,7 @@ Une caution remboursable vous sera demandée
 1. Réservations
 Comment puis-je faire une réservation ?
 Vous pouvez réserver directement sur notre site web dans la section Réservation Directe :
-www.inftourcom
+rent.inftour.es
 Quand ma réservation est-elle confirmée ?
 La réservation est confirmée au moment où le paiement est effectué lors du processus de réservation. Vous recevrez un e-mail confirmant votre séjour.
 Quels moyens de paiement acceptez-vous ?
@@ -357,7 +357,7 @@ Se arrivate fuori orario potrete effettuare il self check-in
 Verrà richiesto un deposito cauzionale rimborsabile
 1. Prenotazioni
 Come posso effettuare una prenotazione?
-Potete prenotare direttamente tramite il nostro sito web nella sezione Prenotazione Diretta: www.inftourcom
+Potete prenotare direttamente tramite il nostro sito web nella sezione Prenotazione Diretta: rent.inftour.es
 Quando viene confermata la mia prenotazione?
 La prenotazione è confermata nel momento in cui viene effettuato il pagamento durante il processo di prenotazione. Riceverete un'e-mail di conferma del vostro soggiorno.
 Quali metodi di pagamento accettate?
@@ -444,7 +444,7 @@ Wenn Sie außerhalb der Bürozeiten anreisen, können Sie den Self-Check-in nutz
 Eine erstattbare Kaution wird verlangt
 1. Reservierungen
 Wie kann ich eine Reservierung vornehmen?
-Sie können direkt über unsere Website im Bereich Direktbuchung buchen: www.inftourcom
+Sie können direkt über unsere Website im Bereich Direktbuchung buchen: rent.inftour.es
 Wann wird meine Reservierung bestätigt?
 Die Reservierung ist in dem Moment bestätigt, in dem die Zahlung während des Buchungsvorgangs erfolgt. Sie erhalten eine E-Mail mit der Bestätigung Ihres Aufenthalts.
 Welche Zahlungsmethoden akzeptieren Sie?
@@ -532,7 +532,7 @@ Nutzen Sie auch unseren KI-Assistenten.`,
 1. Бронювання
 Як я можу зробити бронювання?
 Ви можете забронювати житло безпосередньо через наш сайт у розділі Пряме бронювання:
-www.inftourcom 
+rent.inftour.es 
 Коли моє бронювання підтверджується?
 Бронювання підтверджується в момент внесення оплати під час процесу бронювання. Ви отримаєте електронний лист із підтвердженням вашого проживання.
 Які способи оплати ви приймаєте?
@@ -619,7 +619,7 @@ Jeśli przybędziesz poza godzinami pracy biura, możesz dokonać samodzielnego 
 Zostanie pobrana zwrotna kaucja
 1. Rezerwacje
 Jak mogę dokonać rezerwacji?
-Możesz zarezerwować bezpośrednio przez naszą stronę internetową w sekcji Rezerwacja Bezpośrednia: www.inftourcom
+Możesz zarezerwować bezpośrednio przez naszą stronę internetową w sekcji Rezerwacja Bezpośrednia: rent.inftour.es
 Kiedy moja rezerwacja jest potwierdzona?
 Rezerwacja jest potwierdzona w momencie dokonania płatności podczas procesu rezerwacji. Otrzymasz wiadomość e-mail z potwierdzeniem pobytu.
 Jakie formy płatności akceptujecie?

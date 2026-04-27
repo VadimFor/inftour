@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getDriveFileListWithSlugs } from "./lib/drive";
 import { modalSeoPages } from "./lib/modalSeoPages";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.inftour.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rent.inftour.es";
 const DEFAULT_LAST_MODIFIED = new Date("2026-04-13T00:00:00.000Z");
 const pages = [
   { path: "/", changeFrequency: "daily", priority: 1.0 },

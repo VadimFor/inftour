@@ -2,7 +2,7 @@ import PageShell from "../components/PageShell";
 import { buildPageMetadata } from "../lib/metadata";
 import ServicesContent from "./components/ServicesContent";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.inftour.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rent.inftour.es";
 
 export const metadata = buildPageMetadata({
   title: "Servicios para huéspedes y propietarios | INFTOUR",

@@ -88,7 +88,7 @@ function renderInlineLinkChunks(
 ): ReactNode[] {
   const chunks: ReactNode[] = [];
   const tokenRegex =
-    /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:https?:\/\/)?(?:www\.)?inftour(?:\.?com)?|\+?\d[\d\s().-]{6,}\d)/gi;
+    /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:https?:\/\/)?(?:(?:www|rent)\.)?inftour(?:(?:\.?com)|(?:\.es))?|\+?\d[\d\s().-]{6,}\d)/gi;
   let lastIndex = 0;
   let match: RegExpExecArray | null = tokenRegex.exec(line);
   let tokenIndex = 0;
@@ -121,9 +121,11 @@ function renderInlineLinkChunks(
       const label = looksLikeUrl
         ? normalizedToken
         : normalizedToken
-            .replace(/^www\.?inftourcom$/i, "www.inftour.com")
-            .replace(/^inftourcom$/i, "www.inftour.com")
-            .replace(/^inftour\.com$/i, "www.inftour.com");
+            .replace(/^www\.?inftourcom$/i, "rent.inftour.es")
+            .replace(/^inftourcom$/i, "rent.inftour.es")
+            .replace(/^inftour\.com$/i, "rent.inftour.es")
+            .replace(/^www\.inftour\.com$/i, "rent.inftour.es")
+            .replace(/^rent\.inftour\.es$/i, "rent.inftour.es");
       chunks.push(
         <Link
           key={`${keyPrefix}-site-${tokenIndex}`}
@@ -272,7 +274,7 @@ function renderFaqLine(line: string, key: string): ReactNode {
     );
   }
 
-  if (/(?:https?:\/\/)?(?:www\.)?inftour(?:\.?com)?/i.test(line)) {
+  if (/(?:https?:\/\/)?(?:(?:www|rent)\.)?inftour(?:(?:\.?com)|(?:\.es))?/i.test(line)) {
     return (
       <p key={key} className="text-sm font-semibold text-brand-black break-all">
         {renderInlineLinkChunks(
