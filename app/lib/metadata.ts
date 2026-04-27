@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LANG_TO_HREFLANG, VALID_LANGS, localizedPath } from "./i18n";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rent.inftour.es";
 const SITE_NAME = "INFTOUR";
@@ -16,6 +17,12 @@ export function buildPageMetadata({
 }: PageMetadataInput): Metadata {
   const url = new URL(path, SITE_URL).toString();
   const imageUrl = new URL("/opengraph-image", SITE_URL).toString();
+  const languageAlternates = Object.fromEntries(
+    VALID_LANGS.map((lang) => [
+      LANG_TO_HREFLANG[lang],
+      new URL(localizedPath(path, lang), SITE_URL).toString(),
+    ]),
+  );
 
   return {
     title,
@@ -23,7 +30,7 @@ export function buildPageMetadata({
     alternates: {
       canonical: url,
       languages: {
-        "es-ES": url,
+        ...languageAlternates,
         "x-default": url,
       },
     },

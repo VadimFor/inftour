@@ -16,12 +16,12 @@ import { instrWhatIfTranslations } from "../lobby/translations/instr_whatif_merg
 import { menuTranslations } from "./menu_translations";
 import { footerTranslations } from "./footer_translations";
 import { topBarTranslations } from "../components/TopBar/topbar_translations";
+import { LANG_TO_HTML, VALID_LANGS } from "./i18n";
+import type { Lang } from "./i18n";
 
-export type Lang = "eng" | "esp" | "ru" | "fr" | "it" | "de" | "uk" | "pl";
+export type { Lang } from "./i18n";
 
 const STORAGE_KEY = "inftour_lang";
-const LANG_TO_HTML: Record<Lang, string> = { eng: "en", esp: "es", ru: "ru", fr: "fr", it: "it", de: "de", uk: "uk", pl: "pl" };
-const VALID_LANGS: Lang[] = ["eng", "esp", "ru", "fr", "it", "de", "uk", "pl"];
 
 /** Map browser language tag (e.g. "en", "es-ES") to our Lang. Uses first match from navigator.languages. */
 function getBrowserLang(): Lang {
