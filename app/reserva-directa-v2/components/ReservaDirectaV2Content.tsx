@@ -541,7 +541,7 @@ const bookingSearchTranslations = {
     eng: "Reset",
     esp: "Reset",
     ru: "Сброс",
-    fr: "Reinitialiser",
+    fr: "Réinitialiser",
     it: "Reimposta",
     de: "Reset",
     uk: "Скинути",
@@ -2325,18 +2325,16 @@ type QueueItem = {
   readyAt: number;
 };
 
-type CalendarAvailabilityCacheEntry = {
-  unavailableDates: Set<string>;
-  windowStart: string;
-  windowEnd: string;
+type AvailabilityCacheEntry = {
+  available: boolean;
+  startDate: string;
+  endDate: string;
   fetchedAt: number;
   expiresAt: number;
 };
 
-type CalendarAvailabilityInFlightEntry = {
-  windowStart: string;
-  windowEnd: string;
-  promise: Promise<CalendarAvailabilityCacheEntry>;
+type AvailabilityInFlightEntry = {
+  promise: Promise<AvailabilityCacheEntry>;
 };
 
 type BatchDetailResponseItem = {
@@ -2358,18 +2356,11 @@ const SEARCH_QUEUE_GAP_MS = 40;
 const SEARCH_MAX_RETRIES = 4;
 const SEARCH_429_BASE_COOLDOWN_MS = 900;
 const SEARCH_429_MAX_COOLDOWN_MS = 5000;
-const CALENDAR_CACHE_TTL_MS = 5 * 60 * 1000;
-const CALENDAR_CACHE_MONTHS_AHEAD = 3;
-const CALENDAR_CACHE_MAX_ENTRIES = 3000;
+const AVAILABILITY_CACHE_TTL_MS = 5 * 60 * 1000;
+const AVAILABILITY_CACHE_MAX_ENTRIES = 3000;
 
-const calendarAvailabilityCache = new Map<
-  number,
-  CalendarAvailabilityCacheEntry
->();
-const calendarAvailabilityInFlight = new Map<
-  number,
-  CalendarAvailabilityInFlightEntry
->();
+const availabilityCache = new Map<string, AvailabilityCacheEntry>();
+const availabilityInFlight = new Map<string, AvailabilityInFlightEntry>();
 
 function getBatchCooldownMs(hitRateLimit: boolean, streak: number): number {
   if (!hitRateLimit) return DETAIL_QUEUE_GAP_MS;
@@ -2387,162 +2378,29 @@ function getSearchCooldownMs(hitRateLimit: boolean, streak: number): number {
   );
 }
 
-function isIsoDateKey(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+function buildAvailabilityCacheKey(
+  propertyId: number,
+  startDate: string,
+  endDate: string,
+): string {
+  return `${propertyId}:${startDate}:${endDate}`;
 }
 
-function looksUnavailable(value: unknown): boolean {
-  if (typeof value === "number") return value !== 0;
-  if (typeof value === "boolean") return !value;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (!normalized) return false;
-    const parsed = Number.parseFloat(normalized);
-    if (Number.isFinite(parsed)) return parsed !== 0;
-    return (
-      normalized.includes("unavailable") ||
-      normalized.includes("occupied") ||
-      normalized.includes("booked") ||
-      normalized.includes("reserved") ||
-      normalized.includes("no disponible")
-    );
+function parseAvailabilityResponse(payload: unknown): boolean {
+  if (typeof payload === "number") return payload === 1;
+  if (typeof payload === "boolean") return payload;
+  if (typeof payload === "string") {
+    const normalized = payload.trim();
+    if (normalized === "1") return true;
+    if (normalized === "0") return false;
   }
-  if (!value || typeof value !== "object") return false;
-
-  const record = value as Record<string, unknown>;
-  if (typeof record.available === "boolean") return !record.available;
-  if (typeof record.isAvailable === "boolean") return !record.isAvailable;
-  if (typeof record.booked === "boolean") return record.booked;
-  if (typeof record.value === "number") return record.value !== 0;
-  return false;
-}
-
-function isUnavailableCalendarRange(
-  record: Record<string, unknown>,
-  normalizedType: string,
-): boolean {
-  if (
-    normalizedType.includes("BLOCKED") ||
-    normalizedType.includes("BOOKED") ||
-    normalizedType.includes("RESERVED") ||
-    normalizedType.includes("PAID") ||
-    normalizedType.includes("UNAVAILABLE") ||
-    normalizedType.includes("OCCUPIED")
-  ) {
-    return true;
+  if (payload && typeof payload === "object") {
+    const candidate = payload as Record<string, unknown>;
+    if (typeof candidate.available === "boolean") return candidate.available;
+    if (typeof candidate.isAvailable === "boolean") return candidate.isAvailable;
+    if (typeof candidate.value === "number") return candidate.value === 1;
   }
-
-  return typeof record.booking === "string" && record.booking.trim().length > 0;
-}
-
-function extractUnavailableDates(
-  payload: unknown,
-  unavailableDates: Set<string>,
-  depth = 0,
-): void {
-  if (!payload || depth > 6) return;
-
-  if (Array.isArray(payload)) {
-    payload.forEach((item) =>
-      extractUnavailableDates(item, unavailableDates, depth + 1),
-    );
-    return;
-  }
-
-  if (typeof payload !== "object") return;
-
-  const record = payload as Record<string, unknown>;
-  if (
-    typeof record.startDate === "string" &&
-    typeof record.endDate === "string" &&
-    isIsoDateKey(record.startDate) &&
-    isIsoDateKey(record.endDate)
-  ) {
-    const type =
-      typeof record.type === "string" ? record.type.trim().toUpperCase() : "";
-    const isBlockedRange = isUnavailableCalendarRange(record, type);
-
-    if (isBlockedRange) {
-      const cursor = new Date(record.startDate);
-      const end = new Date(record.endDate);
-      while (cursor <= end) {
-        unavailableDates.add(formatApiDate(cursor));
-        cursor.setDate(cursor.getDate() + 1);
-      }
-    }
-  }
-
-  const dateCandidate =
-    typeof record.date === "string"
-      ? record.date
-      : typeof record.day === "string"
-        ? record.day
-        : typeof record.dt === "string"
-          ? record.dt
-          : null;
-
-  if (
-    dateCandidate &&
-    isIsoDateKey(dateCandidate) &&
-    looksUnavailable(record)
-  ) {
-    unavailableDates.add(dateCandidate);
-  }
-
-  Object.entries(record).forEach(([key, value]) => {
-    if (isIsoDateKey(key) && looksUnavailable(value)) {
-      unavailableDates.add(key);
-      return;
-    }
-    extractUnavailableDates(value, unavailableDates, depth + 1);
-  });
-}
-
-function isRangeAvailableFromUnavailableDates(
-  unavailableDates: Set<string>,
-  startDate: Date,
-  endDate: Date,
-): boolean {
-  let cursor = startOfDay(startDate);
-  const checkout = startOfDay(endDate);
-
-  while (cursor < checkout) {
-    if (unavailableDates.has(formatApiDate(cursor))) {
-      return false;
-    }
-    cursor = addDays(cursor, 1);
-  }
-
-  return true;
-}
-
-function isDateRangeCoveredByCalendarWindow(
-  startDate: Date,
-  endDate: Date,
-  windowStart: string,
-  windowEnd: string,
-): boolean {
-  const startKey = formatApiDate(startOfDay(startDate));
-  const checkout = startOfDay(endDate);
-  if (checkout <= startOfDay(startDate)) return true;
-  const lastNightKey = formatApiDate(addDays(checkout, -1));
-  return startKey >= windowStart && lastNightKey <= windowEnd;
-}
-
-function getCalendarFetchWindow(endDate: Date): {
-  windowStart: string;
-  windowEnd: string;
-} {
-  const today = startOfDay(new Date());
-  const threeMonthsAhead = addMonths(today, CALENDAR_CACHE_MONTHS_AHEAD);
-  const requestedCheckout = startOfDay(endDate);
-  const windowEnd =
-    requestedCheckout > threeMonthsAhead ? requestedCheckout : threeMonthsAhead;
-
-  return {
-    windowStart: formatApiDate(today),
-    windowEnd: formatApiDate(windowEnd),
-  };
+  throw new Error("Unexpected availability payload");
 }
 
 function formatApiDateForDisplay(value: string): string {
@@ -2571,108 +2429,85 @@ function parseApiDate(value: string): Date | null {
   return parsed;
 }
 
-function pruneCalendarAvailabilityCache(now = Date.now()): void {
-  calendarAvailabilityCache.forEach((entry, propertyId) => {
+function pruneAvailabilityCache(now = Date.now()): void {
+  availabilityCache.forEach((entry, cacheKey) => {
     if (entry.expiresAt <= now) {
-      calendarAvailabilityCache.delete(propertyId);
+      availabilityCache.delete(cacheKey);
     }
   });
 
-  if (calendarAvailabilityCache.size <= CALENDAR_CACHE_MAX_ENTRIES) return;
+  if (availabilityCache.size <= AVAILABILITY_CACHE_MAX_ENTRIES) return;
 
-  const oldestFirst = [...calendarAvailabilityCache.entries()].sort(
+  const oldestFirst = [...availabilityCache.entries()].sort(
     (a, b) => a[1].fetchedAt - b[1].fetchedAt,
   );
-  const excess = calendarAvailabilityCache.size - CALENDAR_CACHE_MAX_ENTRIES;
-  oldestFirst.slice(0, excess).forEach(([propertyId]) => {
-    calendarAvailabilityCache.delete(propertyId);
+  const excess = availabilityCache.size - AVAILABILITY_CACHE_MAX_ENTRIES;
+  oldestFirst.slice(0, excess).forEach(([cacheKey]) => {
+    availabilityCache.delete(cacheKey);
   });
 }
 
-function getFreshCalendarCacheForRange(
+function getFreshAvailabilityCacheForRange(
   propertyId: number,
   startDate: Date,
   endDate: Date,
   now = Date.now(),
-): CalendarAvailabilityCacheEntry | null {
-  const entry = calendarAvailabilityCache.get(propertyId);
+): AvailabilityCacheEntry | null {
+  const startKey = formatApiDate(startOfDay(startDate));
+  const endKey = formatApiDate(startOfDay(endDate));
+  const cacheKey = buildAvailabilityCacheKey(propertyId, startKey, endKey);
+  const entry = availabilityCache.get(cacheKey);
   if (!entry) return null;
   if (entry.expiresAt <= now) {
-    calendarAvailabilityCache.delete(propertyId);
-    return null;
-  }
-  if (
-    !isDateRangeCoveredByCalendarWindow(
-      startDate,
-      endDate,
-      entry.windowStart,
-      entry.windowEnd,
-    )
-  ) {
+    availabilityCache.delete(cacheKey);
     return null;
   }
   return entry;
 }
 
-async function fetchCalendarAvailabilityForProperty(
+async function fetchAvailabilityForProperty(
   propertyId: number,
   startDate: Date,
   endDate: Date,
-): Promise<CalendarAvailabilityCacheEntry> {
+): Promise<AvailabilityCacheEntry> {
+  const startKey = formatApiDate(startOfDay(startDate));
+  const endKey = formatApiDate(startOfDay(endDate));
+  const cacheKey = buildAvailabilityCacheKey(propertyId, startKey, endKey);
   const now = Date.now();
-  pruneCalendarAvailabilityCache(now);
-  const cached = getFreshCalendarCacheForRange(
-    propertyId,
-    startDate,
-    endDate,
-    now,
-  );
+  pruneAvailabilityCache(now);
+  const cached = getFreshAvailabilityCacheForRange(propertyId, startDate, endDate, now);
   if (cached) return cached;
 
-  const { windowStart, windowEnd } = getCalendarFetchWindow(endDate);
-  const inFlight = calendarAvailabilityInFlight.get(propertyId);
-  if (
-    inFlight &&
-    isDateRangeCoveredByCalendarWindow(
-      startDate,
-      endDate,
-      inFlight.windowStart,
-      inFlight.windowEnd,
-    )
-  ) {
+  const inFlight = availabilityInFlight.get(cacheKey);
+  if (inFlight) {
     return inFlight.promise;
   }
 
   const requestPromise = (async () => {
-    const response = await apiFetch(
-      `/accommodations/${propertyId}/calendar?startDate=${windowStart}&endDate=${windowEnd}`,
+    const payload = await apiFetch(
+      `/accommodations/${propertyId}/availability/?startDate=${startKey}&endDate=${endKey}`,
     );
-    const unavailableDates = new Set<string>();
-    extractUnavailableDates(response, unavailableDates);
+    const available = parseAvailabilityResponse(payload);
     const fetchedAt = Date.now();
-    const entry: CalendarAvailabilityCacheEntry = {
-      unavailableDates,
-      windowStart,
-      windowEnd,
+    const entry: AvailabilityCacheEntry = {
+      available,
+      startDate: startKey,
+      endDate: endKey,
       fetchedAt,
-      expiresAt: fetchedAt + CALENDAR_CACHE_TTL_MS,
+      expiresAt: fetchedAt + AVAILABILITY_CACHE_TTL_MS,
     };
-    calendarAvailabilityCache.set(propertyId, entry);
-    pruneCalendarAvailabilityCache(fetchedAt);
+    availabilityCache.set(cacheKey, entry);
+    pruneAvailabilityCache(fetchedAt);
     return entry;
   })();
 
-  calendarAvailabilityInFlight.set(propertyId, {
-    windowStart,
-    windowEnd,
-    promise: requestPromise,
-  });
+  availabilityInFlight.set(cacheKey, { promise: requestPromise });
   try {
     return await requestPromise;
   } finally {
-    const activeRequest = calendarAvailabilityInFlight.get(propertyId);
+    const activeRequest = availabilityInFlight.get(cacheKey);
     if (activeRequest?.promise === requestPromise) {
-      calendarAvailabilityInFlight.delete(propertyId);
+      availabilityInFlight.delete(cacheKey);
     }
   }
 }
@@ -4086,10 +3921,10 @@ export default function ReservaDirectaV2Content() {
 
     try {
       const now = Date.now();
-      pruneCalendarAvailabilityCache(now);
+      pruneAvailabilityCache(now);
       const queue: QueueItem[] = [];
       guestFilteredIds.forEach((id) => {
-        const cached = getFreshCalendarCacheForRange(
+        const cached = getFreshAvailabilityCacheForRange(
           id,
           startDate,
           endDate,
@@ -4103,11 +3938,7 @@ export default function ReservaDirectaV2Content() {
           );
           if (
             passesMinimumNotice &&
-            isRangeAvailableFromUnavailableDates(
-              cached.unavailableDates,
-              startDate,
-              endDate,
-            )
+            cached.available
           ) {
             availableIds.add(id);
             queuePriceFetchForProperty(id);
@@ -4155,7 +3986,7 @@ export default function ReservaDirectaV2Content() {
         const batchResults = await Promise.all(
           readyItems.map(async (item) => {
             try {
-              const cacheEntry = await fetchCalendarAvailabilityForProperty(
+              const cacheEntry = await fetchAvailabilityForProperty(
                 item.id,
                 startDate,
                 endDate,
@@ -4168,12 +3999,7 @@ export default function ReservaDirectaV2Content() {
                   hasMinimumCheckInNotice(
                     startDate,
                     property?.entryTime ?? null,
-                  ) &&
-                  isRangeAvailableFromUnavailableDates(
-                    cacheEntry.unavailableDates,
-                    startDate,
-                    endDate,
-                  ),
+                  ) && cacheEntry.available,
               };
             } catch (error) {
               return {
@@ -4775,7 +4601,7 @@ export default function ReservaDirectaV2Content() {
             <button
               type="button"
               onClick={resetSearchResults}
-              className="min-h-[50px] w-full border-l border-[#d9d9d9] bg-[#eef4fb] px-3 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-[#4c6785] transition-colors hover:bg-[#e3edf8] disabled:cursor-not-allowed disabled:opacity-70"
+              className="min-h-[50px] w-full border-l border-[#d9d9d9] bg-[#eef4fb] px-2 sm:px-3 text-center text-[10px] sm:text-[11px] leading-[1.15] whitespace-normal wrap-break-word font-bold uppercase tracking-[0.04em] sm:tracking-[0.08em] text-[#4c6785] transition-colors hover:bg-[#e3edf8] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={isSearchRunning}
             >
               {resetLabel}
@@ -4785,7 +4611,7 @@ export default function ReservaDirectaV2Content() {
               onClick={() => {
                 void runSearch();
               }}
-              className={`min-h-[50px] w-full px-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`min-h-[50px] w-full px-2 sm:px-4 text-center text-[10px] sm:text-[11px] leading-[1.15] whitespace-normal wrap-break-word font-bold uppercase tracking-[0.04em] sm:tracking-[0.08em] text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
                 searchButtonErrorFlash
                   ? "bg-[#dc2626] hover:bg-[#dc2626]"
                   : "bg-[#c2a457] hover:bg-[#af944f]"

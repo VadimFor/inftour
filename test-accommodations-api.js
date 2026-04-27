@@ -35,7 +35,20 @@ const app = express();
 const PORT = 3001;
 const AVAIBOOK_API = "https://api.avaibook.com/api/owner";
 const NEXT_APP_BASE_URL = process.env.NEXT_APP_BASE_URL || "http://localhost:3000";
+const AVAILABILITY_MONTHS_TO_RENDER = 4;
+const CALENDAR_MAX_RANGE_DAYS = 90;
 let prefetchCount = null;
+
+function resolveAvaibookToken() {
+  return (
+    process.env.AVAIBOOK_TOKEN ||
+    process.env.AVAIBOOK_TOKEN_SEARCH ||
+    process.env.AVAIBOOK_TOKEN_ALL_PROPERTIES ||
+    process.env.AVAIBOOK_TOKEN_PROPERTY_INFO ||
+    process.env.AVAIBOOK_TOKEN_0 ||
+    null
+  );
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -146,7 +159,11 @@ function extractUnavailableDates(payload, unavailableDates, depth = 0) {
   });
 }
 
-function buildAvailabilityCalendars(unavailableDates, startDate, monthsToRender = 3) {
+function buildAvailabilityCalendars(
+  unavailableDates,
+  startDate,
+  monthsToRender = AVAILABILITY_MONTHS_TO_RENDER,
+) {
   const today = new Date();
   const weekdays = ["L", "M", "X", "J", "V", "S", "D"];
   const monthFormatter = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" });
@@ -256,10 +273,11 @@ async function avaibookBatchFetch(ids) {
 }
 
 function getTokenOrFail(res) {
-  const token = process.env.AVAIBOOK_TOKEN;
+  const token = resolveAvaibookToken();
   if (!token) {
     res.status(400).json({
-      error: "Falta AVAIBOOK_TOKEN en variables de entorno.",
+      error:
+        "Falta token de AvaiBook en variables de entorno (AVAIBOOK_TOKEN, AVAIBOOK_TOKEN_SEARCH, AVAIBOOK_TOKEN_ALL_PROPERTIES, AVAIBOOK_TOKEN_PROPERTY_INFO o AVAIBOOK_TOKEN_0).",
     });
     return null;
   }
@@ -432,10 +450,9 @@ app.get("/api/accommodations/:id", async (req, res) => {
     const unit = Array.isArray(data?.units) ? data.units[0] : null;
     const unitSeasons = Array.isArray(unit?.unitSeasons) ? unit.unitSeasons : [];
     const availabilityStartDate = new Date();
-    const availabilityEndDate = new Date(
-      availabilityStartDate.getFullYear(),
-      availabilityStartDate.getMonth() + 3,
-      0,
+    const availabilityEndDate = new Date(availabilityStartDate);
+    availabilityEndDate.setDate(
+      availabilityEndDate.getDate() + CALENDAR_MAX_RANGE_DAYS - 1,
     );
     const availabilityPath = `/accommodations/${id}/calendar?startDate=${formatApiDate(availabilityStartDate)}&endDate=${formatApiDate(availabilityEndDate)}`;
     const calendarApiUrl = `${AVAIBOOK_API}${availabilityPath}`;
@@ -479,7 +496,7 @@ app.get("/api/accommodations/:id", async (req, res) => {
     const availabilityCalendarHtml = buildAvailabilityCalendars(
       unavailableDates,
       new Date(availabilityStartDate.getFullYear(), availabilityStartDate.getMonth(), 1),
-      3,
+      AVAILABILITY_MONTHS_TO_RENDER,
     );
 
     return res.send(`<!doctype html>
@@ -744,10 +761,12 @@ app.listen(PORT, () => {
   console.log(`Servidor de prueba activo en http://localhost:${PORT}`);
   void (async () => {
     try {
-      const token = process.env.AVAIBOOK_TOKEN;
+      const token = resolveAvaibookToken();
       if (!token) {
         prefetchCount = -1;
-        console.error("Prefetch error: falta AVAIBOOK_TOKEN en variables de entorno.");
+        console.error(
+          "Prefetch error: falta token de AvaiBook en variables de entorno.",
+        );
         return;
       }
       const data = await avaibookFetch("/accommodations/", token);
