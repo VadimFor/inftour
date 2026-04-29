@@ -19,7 +19,7 @@ export default function NavMobileMenu() {
   const { lang, t } = useLangStore(
     useShallow((s) => ({ lang: s.lang, t: s.t })),
   );
-  const aiLabel = lang === "esp" ? "Asistente IA" : t("aiAgent");
+  const aiLabel = t("aiAgentCta");
 
   useEffect(() => {
     const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`);
@@ -112,21 +112,22 @@ export default function NavMobileMenu() {
                 );
               })}
             </ul>
-            <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
-              <div className="flex items-center justify-center gap-4">
-                <Link
-                  href="/lobby#ai-guide"
+            <div className="mt-2 space-y-3">
+              <div className="flex items-center justify-center">
+                <a
+                  href="https://inftour.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => {
                     triggerLightTapHaptic();
                     setOpen(false);
                   }}
-                  className="inline-flex items-center gap-1 whitespace-nowrap rounded-sm bg-brand-darkgray px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-sm transition hover:bg-gray-600"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-sm bg-brand-darkgray px-2 py-1.5 text-center text-[11px] font-semibold leading-tight normal-case text-white shadow-sm transition hover:bg-gray-600"
                 >
-                  <span>{aiLabel}</span>
-                  <span aria-hidden>&rarr;</span>
-                </Link>
+                  <span className="whitespace-normal">{aiLabel}</span>
+                </a>
               </div>
-              <div className="flex justify-center">
+              <div className="flex justify-center border-t border-gray-200 pt-3">
                 <LanguageSwitcher compact inlineAll />
               </div>
             </div>

@@ -80,6 +80,16 @@ export const menuTranslations: Record<string, LangStrings> = {
     uk: "ІІ-агент",
     pl: "Agent AI",
   },
+  aiAgentCta: {
+    eng: "Thinking of buying a home?",
+    esp: "¿Pensando en comprar vivienda?",
+    ru: "Думаете купить недвижимость?",
+    fr: "Vous pensez acheter un logement ?",
+    it: "Vuoi comprare casa?",
+    de: "Immobilie kaufen?",
+    uk: "Думаєте купити нерухомість?",
+    pl: "Myślisz o zakupie nieruchomości?",
+  },
   openAIChat: {
     eng: "Open AI Agent chat",
     esp: "Abrir chat del agente IA",

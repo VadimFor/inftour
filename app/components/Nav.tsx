@@ -13,7 +13,7 @@ export default function Nav() {
   const { lang, t } = useLangStore(
     useShallow((s) => ({ lang: s.lang, t: s.t })),
   );
-  const aiLabel = lang === "esp" ? "Asistente IA" : t("aiAgent");
+  const aiLabel = t("aiAgentCta");
 
   return (
     <nav
@@ -49,13 +49,14 @@ export default function Nav() {
             );
           })}
           <LanguageSwitcher compact />
-          <Link
-            href="/lobby#ai-guide"
-            className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-sm bg-brand-darkgray px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-sm transition hover:bg-gray-600 xl:px-5"
+          <a
+            href="https://inftour.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 max-w-[190px] shrink-0 items-center justify-center rounded-sm bg-brand-darkgray px-2 py-1.5 text-center text-[11px] font-semibold leading-tight normal-case text-white shadow-sm transition hover:bg-gray-600 xl:px-3"
           >
-            <span>{aiLabel}</span>
-            <span aria-hidden>&rarr;</span>
-          </Link>
+            <span className="whitespace-normal">{aiLabel}</span>
+          </a>
         </div>
         <div className="shrink-0">
           <NavMobileMenu />
